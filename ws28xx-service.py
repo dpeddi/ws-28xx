@@ -93,8 +93,13 @@ class CCommunicationService(object):
 		REF              = 0x7C
 		RXMISC           = 0x7D
 	
-	x = AX5051RegisterNames.RXMISC
-	print x
+#	x = AX5051RegisterNames.RXMISC
+#	print x
+	
+	AX5051RegisterNames_map = dict()
+#	print AX5051RegisterNames_map[AX5051RegisterNames.RXMISC]
+	AX5051RegisterNames_map[AX5051RegisterNames.RXMISC]=5
+	print AX5051RegisterNames_map[AX5051RegisterNames.RXMISC]
 
 	def caluculateFrequency(self,Frequency):
 		print "CCommunicationService::caluculateFrequency"
