@@ -64,3 +64,6 @@ class sHID(object):
 	def GetState(self,StateBuffer):
 		print "sHID::GetState (not implemented yet)"
 
+	def ReadConfigFlash(self,v1,v2,v3):
+		print "ReadConfigFlash (not implemented yet)"
+		

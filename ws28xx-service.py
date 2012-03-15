@@ -4,8 +4,7 @@ import sHID
 class Animal:
 	DOG=1
 	CAT=2
-
-x = Animal.DOG
+	
 
 class xTransceiverSettings:
 	VendorId	= 0x6666
@@ -32,41 +31,107 @@ class ws28xxError(IOError):
 
 class CCommunicationService(object):
 
-	def AX5051RegisterNames:
-		a=1
-		
+	class AX5051RegisterNames:
+		REVISION         = 0x0
+		SCRATCH          = 0x1
+		POWERMODE        = 0x2
+		XTALOSC          = 0x3
+		FIFOCTRL         = 0x4
+		FIFODATA         = 0x5
+		IRQMASK          = 0x6
+		IFMODE           = 0x8
+		PINCFG1          = 0x0C
+		PINCFG2          = 0x0D
+		MODULATION       = 0x10
+		ENCODING         = 0x11
+		FRAMING          = 0x12
+		CRCINIT3         = 0x14
+		CRCINIT2         = 0x15
+		CRCINIT1         = 0x16
+		CRCINIT0         = 0x17
+		FREQ3            = 0x20
+		FREQ2            = 0x21
+		FREQ1            = 0x22
+		FREQ0            = 0x23
+		FSKDEV2          = 0x25
+		FSKDEV1          = 0x26
+		FSKDEV0          = 0x27
+		IFFREQHI         = 0x28
+		IFFREQLO         = 0x29
+		PLLLOOP          = 0x2C
+		PLLRANGING       = 0x2D
+		PLLRNGCLK        = 0x2E
+		TXPWR            = 0x30
+		TXRATEHI         = 0x31
+		TXRATEMID        = 0x32
+		TXRATELO         = 0x33
+		MODMISC          = 0x34
+		FIFOCONTROL2     = 0x37
+		ADCMISC          = 0x38
+		AGCTARGET        = 0x39
+		AGCATTACK        = 0x3A
+		AGCDECAY         = 0x3B
+		AGCCOUNTER       = 0x3C
+		CICDEC           = 0x3F
+		DATARATEHI       = 0x40
+		DATARATELO       = 0x41
+		TMGGAINHI        = 0x42
+		TMGGAINLO        = 0x43
+		PHASEGAIN        = 0x44
+		FREQGAIN         = 0x45
+		FREQGAIN2        = 0x46
+		AMPLGAIN         = 0x47
+		TRKFREQHI        = 0x4C
+		TRKFREQLO        = 0x4D
+		XTALCAP          = 0x4F
+		SPAREOUT         = 0x60
+		TESTOBS          = 0x68
+		APEOVER          = 0x70
+		TMMUX            = 0x71
+		PLLVCOI          = 0x72
+		PLLCPEN          = 0x73
+		PLLRNGMISC       = 0x74
+		AGCMANUAL        = 0x78
+		ADCDCLEVEL       = 0x79
+		RFMISC           = 0x7A
+		TXDRIVER         = 0x7B
+		REF              = 0x7C
+		RXMISC           = 0x7D
+
 	def caluculateFrequency(self,Frequency):
 		print "CCommunicationService::caluculateFrequency"
 		FreqVal =  (Frequency / 16000000.0 * 16777216.0);
-		if lowlevel.ReadConfigFlash(0x1F5u, 4u, FreqCorrection):
-			CorVal = (unsigned __int8)FreqCorrection[0] << 8;
+		FreqCorrection = 0
+		if lowlevel.ReadConfigFlash(0x1F5, 4, FreqCorrection):
+			CorVal = FreqCorrection[0] << 8;
 			CorVal |= FreqCorrection[1];
 			CorVal <<= 8;
 			CorVal |= FreqCorrection[2];
 			CorVal <<= 8;
 			CorVal |= FreqCorrection[3];
 			FreqVal += CorVal;
-		if ( not (FreqVal % 2) )
+		if ( not (FreqVal % 2) ):
+			print "caluculateFrequency fixme"
 			++FreqVal;
-			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less
-				 <enum__CCommunicationService::AX5051RegisterNames>_std::allocator
-				 <std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
-			    	    &thisa->TransceiverSettings,
-			    	    &_Keyval) = BYTE3(FreqVal);
-			v5 = 33;
-			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
-			        &thisa->TransceiverSettings,
-			(CCommunicationService::AX5051RegisterNames *)&v5) = FreqVal >> 16;
-			v6 = 34;
-			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
-			        &thisa->TransceiverSettings,
-			(CCommunicationService::AX5051RegisterNames *)&v6) = BYTE1(FreqVal);
-			v7 = 35;
-			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
-                           &thisa->TransceiverSettings,
-			(CCommunicationService::AX5051RegisterNames *)&v7) = FreqVal;
-                }
-                                                                                    
+#			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less
+#				 <enum__CCommunicationService::AX5051RegisterNames>_std::allocator
+#				 <std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
+#			    	    &thisa->TransceiverSettings,
+#			    	    &_Keyval) = BYTE3(FreqVal);
+#			v5 = 33;
+#			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
+#			        &thisa->TransceiverSettings,
+#			(CCommunicationService::AX5051RegisterNames *)&v5) = FreqVal >> 16;
+#			v6 = 34;
+#			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
+#			        &thisa->TransceiverSettings,
+#			(CCommunicationService::AX5051RegisterNames *)&v6) = BYTE1(FreqVal);
+#			v7 = 35;
+#			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
+#                           &thisa->TransceiverSettings,
+#			(CCommunicationService::AX5051RegisterNames *)&v7) = FreqVal;
+#                }
+#                                                                                    
 
 
 	def GenerateResponse(self,FrameBuffer,DataLength):
