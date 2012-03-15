@@ -55,15 +55,42 @@ class sHID(object):
 		    import sys
 		    sys.stdout.write("sHID::SetRX message:")
 		    for entry in buffer:
-			sys.stdout.write("%x" % (buffer[i]))
+			sys.stdout.write("%.2x" % (buffer[i]))
 			i+=1
 		    sys.stdout.write(" fail\n")
 		    pass
-		print "sHID::SetRX end"
+		print "sHID::SetRX - end"
 
 	def GetState(self,StateBuffer):
 		print "sHID::GetState (not implemented yet)"
 
 	def ReadConfigFlash(self,v1,v2,v3):
 		print "ReadConfigFlash (not implemented yet)"
-		
+
+	def WriteReg(self,regAddr,data):
+		print "WriteReg"
+		print "Reg: %x Value: %x" % (regAddr,data)
+		buffer = array.array("h",range(0x05))
+		buffer[0] = 0xF0;
+		buffer[1] = regAddr & 0x7F;
+		buffer[2] = 0x01;
+		buffer[3] = data;
+		buffer[4] = 0x00;
+		try:
+		    self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,       # requestType
+		                                0x0000000,                                  # request
+		                                buffer,                                     # buffer
+		                                0x0000000,                                  # value
+		                                0x0000000,                                  # index
+		                                1000)                                       # timeout
+		except:
+		    i=0
+		    import sys
+		    sys.stdout.write("sHID::SetRX message:")
+		    for entry in buffer:
+			sys.stdout.write("%.2x" % (buffer[i]))
+			i+=1
+		    sys.stdout.write(" fail\n")
+		    pass
+		print "WriteReg - end"
+

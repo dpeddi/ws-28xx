@@ -92,18 +92,12 @@ class CCommunicationService(object):
 		TXDRIVER         = 0x7B
 		REF              = 0x7C
 		RXMISC           = 0x7D
-	
-#	x = AX5051RegisterNames.RXMISC
-#	print x
-	
+
 	AX5051RegisterNames_map = dict()
-#	print AX5051RegisterNames_map[AX5051RegisterNames.RXMISC]
-	AX5051RegisterNames_map[AX5051RegisterNames.RXMISC]=5
-	print AX5051RegisterNames_map[AX5051RegisterNames.RXMISC]
 
 	def caluculateFrequency(self,Frequency):
 		print "CCommunicationService::caluculateFrequency"
-		FreqVal =  (Frequency / 16000000.0 * 16777216.0);
+		FreqVal =  long(Frequency / 16000000.0 * 16777216.0);
 		FreqCorrection = 0
 		if lowlevel.ReadConfigFlash(0x1F5, 4, FreqCorrection):
 			CorVal = FreqCorrection[0] << 8;
@@ -114,12 +108,16 @@ class CCommunicationService(object):
 			CorVal |= FreqCorrection[3];
 			FreqVal += CorVal;
 		if ( not (FreqVal % 2) ):
-			print "caluculateFrequency fixme"
 			++FreqVal;
-			AX5051RegisterNames_map[AX5051RegisterNames.FREQ3] = BYTE3(FreqVal);
-			AX5051RegisterNames_map[AX5051RegisterNames.FREQ2] = FreqVal >> 16;
-			AX5051RegisterNames_map[AX5051RegisterNames.FREQ1] = BYTE1(FreqVal);
-			AX5051RegisterNames_map[AX5051RegisterNames.FREQ0] = FreqVal;
+			self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ3] = (FreqVal >>24) & 0xFF;
+			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ3])
+			self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ2] = (FreqVal >>16) & 0xFF;
+			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ2])
+			self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ1] = (FreqVal >>8)  & 0xFF;
+			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ1])
+			self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0] = (FreqVal >>0)  & 0xFF;
+			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0])
+		print "CCommunicationService::caluculateFrequency - end"
 
 #		http://docs.python.org/tutorial/datastructures.html
 #		>>> questions = ['name', 'quest', 'favorite color']
@@ -138,9 +136,10 @@ class CCommunicationService(object):
 
 		self.caluculateFrequency(TransceiverSettings.Frequency);
 		#if ( lowlevel.ReadConfigFlash(v2, 0x1F9u, 7u, buffer) ) #if ( sHID::ReadConfigFlash(v2, 0x1F9u, 7u, buffer) )
-			
-			#while enum AX5051
-			#	lowlevel.WriteReg(reg,value)
+		if True:
+			for i, Register in enumerate(self.AX5051RegisterNames_map):
+				lowlevel.WriteReg(Register,self.AX5051RegisterNames_map[Register])
+				#print "%x %x" % (Register,self.AX5051RegisterNames_map[Register])
 		#raise NotImplementedError()
 		#raise ws28xxError("not implemented yet")
 
