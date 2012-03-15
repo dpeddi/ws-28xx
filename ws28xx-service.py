@@ -1,11 +1,6 @@
 import array
 import sHID
 
-class Animal:
-	DOG=1
-	CAT=2
-	
-
 class xTransceiverSettings:
 	VendorId	= 0x6666
 	ProductId	= 0x5555
@@ -97,6 +92,9 @@ class CCommunicationService(object):
 		TXDRIVER         = 0x7B
 		REF              = 0x7C
 		RXMISC           = 0x7D
+	
+	x = AX5051RegisterNames.RXMISC
+	print x
 
 	def caluculateFrequency(self,Frequency):
 		print "CCommunicationService::caluculateFrequency"
@@ -131,7 +129,12 @@ class CCommunicationService(object):
 #                           &thisa->TransceiverSettings,
 #			(CCommunicationService::AX5051RegisterNames *)&v7) = FreqVal;
 #                }
-#                                                                                    
+#		http://docs.python.org/tutorial/datastructures.html
+#		>>> questions = ['name', 'quest', 'favorite color']
+#		>>> answers = ['lancelot', 'the holy grail', 'blue']
+#		>>> for q, a in zip(questions, answers):
+#		...     print 'What is your {0}?  It is {1}.'.format(q, a)
+#		                                                                                    
 
 
 	def GenerateResponse(self,FrameBuffer,DataLength):
