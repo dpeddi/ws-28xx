@@ -31,8 +31,43 @@ class ws28xxError(IOError):
 	"Used to signal an error condition"
 
 class CCommunicationService(object):
+
+	def AX5051RegisterNames:
+		a=1
+		
 	def caluculateFrequency(self,Frequency):
-		print "CCommunicationService::caluculateFrequency (not implemented yet)"
+		print "CCommunicationService::caluculateFrequency"
+		FreqVal =  (Frequency / 16000000.0 * 16777216.0);
+		if lowlevel.ReadConfigFlash(0x1F5u, 4u, FreqCorrection):
+			CorVal = (unsigned __int8)FreqCorrection[0] << 8;
+			CorVal |= FreqCorrection[1];
+			CorVal <<= 8;
+			CorVal |= FreqCorrection[2];
+			CorVal <<= 8;
+			CorVal |= FreqCorrection[3];
+			FreqVal += CorVal;
+		if ( not (FreqVal % 2) )
+			++FreqVal;
+			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less
+				 <enum__CCommunicationService::AX5051RegisterNames>_std::allocator
+				 <std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
+			    	    &thisa->TransceiverSettings,
+			    	    &_Keyval) = BYTE3(FreqVal);
+			v5 = 33;
+			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
+			        &thisa->TransceiverSettings,
+			(CCommunicationService::AX5051RegisterNames *)&v5) = FreqVal >> 16;
+			v6 = 34;
+			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
+			        &thisa->TransceiverSettings,
+			(CCommunicationService::AX5051RegisterNames *)&v6) = BYTE1(FreqVal);
+			v7 = 35;
+			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
+                           &thisa->TransceiverSettings,
+			(CCommunicationService::AX5051RegisterNames *)&v7) = FreqVal;
+                }
+                                                                                    
+
 
 	def GenerateResponse(self,FrameBuffer,DataLength):
 		print "CCommunicationService::GenerateResponse (not implemented yet)"
