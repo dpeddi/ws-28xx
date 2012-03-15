@@ -17,8 +17,6 @@ class TransceiverSettings:
 	manufacturer	= "LA CROSSE TECHNOLOGY"
 	product		= "Weather Direct Light Wireless Device"
 
-#print(dir(sHID))
-
 lowlevel = sHID.sHID()
 
 class ws28xxError(IOError):
@@ -119,14 +117,6 @@ class CCommunicationService(object):
 			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0])
 		print "CCommunicationService::caluculateFrequency - end"
 
-#		http://docs.python.org/tutorial/datastructures.html
-#		>>> questions = ['name', 'quest', 'favorite color']
-#		>>> answers = ['lancelot', 'the holy grail', 'blue']
-#		>>> for q, a in zip(questions, answers):
-#		...     print 'What is your {0}?  It is {1}.'.format(q, a)
-#		                                                                                    
-
-
 	def GenerateResponse(self,FrameBuffer,DataLength):
 		print "CCommunicationService::GenerateResponse (not implemented yet)"
 
@@ -224,7 +214,6 @@ class CCommunicationService(object):
 			
 			#if not ret:
 			
-
 
 
 myCCommunicationService = CCommunicationService()
