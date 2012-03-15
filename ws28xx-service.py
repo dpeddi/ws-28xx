@@ -116,24 +116,11 @@ class CCommunicationService(object):
 		if ( not (FreqVal % 2) ):
 			print "caluculateFrequency fixme"
 			++FreqVal;
-#			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less
-#				 <enum__CCommunicationService::AX5051RegisterNames>_std::allocator
-#				 <std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
-#			    	    &thisa->TransceiverSettings,
-#			    	    &_Keyval) = BYTE3(FreqVal);
-#			v5 = 33;
-#			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
-#			        &thisa->TransceiverSettings,
-#			(CCommunicationService::AX5051RegisterNames *)&v5) = FreqVal >> 16;
-#			v6 = 34;
-#			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
-#			        &thisa->TransceiverSettings,
-#			(CCommunicationService::AX5051RegisterNames *)&v6) = BYTE1(FreqVal);
-#			v7 = 35;
-#			*std::map<enum__CCommunicationService::AX5051RegisterNames_unsigned_char_std::less<enum__CCommunicationService::AX5051RegisterNames>_std::allocator<std::pair<enum__CCommunicationService::AX5051RegisterNames_const_unsigned_char>>>::operator__(
-#                           &thisa->TransceiverSettings,
-#			(CCommunicationService::AX5051RegisterNames *)&v7) = FreqVal;
-#                }
+			AX5051RegisterNames_map[AX5051RegisterNames.FREQ3] = BYTE3(FreqVal);
+			AX5051RegisterNames_map[AX5051RegisterNames.FREQ2] = FreqVal >> 16;
+			AX5051RegisterNames_map[AX5051RegisterNames.FREQ1] = BYTE1(FreqVal);
+			AX5051RegisterNames_map[AX5051RegisterNames.FREQ0] = FreqVal;
+
 #		http://docs.python.org/tutorial/datastructures.html
 #		>>> questions = ['name', 'quest', 'favorite color']
 #		>>> answers = ['lancelot', 'the holy grail', 'blue']
