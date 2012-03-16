@@ -204,7 +204,11 @@ class CCommunicationService(object):
 
 			if lowlevel.Execute(5):
 				lowlevel.SetPreamblePattern(0xaa)
-
+				if lowlevel.SetState(0):
+					#print "fixme: subsecond duration" //fixme
+					if lowlevel.SetRX():
+						v67 = 1  #//fixme:and so?
+						v78 = -1 #//fixme:and so?
 
 
 		#raise NotImplementedError()

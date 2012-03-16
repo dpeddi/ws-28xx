@@ -152,6 +152,7 @@ class sHID(object):
 					                                0x0000000,                                  # value
 					                                0x0000000,                                  # index
 					                                1000)                                       # timeout
+					result = 1
 				except:
 					i=0
 					import sys
@@ -178,6 +179,7 @@ class sHID(object):
 					                                0x0000000,                                  # value
 					                                0x0000000,                                  # index
 					                                1000)                                       # timeout
+					result = 1
 				except:
 					if addr == 0x1F5 and self.debug == 1: #//fixme #debugging... without device
 						print "sHID::ReadConfigFlash -emulated 0x1F5"
@@ -217,7 +219,33 @@ class sHID(object):
 		return result
 
 	def SetState(self,a1):
-		print "sHID::SetState (not implemented yet)"
+		#print "sHID::SetState"
+		buffer = [0]*0x15
+		buffer[0] = 0xD7;
+		try:
+			self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,       # requestType
+		                                0x0000000,                                  # request
+		                                buffer,                                     # buffer
+		                                0x0000000,                                  # value
+		                                0x0000000,                                  # index
+		                                1000)                                       # timeout
+			result = 1
+		except:
+			i=0
+			import sys
+			sys.stdout.write("sHID::SetState message: ")
+			for entry in buffer:
+				sys.stdout.write("%.2x" % (buffer[i]))
+				i+=1
+			sys.stdout.write(" fail\n")
+			result = 0
+			#pass
+			if self.debug == 1:
+				return 1;
+
+		#print "sHID::SetState - end"
+		return result
+
 
 	def SetFrame(self,a1,a2):
 		print "sHID::SetFrame (not implemented yet)"
@@ -248,7 +276,8 @@ class sHID(object):
 			sys.stdout.write(" fail\n")
 			result = 0
 			#pass
-
+			if self.debug == 1:
+				return 1;
 		#print "sHID::WriteReg - end"
 		return result
 
@@ -275,10 +304,8 @@ class sHID(object):
 			sys.stdout.write(" fail\n")
 			result = 0
 			#pass
-
 			if self.debug == 1:
 				return 1;
-
 		#print "sHID::Execute - end"
 		return result
 
@@ -306,9 +333,7 @@ class sHID(object):
 			sys.stdout.write(" fail\n")
 			result = 0
 			#pass
-
 			if self.debug == 1:
 				return 1;
-
 		#print "sHID::SetPreamblePattern - end"
 		return result
