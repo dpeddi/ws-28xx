@@ -247,8 +247,49 @@ class sHID(object):
 		return result
 
 
-	def SetFrame(self,a1,a2):
-		print "sHID::SetFrame (not implemented yet)"
+	def SetFrame(self,data,numBytes):
+		print "sHID::SetFrame (not fully implemented yet)"
+		v4 = 0xd5;
+		#  v5 = (unsigned __int8)a3 >> 8;
+		# v6 = a3;
+		#  for ( i = 0; i < a3; ++i )
+		#    v7[i] = *(_BYTE *)a2++;
+
+		#  for ( i = a3 + 3; i < 0x131; ++i )
+		#    *(&v4 + i) = 0;
+		#  if ( (unsigned __int8)HidD_SetFeature(*(_DWORD *)(this + 80), &v4, 273) )
+
+		buffer = [0]*0x131
+		buffer[0] = 0xD5;
+		buffer[1] = numBytes >> 8;
+		buffer[2] = numBytes;
+
+		#buffer 
+
+		try:
+			self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,       # requestType
+		                                0x0000000,                                  # request
+		                                buffer,                                     # buffer
+		                                0x0000000,                                  # value
+		                                0x0000000,                                  # index
+		                                1000)                                       # timeout
+			result = 1
+		except:
+			i=0
+			import sys
+			sys.stdout.write("sHID::SetFrame message: ")
+			for entry in buffer:
+				sys.stdout.write("%.2x" % (buffer[i]))
+				i+=1
+			sys.stdout.write(" fail\n")
+			result = 0
+			#pass
+			if self.debug == 1:
+				return 1;
+
+		#print "sHID::SetFrame - end"
+		return result
+
 
 	def WriteReg(self,regAddr,data):
 		#print "sHID::WriteReg"
