@@ -1,6 +1,9 @@
 import array
 import sHID
 
+#placeholder to start hacking with hardware  //FIXME
+#remove next class TransceiverSettings and 
+#rename xTransceiverSettings to TransceiverSettings
 class xTransceiverSettings:
 	VendorId	= 0x6666
 	ProductId	= 0x5555
@@ -9,13 +12,15 @@ class xTransceiverSettings:
 	manufacturer	= "LA CROSSE TECHNOLOGY"
 	product		= "Weather Direct Light Wireless Device"
 
+#placeholder to start testing driver without hardware  //FIXME
+#pls change next vars to match some hardware you have..
 class TransceiverSettings:
 	VendorId	= 0x046d
 	ProductId	= 0xc00e
 	VersionNo	= 1	#seems unused
 	Frequency	= 905000000
-	manufacturer	= "LA CROSSE TECHNOLOGY"
-	product		= "Weather Direct Light Wireless Device"
+	manufacturer	= "Logitech"
+	product		= "USB-PS/2 Optical Mouse"
 
 lowlevel = sHID.sHID()
 
@@ -93,20 +98,76 @@ class CCommunicationService(object):
 
 	AX5051RegisterNames_map = dict()
 
+	def getInstance(self):
+		print "getInstance(partially implemented)"
+		self.CCommunicationService();
+
+	def CCommunicationService(self):
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.IFMODE]     = 0x00;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.MODULATION] = 0x41;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.ENCODING]   = 0x07;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FRAMING]    = 0x84;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.CRCINIT3]   = 0xff;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.CRCINIT2]   = 0xff;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.CRCINIT1]   = 0xff;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.CRCINIT0]   = 0xff;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ3]      = 0x38;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ2]      = 0x90;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ1]      = 0x00;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0]      = 0x01;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.PLLLOOP]    = 0x1d;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.PLLRANGING] = 0x08;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.PLLRNGCLK]  = 0x03;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.MODMISC]    = 0x03;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.SPAREOUT]   = 0x00;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TESTOBS]    = 0x00;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.APEOVER]    = 0x00;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TMMUX]      = 0x00;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.PLLVCOI]    = 0x01;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.PLLCPEN]    = 0x01;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.RFMISC]     = 0xb0;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.REF]        = 0x23;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.IFFREQHI]   = 0x20;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.IFFREQLO]   = 0x00;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.ADCMISC]    = 0x01;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.AGCTARGET]  = 0x0e;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.AGCATTACK]  = 0x11;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.AGCDECAY]   = 0x0e;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.CICDEC]     = 0x3f;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.DATARATEHI] = 0x19;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.DATARATELO] = 0x66;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TMGGAINHI]  = 0x01;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TMGGAINLO]  = 0x96;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.PHASEGAIN]  = 0x03;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQGAIN]   = 0x04;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQGAIN2]  = 0x0a;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.AMPLGAIN]   = 0x06;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.AGCMANUAL]  = 0x00;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.ADCDCLEVEL] = 0x10;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.RXMISC]     = 0x35;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FSKDEV2]    = 0x00;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FSKDEV1]    = 0x31;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FSKDEV0]    = 0x27;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TXPWR]      = 0x03;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TXRATEHI]   = 0x00;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TXRATEMID]  = 0x51;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TXRATELO]   = 0xec;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TXDRIVER]   = 0x88;
+
 	def caluculateFrequency(self,Frequency):
 		print "CCommunicationService::caluculateFrequency"
 		FreqVal =  long(Frequency / 16000000.0 * 16777216.0);
-		FreqCorrection = 0
+		FreqCorrection = [None]
 		if lowlevel.ReadConfigFlash(0x1F5, 4, FreqCorrection):
-			CorVal = FreqCorrection[0] << 8;
-			CorVal |= FreqCorrection[1];
+			CorVal = FreqCorrection[0][0] << 8;
+			CorVal |= FreqCorrection[0][1];
 			CorVal <<= 8;
-			CorVal |= FreqCorrection[2];
+			CorVal |= FreqCorrection[0][2];
 			CorVal <<= 8;
-			CorVal |= FreqCorrection[3];
+			CorVal |= FreqCorrection[0][3];
 			FreqVal += CorVal;
 		if ( not (FreqVal % 2) ):
-			++FreqVal;
+			FreqVal+=1;
 			self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ3] = (FreqVal >>24) & 0xFF;
 			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ3])
 			self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ2] = (FreqVal >>16) & 0xFF;
@@ -151,7 +212,10 @@ class CCommunicationService(object):
 
 		StateBuffer = array.array("h",range(0x200))
 		ret = lowlevel.GetState(StateBuffer);
+		print ret
 		if ret == 1:
+			FrameBuffer=[None]*0x200 #//FIXME
+			DataLength = 0 #//FIXME
 			ReceiverState = StateBuffer[0];
 			if ReceiverState == 22:
 				ret = lowlevel.GetFrame(FrameBuffer, DataLength);
@@ -166,7 +230,7 @@ class CCommunicationService(object):
 					#CTracer::WriteDump((CTracer *)td, 50, v22, v23, v24);
 			rel_time = self.GenerateResponse(FrameBuffer, DataLength);
 			if rel_time == None:
-				raise ws28xxError("GenerateResponse Failed...")
+				print ws28xxError("GenerateResponse Failed...")
 			if DataLength:
 				v24 = DataLength;
 				v23 = FrameBuffer;
@@ -217,5 +281,6 @@ class CCommunicationService(object):
 
 
 myCCommunicationService = CCommunicationService()
+myCCommunicationService.getInstance()
 myCCommunicationService.doRFCommunication()
 
