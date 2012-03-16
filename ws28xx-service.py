@@ -183,11 +183,12 @@ class CCommunicationService(object):
 
 	def TransceiverInit(self):
 		#print "CCommunicationService::TransceiverInit"
-		print "CCommunicationService::TransceiverInit (not implemented yet)"
+		print "CCommunicationService::TransceiverInit (partially implemented)"
 
 		self.caluculateFrequency(TransceiverSettings.Frequency);
-		#if ( lowlevel.ReadConfigFlash(v2, 0x1F9u, 7u, buffer) ) #if ( sHID::ReadConfigFlash(v2, 0x1F9u, 7u, buffer) )
-		if True:
+
+		buffer = [None]
+		if ( lowlevel.ReadConfigFlash(0x1F9, 7, buffer) ):
 			for i, Register in enumerate(self.AX5051RegisterNames_map):
 				lowlevel.WriteReg(Register,self.AX5051RegisterNames_map[Register])
 				#print "%x %x" % (Register,self.AX5051RegisterNames_map[Register])
@@ -248,11 +249,11 @@ class CCommunicationService(object):
 			lowlevel.SetState(0);
 			ret = lowlevel.SetFrame(FrameBuffer, DataLength);
 			if ret == None:
-				raise "USBDevice->SetFrame returned false"  #it shouldn't be blocking
+				print "USBDevice->SetFrame returned false"  #it shouldn't be blocking
 				#goto LABEL_49
 			ret = lowlevel.SetTX();
 			if ret == None:
-				raise ws28xxError("USBDevice->SetTX returned false")  #it shouldn't be blocking
+				print ws28xxError("USBDevice->SetTX returned false")  #it shouldn't be blocking
 				#goto LABEL_49
 			ReceiverState = 0xc8;
 			timeout = 1000;
