@@ -282,3 +282,33 @@ class sHID(object):
 		#print "sHID::Execute - end"
 		return result
 
+	def SetPreamblePattern(self,pattern):
+		#print "sHID::Execute"
+		buffer = [0]*0x0f #*0x15
+		buffer[0] = 0xD8;
+		buffer[1] = command;
+		try:
+			self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,       # requestType
+		                                0x0000000,                                  # request
+		                                buffer,                                     # buffer
+		                                0x0000000,                                  # value
+		                                0x0000000,                                  # index
+		                                1000)                                       # timeout
+			result = 1
+
+		except:
+			i=0
+			import sys
+			sys.stdout.write("sHID::SetPreamblePattern message: ")
+			for entry in buffer:
+				sys.stdout.write("%.2x" % (buffer[i]))
+				i+=1
+			sys.stdout.write(" fail\n")
+			result = 0
+			#pass
+
+			if self.debug == 1:
+				return 1;
+
+		#print "sHID::SetPreamblePattern - end"
+		return result
