@@ -284,9 +284,9 @@ class sHID(object):
 
 	def SetPreamblePattern(self,pattern):
 		#print "sHID::Execute"
-		buffer = [0]*0x0f #*0x15
+		buffer = [0]*0x15
 		buffer[0] = 0xD8;
-		buffer[1] = command;
+		buffer[1] = pattern	;
 		try:
 			self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,       # requestType
 		                                0x0000000,                                  # request
