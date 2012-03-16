@@ -111,12 +111,11 @@ class sHID(object):
 			result = 1
 		except:
 
-			##emulate hw // FIXME
-			result = 1
-			buffer[1]=0x14
-			StateBuffer=[0]*0x2
-			StateBuffer[0]=buffer[1]
-			StateBuffer[1]=buffer[2]
+			if self.debug == 1:
+				buffer[1]=0x14
+				StateBuffer=[0]*0x2
+				StateBuffer[0]=buffer[1]
+				StateBuffer[1]=buffer[2]
 
 			i=0
 			import sys
@@ -128,8 +127,8 @@ class sHID(object):
 			result = 0
 			#pass
 			
-			##emulate hw // FIXME
-			result = 1
+			if self.debug == 1:
+				return 1;
 		
 		return result
 
@@ -255,7 +254,7 @@ class sHID(object):
 
 	def Execute(self,command):
 		#print "sHID::Execute"
-		buffer = [0]*0x15
+		buffer = [0]*0x0f #*0x15
 		buffer[0] = 0xD9;
 		buffer[1] = command;
 		try:
@@ -276,6 +275,9 @@ class sHID(object):
 			sys.stdout.write(" fail\n")
 			result = 0
 			#pass
+
+			if self.debug == 1:
+				return 1;
 
 		#print "sHID::Execute - end"
 		return result

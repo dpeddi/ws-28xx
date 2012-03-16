@@ -189,9 +189,24 @@ class CCommunicationService(object):
 
 		buffer = [None]
 		if ( lowlevel.ReadConfigFlash(0x1F9, 7, buffer) ):
+			ID  = buffer[0][5] << 8;
+			ID += buffer[0][6];
+			print "CCommunicationService::TransceiverInit TransceiverID %d" % ID
+
+			SN  = buffer[0][0] << 24;
+			SN += buffer[0][1] << 16;
+			SN += buffer[0][2] << 8;
+			SN += buffer[0][3];
+			print "CCommunicationService::TransceiverInit TransceiverSN %d - ????" % SN
+
 			for i, Register in enumerate(self.AX5051RegisterNames_map):
 				lowlevel.WriteReg(Register,self.AX5051RegisterNames_map[Register])
-				#print "%x %x" % (Register,self.AX5051RegisterNames_map[Register])
+
+			if lowlevel.Execute(5):
+				lowlevel.SetPreamblePattern(0xaa)
+
+
+
 		#raise NotImplementedError()
 		#raise ws28xxError("not implemented yet")
 
@@ -264,11 +279,12 @@ class CCommunicationService(object):
 				ReceiverState = StateBuffer[0];
 				if ( not StateBuffer[0]) or (ReceiverState == 0x15 ):
 #LABEL_42
-					if timeout and RepeatCount:
-						--RepeatCount;
+					#if timeout and RepeatCount:
+					#	--RepeatCount;
 						#*(_QWORD *)&v23 = thisa->RepeatInterval;
 						#a delay until I get 0x15
-					break;
+					#break;
+					a=1
 
 				--timeout;
 				#if ( !timeout )
