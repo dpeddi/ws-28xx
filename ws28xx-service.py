@@ -1,4 +1,3 @@
-import array
 import sHID
 
 #placeholder to start hacking with hardware  //FIXME
@@ -28,6 +27,8 @@ class ws28xxError(IOError):
 	"Used to signal an error condition"
 
 class CCommunicationService(object):
+
+	AX5051RegisterNames_map = dict()
 
 	class AX5051RegisterNames:
 		REVISION         = 0x0
@@ -96,11 +97,22 @@ class CCommunicationService(object):
 		REF              = 0x7C
 		RXMISC           = 0x7D
 
-	AX5051RegisterNames_map = dict()
 
 	def getInstance(self):
 		print "getInstance(partially implemented)"
 		self.CCommunicationService();
+
+	def handleWsAck():
+
+	def handleConfig():
+
+	def handleCurrentData():
+
+	def handleHistoryData():
+
+	def handleNextAction():
+
+	def buildTimeFrame():
 
 	def CCommunicationService(self):
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.IFMODE]     = 0x00;
@@ -143,6 +155,7 @@ class CCommunicationService(object):
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQGAIN2]  = 0x0a;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.AMPLGAIN]   = 0x06;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.AGCMANUAL]  = 0x00;
+
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.ADCDCLEVEL] = 0x10;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.RXMISC]     = 0x35;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FSKDEV2]    = 0x00;
@@ -180,6 +193,7 @@ class CCommunicationService(object):
 
 	def GenerateResponse(self,FrameBuffer,DataLength):
 		print "CCommunicationService::GenerateResponse (not implemented yet)"
+		print FrameBuffer
 
 	def TransceiverInit(self):
 		#print "CCommunicationService::TransceiverInit"
@@ -191,7 +205,7 @@ class CCommunicationService(object):
 		if ( lowlevel.ReadConfigFlash(0x1F9, 7, buffer) ):
 			ID  = buffer[0][5] << 8;
 			ID += buffer[0][6];
-			print "CCommunicationService::TransceiverInit TransceiverID %d" % ID
+			print "CCommunicationService::TransceiverInit TransceiverID 0x%x" % ID
 
 			SN  = buffer[0][0] << 24;
 			SN += buffer[0][1] << 16;
@@ -209,7 +223,6 @@ class CCommunicationService(object):
 					if lowlevel.SetRX():
 						v67 = 1  #//fixme:and so?
 						v78 = -1 #//fixme:and so?
-
 
 		#raise NotImplementedError()
 		#raise ws28xxError("not implemented yet")
@@ -230,13 +243,14 @@ class CCommunicationService(object):
 			#RequestType = getRequestType
 			#if RequestType = 5
 
-		StateBuffer = array.array("h",range(0x200))
+		StateBuffer = [0]*0x200
 		ret = lowlevel.GetState(StateBuffer);
-		print ret
 		if ret == 1:
 			FrameBuffer=[None]*0x200 #//FIXME
 			DataLength = 0 #//FIXME
-			ReceiverState = StateBuffer[0];
+
+			ReceiverState = StateBuffer[0][0];
+			print "DEBUG:", ReceiverState
 			if ReceiverState == 22:
 				ret = lowlevel.GetFrame(FrameBuffer, DataLength);
 				if ret == None:

@@ -110,12 +110,12 @@ class sHID(object):
 			StateBuffer[1]=buffer[2]
 			result = 1
 		except:
-
 			if self.debug == 1:
 				buffer[1]=0x14
-				StateBuffer=[0]*0x2
-				StateBuffer[0]=buffer[1]
-				StateBuffer[1]=buffer[2]
+				StateBuffer[0]=[0]*0x2
+				StateBuffer[0][0]=buffer[1]
+				StateBuffer[0][1]=buffer[2]
+			#print "EDDI:",StateBuffer
 
 			i=0
 			import sys
