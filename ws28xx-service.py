@@ -434,10 +434,10 @@ class CCommunicationService(object):
 		else:
 		    print "CCommunicationService->Buffer=",Buffer
 		
-		if (Buffer[2] & 0xE0) - 0x20) == 0x40:
+		if ((Buffer[2] & 0xE0) - 0x20) == 0x40:
 			if Length == 215:
 				self.handleCurrentData(Buffer, Length);
-			else
+			else:
 				Length = 0
 
 

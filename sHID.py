@@ -44,11 +44,12 @@ class sHID(object):
 					print "interfaceNumber %d" % self.usbInterface.interfaceNumber
 
 					try:
-					  #self.devh.detachKernelDriver(self.usbInterface.interfaceNumber)
+					  self.devh.detachKernelDriver(self.usbInterface.interfaceNumber)
 					  self.logger.info("Unloaded other driver from interface %d" %
 					      self.usbInterface.interfaceNumber)
 					except usb.USBError, e:
-					  pass
+					    print "exception in detach"
+					    pass
 
 					#self.devh.setAltInterface(0)
 					
