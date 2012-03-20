@@ -424,7 +424,6 @@ class CCommunicationService(object):
 			DataLength = 0
 			StateBuffer = [None]
 			ret = lowlevel.GetState(StateBuffer);
-			print "ret %d " % ret
 			if ret == 1:
 				FrameBuffer=[None]*0x200 #//FIXME
 	
