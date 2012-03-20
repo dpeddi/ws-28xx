@@ -167,6 +167,9 @@ class ws28xxError(IOError):
 
 class CCommunicationService(object):
 
+	Regenerate = 0
+	TimeSent = 0
+	
 	AX5051RegisterNames_map = dict()
 
 	class AX5051RegisterNames:
@@ -244,6 +247,68 @@ class CCommunicationService(object):
 		print "getInstance (partially implemented)"
 		self.CCommunicationService();
 
+	def buildACKFrame(Buffer, Action, CheckSum, HistoryIndex, ComInt):
+		print "buildACKFrame (not yet implemented)"
+#			if ( !Action && ComInt == -1 ):
+#				v28 = 0;
+#				if ( !Stat.LastCurrentWeatherTime.m_status ):
+#				ATL::COleDateTime::operator_(&now, &ts, &Stat.LastCurrentWeatherTime);
+#				if ( ATL::COleDateTimeSpan::GetTotalSeconds(&ts) >= 8.0 )
+#					Action = 5;
+#				v28 = -1;
+#			Buffer[2] = Action & 0xF;
+#			v7 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+#			v21 = CDataStore::GetDeviceConfigCS(v7);
+#			if ( HistoryIndex >= 0x705 ):
+#				HistoryAddress = -1;
+#			else:
+#			{
+#				v8 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+#				if ( !CDataStore::getBufferCheck(v8) )
+#				{
+#				if ( !ATL::COleDateTime::GetStatus(&Stat.LastHistoryDataTime) )
+#				{
+#					v9 = ATL::COleDateTime::operator_(&now, &result, &Stat.LastHistoryDataTime);
+#					if ( ATL::COleDateTimeSpan::operator>(v9, &BUFFER_OVERFLOW_SPAN) )
+#					{
+#					val = 1;
+#					v10 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+#					CDataStore::setBufferCheck(v10, &val);
+#					}
+#				}
+#				}
+#				v11 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+#				if ( CDataStore::getBufferCheck(v11) != 1
+#				&& (v12 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore), CDataStore::getBufferCheck(v12) != 2) )
+#				{
+#				HistoryAddress = 18 * *HistoryIndex + 416;
+#				}
+#				else
+#				{
+#				if ( *HistoryIndex )
+#					HistoryAddress = 18 * (*HistoryIndex - 1) + 416;
+#				else
+#					HistoryAddress = 32744;
+#				v20 = 2;
+#				v13 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+#				CDataStore::setBufferCheck(v13, (CDataStore::TBufferCheck *)&v20);
+#				}
+#			}
+#			(*Buffer)[3] = *(_WORD *)CheckSum >> 8;
+#			(*Buffer)[4] = *(_BYTE *)CheckSum;
+#			if ( ComInt == -1 )
+#			{
+#				v14 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+#				ComInt = CDataStore::getCommModeInterval(v14);
+#			}
+#			(Buffer)[5] = ComInt >> 4;
+#			(Buffer)[6] = (HistoryAddress >> 16) & 0xF | 16 * (ComInt & 0xF);
+#			(Buffer)[7] = BYTE1(HistoryAddress);
+#			(Buffer)[8] = HistoryAddress;
+#			thisa->Regenerate = 0;
+#		thisa->TimeSent = 0;
+	
+
 	def handleWsAck():
 		print "handleWsAck (not yet implemented)"
 
@@ -252,6 +317,21 @@ class CCommunicationService(object):
 
 	def handleCurrentData():
 		print "handleCurrentData (not yet implemented)"
+#			rtGetCurrent     = 0
+#			rtGetHistory     = 1
+#			rtGetConfig      = 2
+#			rtSetConfig      = 3
+#			rtSetTime        = 4
+#			rtFirstConfig    = 5
+#			rtINVALID        = 6
+		if   rt == 0: #rtGetCurrent
+			self.buildACKFrame(Buffer, 0, &DeviceCS, &HistoryIndex, 0xFFFFFFFFu);
+		elif rt == 1:
+		elif rt == 2:
+		elif rt == 3:
+		elif rt == 4:
+		elif rt == 5:
+		elif rt == 6:
 
 	def handleHistoryData():
 		print "handleHistoryData (not yet implemented)"
@@ -339,13 +419,19 @@ class CCommunicationService(object):
 			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0])
 		print "CCommunicationService::caluculateFrequency - end"
 
-	def GenerateResponse(self,FrameBuffer,DataLength):
+	def GenerateResponse(self,Buffer,Length):
 		print "CCommunicationService::GenerateResponse (not implemented yet)"
-		print "CCommunicationService->DataLength=",DataLength
-		if DataLength == 0:
-		    print "CCommunicationService->Framebuffer=[None]"
+		print "CCommunicationService->Length=",Length
+		if Length == 0:
+		    print "CCommunicationService->Buffer=[None]"
 		else:
-		    print "CCommunicationService->Framebuffer=",FrameBuffer
+		    print "CCommunicationService->Buffer=",Buffer
+		
+		if (Buffer[2] & 0xE0) - 0x20) == 0x40:
+			if Length == 215:
+				self.handleCurrentData(Buffer, Length);
+			else
+				Length = 0
 
 
 	#_RTC_CheckStackVars();
@@ -441,6 +527,7 @@ class CCommunicationService(object):
 						#v43 = &v22;
 						#CTracer::WriteDump((CTracer *)td, 50, v22, v23, v24);
 				self.GenerateResponse(FrameBuffer, DataLength); #// return 0 no error, return 1 runtime error
+																# this one prepare the ackframe  
 				if DataLength:
 					v24 = DataLength;
 					v23 = FrameBuffer;
@@ -456,7 +543,7 @@ class CCommunicationService(object):
 					#LOBYTE(v67) = 0;
 					#CTracer::WriteDump((CTracer *)td, 50, v22, v23, v24);
 				lowlevel.SetState(0);
-				ret = lowlevel.SetFrame(FrameBuffer, DataLength);
+				ret = lowlevel.SetFrame(FrameBuffer, DataLength); # send the ackframe prepared by GenerateResponse
 				if ret == None:
 					print "USBDevice->SetFrame returned false"  #it shouldn't be blocking
 					#goto LABEL_49

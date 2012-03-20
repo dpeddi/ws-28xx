@@ -373,8 +373,6 @@ class sHID(object):
 	def GetFrame(self,data,numBytes):
 		print "sHID::GetFrame (not fully implemented yet)"
 		import usb
-		buffer = [0]*0x111
-		buffer[0] = 0xd6;
 
 		try:
 			buffer = self.devh.controlMsg(requestType=usb.TYPE_CLASS | usb.RECIP_INTERFACE | usb.ENDPOINT_IN,
@@ -393,8 +391,9 @@ class sHID(object):
 			#    for ( i = 0; i < *(_DWORD *)a3; ++i )
 			#      *(_BYTE *)a2++ = v7[i];
 		new_data=[0]*0x15
-		for i in xrange(0, ((buffer[1] << 8 | buffer[2])& 0x1ff) ):
-			new_data[i] = buffer[i+1];
+		new_numBytes=(buffer[1] << 8 | buffer[2])& 0x1ff;
+		for i in xrange(0, new_numBytes):
+			new_data[i] = buffer[i+1];	
 
 		if self.debug == 2:
 			i=0
