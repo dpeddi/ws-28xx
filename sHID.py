@@ -5,6 +5,8 @@
 #http://moveonpc.googlecode.com/svn-history/r14/trunk/source/winhid.cpp
 
 #import array
+import platform
+import sys
 import logging
 import time
 
@@ -42,25 +44,46 @@ class sHID(object):
 					print "interfaceNumber %d" % self.usbInterface.interfaceNumber
 
 					try:
-					  self.devh.detachKernelDriver(self.usbInterface.interfaceNumber)
+					  #self.devh.detachKernelDriver(self.usbInterface.interfaceNumber)
 					  self.logger.info("Unloaded other driver from interface %d" %
 					      self.usbInterface.interfaceNumber)
 					except usb.USBError, e:
 					  pass
 
-					#self.devh.setConfiguration(self.usbConfiguration)
-					self.devh.claimInterface(self.usbInterface)
-					self.devh.setAltInterface(self.usbInterface)
-					#self.devh.reset()
+					#self.devh.setAltInterface(0)
+					
+					self.devh.getDescriptor(0x1, 0, 0x12)
 					time.sleep(usbWait)
-
+					self.devh.getDescriptor(0x2, 0, 0x9)
+					time.sleep(usbWait)
+					self.devh.getDescriptor(0x2, 0, 0x22)
+					time.sleep(usbWait)
+					if platform.system() is 'Windows':
+						#self.devh.setConfiguration(self.usbConfiguration)
+						self.devh.setConfiguration(1)
+					#self.devh.claimInterface(self.usbInterface)
+					self.devh.claimInterface(0)
+					#self.devh.setAltInterface(self.usbInterface)
+					self.devh.setAltInterface(0)
+					#self.devh.reset()
+					time.sleep(3.5)
+					
 					ret = self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,
 								0x000000a, [], 0x0000000, 0x0000000, 1000);
-					
-					print self.devh.interruptRead(usb.ENDPOINT_IN + 1, 0xf,
-                                           int(15 * 1000))
-
+					time.sleep(0.3)
+								
 					self.devh.getDescriptor(0x22, 0, 0x2a9)
+					
+					while True:
+						try:
+							ret = self.devh.interruptRead(usb.ENDPOINT_IN + 1, 0xf,
+                                           int(15 * 1000))
+							print ret
+						except:
+							break
+						break
+
+					time.sleep(usbWait)
 
 					#try:
 					#	self.devh.claimInterface(0)
@@ -215,12 +238,12 @@ class sHID(object):
 					                                0x00003dd,                                  # value
 					                                0x0000000,                                  # index
 					                                1000)                                       # timeout
-					print ret 
+					print "retdd:",ret 
 					result = 1
 				except:
 					i=0
 					import sys
-					sys.stdout.write("sHID::ReadConfigFlash message: ")
+					sys.stdout.write("sHID::ReadConfigFlash message1: ")
 					for entry in buffer:
 						sys.stdout.write("%.2x" % (buffer[i]))
 						i+=1
@@ -236,15 +259,18 @@ class sHID(object):
 				# return 0;
 
 				time.sleep(0.5)
+
 				try:
 					#int usb_control_msg(usb_dev_handle *dev, int requesttype, int request, int value, int index, char *bytes, int size, int timeout);
 					#ret = usb_control_msg(devh, USB_TYPE_CLASS + USB_RECIP_INTERFACE + USB_ENDPOINT_IN, 0x0000001, 0x00003dc, 0x0000000, buf, 0x0000015, 1000);
-					ret = self.xdevh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE + usb.ENDPOINT_IN,  # requestType
-					                                0x0000001,                                  # request
-					                                buffer,                                     # buffer
-					                                0x00003dc,                                  # value
-					                                0x0000000,                                  # index
-					                                1000)                                       # timeout
+					ret = self.devh.controlMsg(requestType=usb.TYPE_CLASS | usb.RECIP_INTERFACE | usb.ENDPOINT_IN,
+											   request=usb.REQ_CLEAR_FEATURE,
+											   value=0x00003dc,
+											   index=0x0000000,
+											   buffer=0x15,
+											   timeout=1000)
+
+					print "retdc:",ret
 					result = 1
 				except:
 					if addr == 0x1F5 and self.debug == 1: #//fixme #debugging... without device
@@ -277,7 +303,7 @@ class sHID(object):
 
 		i=0
 		import sys
-		sys.stdout.write("sHID::ReadConfigFlash message: ")
+		sys.stdout.write("sHID::ReadConfigFlash message2: ")
 		for entry in new_data:
 			sys.stdout.write("%.2x" % (new_data[i]))
 			i+=1
