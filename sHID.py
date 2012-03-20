@@ -52,13 +52,15 @@ class sHID(object):
 					self.devh.claimInterface(self.usbInterface)
 					self.devh.setAltInterface(self.usbInterface)
 					#self.devh.reset()
+					time.sleep(usbWait)
 
-					#try:
-					#    ret = self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,
-					#    			0x000000a, [], 0x0000000, 0x0000000, 1000);
-					#except:
-					#    ret = self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,
-					#			0x000000a, [], 0x0000000, 0x0000000, 1000);
+					ret = self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,
+								0x000000a, [], 0x0000000, 0x0000000, 1000);
+					
+					print self.devh.interruptRead(usb.ENDPOINT_IN + 1, 0xf,
+                                           int(15 * 1000))
+
+					self.devh.getDescriptor(0x22, 0, 0x2a9)
 
 					#try:
 					#	self.devh.claimInterface(0)
@@ -184,26 +186,36 @@ class sHID(object):
 
 	def ReadConfigFlash(self,addr,numBytes,data):
 		print "sHID::ReadConfigFlash"
+		import usb
 		if numBytes <= 512:
 			while ( numBytes ):
 				buffer=[0xcc]*0x0f #0x15
 				buffer[0] = 0xdd
-				buffer[1] = 10
+				buffer[1] = 0x0a
 				buffer[2] = (addr >>8)  & 0xFF;
 				buffer[3] = (addr >>0)  & 0xFF;
+
+				i=0
+				import sys
+				sys.stdout.write("sHID::ReadConfigFlash message: ")
+				for entry in buffer:
+					sys.stdout.write("%.2x" % (buffer[i]))
+					i+=1
+				print
+
 				#//fixme
 				#if ( !(unsigned __int8)HidD_SetFeature(*((_DWORD *)v5 + 20), &v6, 21) )
 				#    return 0;
 				try:
-					import usb
-					#int usb_control_msg(usb_dev_handle *dev, int requesttype, int request, int value, int index, char *bytes, int size, int timeout);
+						#int usb_control_msg(usb_dev_handle *dev, int requesttype, int request, int value, int index, char *bytes, int size, int timeout);
 					#ret = usb_control_msg(devh, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 0x0000009, 0x00003dd, 0x0000000, buf, 0x000000f, 1000);
-					self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,       # requestType
+					ret = self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,       # requestType
 					                                0x0000009,                                  # request
 					                                buffer,                                     # buffer
 					                                0x00003dd,                                  # value
 					                                0x0000000,                                  # index
 					                                1000)                                       # timeout
+					print ret 
 					result = 1
 				except:
 					i=0
@@ -213,21 +225,21 @@ class sHID(object):
 						sys.stdout.write("%.2x" % (buffer[i]))
 						i+=1
 					sys.stdout.write(" fail\n")
-					if self.debug != 1:
-						return 0;
+					#if self.debug != 1:
+					#	return 0;
 
 				buffer=[0]*0x15
 				buffer[0] = 0xdc
-				buffer[1] = 10;
+				buffer[1] = 0x0a;
 				#//fixme
 				#f ( !(unsigned __int8)HidD_GetFeature(*((_DWORD *)v5 + 20), &v6, 21) )
 				# return 0;
 
+				time.sleep(0.5)
 				try:
-					import usb
 					#int usb_control_msg(usb_dev_handle *dev, int requesttype, int request, int value, int index, char *bytes, int size, int timeout);
 					#ret = usb_control_msg(devh, USB_TYPE_CLASS + USB_RECIP_INTERFACE + USB_ENDPOINT_IN, 0x0000001, 0x00003dc, 0x0000000, buf, 0x0000015, 1000);
-					self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE + usb.ENDPOINT_IN,  # requestType
+					ret = self.xdevh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE + usb.ENDPOINT_IN,  # requestType
 					                                0x0000001,                                  # request
 					                                buffer,                                     # buffer
 					                                0x00003dc,                                  # value
@@ -244,9 +256,11 @@ class sHID(object):
 						buffer=[0xdc,0x0a,0x01,0xf9,0x01,0x01,0x0c,0x0a,0x0a,0x00,0x41,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x00]
 					if self.debug != 1:
 						return 0;
+				print ret
 
 				new_data=[0]*0x15
 				if ( numBytes < 16 ):
+					print "XXXDEBUG",buffer
 					#for i, Register in enumerate(buffer)
 					for i in xrange(0, numBytes):
 						#print "eddi %d %x" %(i,buffer[i+4])
@@ -264,10 +278,13 @@ class sHID(object):
 		i=0
 		import sys
 		sys.stdout.write("sHID::ReadConfigFlash message: ")
-		for entry in buffer:
-			sys.stdout.write("%.2x" % (buffer[i]))
+		for entry in new_data:
+			sys.stdout.write("%.2x" % (new_data[i]))
 			i+=1
-		sys.stdout.write(" fail\n")
+		if result == 1:
+			sys.stdout.write(" ok\n")
+		else:
+			sys.stdout.write(" fail\n")
 
 		data[0] = new_data
 		return result
@@ -393,6 +410,7 @@ class sHID(object):
 		buffer[3] = data;
 		buffer[4] = 0x00;
 		try:
+			import usb
 			#int usb_control_msg(usb_dev_handle *dev, int requesttype, int request, int value, int index, char *bytes, int size, int timeout);
 			#ret = usb_control_msg(devh, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 0x0000009, 0x00003f0, 0x0000000, buf, 0x0000005, 1000);
 			self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,       # requestType

@@ -393,6 +393,8 @@ class CCommunicationService(object):
 		if device:
 			self.TransceiverInit()
 			lowlevel.SetRX()
+		else:
+			raise "no ws"
 		#while True:
 		if 1 == 1:
 			RequestType = self.getRequestType()
