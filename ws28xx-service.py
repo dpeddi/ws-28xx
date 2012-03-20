@@ -325,13 +325,20 @@ class CCommunicationService(object):
 #			rtFirstConfig    = 5
 #			rtINVALID        = 6
 		if   rt == 0: #rtGetCurrent
-			self.buildACKFrame(Buffer, 0, &DeviceCS, &HistoryIndex, 0xFFFFFFFFu);
+			print "0"
+			#self.buildACKFrame(Buffer, 0, &DeviceCS, &HistoryIndex, 0xFFFFFFFFu);
 		elif rt == 1:
+			print "1"
 		elif rt == 2:
+			print "2"
 		elif rt == 3:
+			print "3"
 		elif rt == 4:
+			print "4"
 		elif rt == 5:
+			print "5"
 		elif rt == 6:
+			print "6"
 
 	def handleHistoryData():
 		print "handleHistoryData (not yet implemented)"
