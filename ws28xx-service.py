@@ -422,7 +422,7 @@ class CCommunicationService(object):
 						#	SetRx()
 
 			DataLength = 0
-			StateBuffer = [0]*0x200
+			StateBuffer = [None]
 			ret = lowlevel.GetState(StateBuffer);
 			print "ret %d " % ret
 			if ret == 1:

@@ -192,10 +192,10 @@ class sHID(object):
 										  index=0x0000000,
 										  buffer=0x0a,
 										  timeout=1000)
-										
-			StateBuffer=[0]*0x2
-			StateBuffer[0]=buffer[1]
-			StateBuffer[1]=buffer[2]
+			StateBuffer[0]=[0]*0x2
+			StateBuffer[0][0]=buffer[1]
+			StateBuffer[0][1]=buffer[2]
+			
 			result = 1
 		except:
 			if self.debug == 1:
@@ -203,7 +203,6 @@ class sHID(object):
 				StateBuffer[0]=[0]*0x2
 				StateBuffer[0][0]=buffer[1]
 				StateBuffer[0][1]=buffer[2]
-			#print "EDDI:",StateBuffer
 
 			i=0
 			import sys
@@ -377,8 +376,6 @@ class sHID(object):
 		buffer[0] = 0xd5;
 		buffer[1] = numBytes >> 8;
 		buffer[2] = numBytes;
-
-		#buffer 
 
 		try:
 			#ret = usb_control_msg(devh, USB_TYPE_CLASS + USB_RECIP_INTERFACE, 0x0000009, 0x00003d5, 0x0000000, buf, 0x0000111, 1000);
