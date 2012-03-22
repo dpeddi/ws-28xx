@@ -20,7 +20,7 @@ class sHID(object):
 
 	devh = None
 
-	debug = 2
+	debug = 0
 
 	def Find(self, vendorID, productID, versionNr):
 		#print "sHID::Find"
@@ -67,7 +67,8 @@ class sHID(object):
 					#self.devh.setAltInterface(self.usbInterface)
 					self.devh.setAltInterface(0)
 					#self.devh.reset()
-					time.sleep(3.5)
+					#time.sleep(3.5)
+					time.sleep(0.5)
 					
 					ret = self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,
 								0x000000a, [], 0x0000000, 0x0000000, 1000);
@@ -283,25 +284,27 @@ class sHID(object):
 		else:
 			result = 0;
 
-		i=0
-		import sys
-		sys.stdout.write("sHID::ReadConfigFlash 0xdd message: ")
-		for entry in new_data:
-			sys.stdout.write("%.2x" % (new_data[i]))
-			i+=1
-		if result == 1:
-			sys.stdout.write(" ok\n")
-		else:
-			sys.stdout.write(" fail\n")
+		if self.debug == 2:
+			i=0
+			import sys
+			sys.stdout.write("sHID::ReadConfigFlash 0xdd message: ")
+			for entry in new_data:
+				sys.stdout.write("%.2x" % (new_data[i]))
+				i+=1
+			if result == 1:
+				sys.stdout.write(" ok\n")
+			else:
+				sys.stdout.write(" fail\n")
 
 		data[0] = new_data
 		return result
 
-	def SetState(self,a1):
+	def SetState(self,state):
 		#print "sHID::SetState"
 		import usb
 		buffer = [0]*0x15
 		buffer[0] = 0xd7;
+		buffer[1] = state;
 		try:
 			self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,       # requestType
 		                                0x0000009,                                  # request
@@ -311,18 +314,20 @@ class sHID(object):
 		                                1000)                                       # timeout
 			result = 1
 		except:
+			result = 0
+
+		if self.debug == 2:
 			i=0
 			import sys
 			sys.stdout.write("sHID::SetState message: ")
 			for entry in buffer:
 				sys.stdout.write("%.2x" % (buffer[i]))
 				i+=1
-			sys.stdout.write(" fail\n")
-			result = 0
-			#pass
-			if self.debug == 1:
-				return 1;
-
+			if result == 1:
+				sys.stdout.write(" ok\n")
+			else:
+				sys.stdout.write(" fail\n")
+	
 		#print "sHID::SetState - end"
 		return result
 
@@ -339,6 +344,19 @@ class sHID(object):
 		#  for ( i = a3 + 3; i < 0x131; ++i )
 		#    *(&v4 + i) = 0;
 		#  if ( (unsigned __int8)HidD_SetFeature(*(_DWORD *)(this + 80), &v4, 273) )
+#    00000000: d5 00 09 f0 f0 03 00 32 00 3f ff ff 00 00 00 00
+#    00000000: d5 00 0c 00 32 c0 00 8f 45 25 15 91 31 20 01 00
+#    00000000: d5 00 09 00 32 00 06 c1 00 3f ff ff 00 00 00 00
+#    00000000: d5 00 09 00 32 01 06 c1 00 3f ff ff 00 00 00 00
+#    00000000: d5 00 0c 00 32 c0 06 c1 47 25 15 91 31 20 01 00
+#    00000000: d5 00 09 00 32 00 06 c1 00 30 01 a0 00 00 00 00
+#    00000000: d5 00 09 00 32 02 06 c1 00 30 01 a0 00 00 00 00
+#    00000000: d5 00 30 00 32 40 64 33 53 04 00 00 00 00 00 00
+#    00000000: d5 00 09 00 32 00 06 ab 00 30 01 a0 00 00 00 00
+#    00000000: d5 00 09 00 32 00 04 d0 00 30 01 a0 00 00 00 00
+#    00000000: d5 00 09 00 32 02 04 d0 00 30 01 a0 00 00 00 00
+#    00000000: d5 00 30 00 32 40 64 32 53 04 00 00 00 00 00 00
+#    00000000: d5 00 09 00 32 00 04 cf 00 30 01 a0 00 00 00 00
 
 		buffer = [0]*0x111
 		buffer[0] = 0xd5;
@@ -394,7 +412,7 @@ class sHID(object):
 		new_data=[0]*0x15
 		new_numBytes=(buffer[1] << 8 | buffer[2])& 0x1ff;
 		for i in xrange(0, new_numBytes):
-			new_data[i] = buffer[i+1];	
+			new_data[i] = buffer[i+3];
 
 		if self.debug == 2:
 			i=0
@@ -408,6 +426,11 @@ class sHID(object):
 			else:
 				sys.stdout.write(" fail\n")
 				
+
+		data[0] = new_data
+		numBytes[0] = new_numBytes
+		print new_data
+		print new_numBytes
 		#print "sHID::GetFrame - end"
 		return result
 
