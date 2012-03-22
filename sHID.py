@@ -10,6 +10,11 @@ import sys
 import logging
 import time
 
+
+import os 
+import sys 
+unbuffered = os.fdopen(sys.stderr.fileno(), 'w', 0)
+
 usbWait =0.5
 
 class sHID(object):
@@ -130,14 +135,14 @@ class sHID(object):
 		if self.debug == 2:
 			i=0
 			import sys
-			sys.stdout.write("sHID::SetTX message: ")
+			unbuffered.write("sHID::SetTX message: ")
 			for entry in buffer:
-				sys.stdout.write("%.2x" % (buffer[i]))
+				unbuffered.write("%.2x" % (buffer[i]))
 				i+=1	
 			if result == 1:
-				sys.stdout.write(" ok\n")
+				unbuffered.write(" ok\n")
 			else:
-				sys.stdout.write(" fail\n")
+				unbuffered.write(" fail\n")
 
 		return result
 		#print "sHID::SetTX - end"
@@ -161,14 +166,14 @@ class sHID(object):
 		if self.debug == 2:
 			i=0
 			import sys
-			sys.stdout.write("sHID::SetRX message: ")
+			unbuffered.write("sHID::SetRX message: ")
 			for entry in buffer:
-				sys.stdout.write("%.2x" % (buffer[i]))
+				unbuffered.write("%.2x" % (buffer[i]))
 				i+=1	
 			if result == 1:
-				sys.stdout.write(" ok\n")
+				unbuffered.write(" ok\n")
 			else:
-				sys.stdout.write(" fail\n")
+				unbuffered.write(" fail\n")
 				
 		return result
 		#print "sHID::SetRX - end"
@@ -188,7 +193,6 @@ class sHID(object):
 			StateBuffer[0][1]=buffer[2]
 			
 			result = 1
-			time.sleep(usbWait)
 		except:
 			result = 0
 			if self.debug == 1:
@@ -201,14 +205,14 @@ class sHID(object):
 		if self.debug == 2:
 			i=0
 			import sys
-			sys.stdout.write("sHID::GetState message: ")
+			unbuffered.write("sHID::GetState message: ")
 			for entry in buffer:
-				sys.stdout.write("%.2x" % (buffer[i]))
+				unbuffered.write("%.2x" % (buffer[i]))
 				i+=1	
 			if result == 1:
-				sys.stdout.write(" ok\n")
+				unbuffered.write(" ok\n")
 			else:
-				sys.stdout.write(" fail\n")		
+				unbuffered.write(" fail\n")		
 						
 		return result
 		#print "sHID::GetState - end"
@@ -238,14 +242,14 @@ class sHID(object):
 				if self.debug == 2:
 					i=0
 					import sys
-					sys.stdout.write("sHID::ReadConfigFlash 0xdc message: ")
+					unbuffered.write("sHID::ReadConfigFlash 0xdc message: ")
 					for entry in buffer:
-						sys.stdout.write("%.2x" % (buffer[i]))
+						unbuffered.write("%.2x" % (buffer[i]))
 						i+=1	
 					if result == 1:
-						sys.stdout.write(" ok\n")
+						unbuffered.write(" ok\n")
 					else:
-						sys.stdout.write(" fail\n")				
+						unbuffered.write(" fail\n")				
 
 				time.sleep(0.5)
 
@@ -287,14 +291,14 @@ class sHID(object):
 		if self.debug == 2:
 			i=0
 			import sys
-			sys.stdout.write("sHID::ReadConfigFlash 0xdd message: ")
+			unbuffered.write("sHID::ReadConfigFlash 0xdd message: ")
 			for entry in new_data:
-				sys.stdout.write("%.2x" % (new_data[i]))
+				unbuffered.write("%.2x" % (new_data[i]))
 				i+=1
 			if result == 1:
-				sys.stdout.write(" ok\n")
+				unbuffered.write(" ok\n")
 			else:
-				sys.stdout.write(" fail\n")
+				unbuffered.write(" fail\n")
 
 		data[0] = new_data
 		return result
@@ -319,14 +323,14 @@ class sHID(object):
 		if self.debug == 2:
 			i=0
 			import sys
-			sys.stdout.write("sHID::SetState message: ")
+			unbuffered.write("sHID::SetState message: ")
 			for entry in buffer:
-				sys.stdout.write("%.2x" % (buffer[i]))
+				unbuffered.write("%.2x" % (buffer[i]))
 				i+=1
 			if result == 1:
-				sys.stdout.write(" ok\n")
+				unbuffered.write(" ok\n")
 			else:
-				sys.stdout.write(" fail\n")
+				unbuffered.write(" fail\n")
 	
 		#print "sHID::SetState - end"
 		return result
@@ -377,14 +381,14 @@ class sHID(object):
 		if self.debug == 2:
 			i=0
 			import sys
-			sys.stdout.write("sHID::SetFrame message: ")
+			unbuffered.write("sHID::SetFrame message: ")
 			for entry in buffer:
-				sys.stdout.write("%.2x" % (buffer[i]))
+				unbuffered.write("%.2x" % (buffer[i]))
 				i+=1	
 			if result == 1:
-				sys.stdout.write(" ok\n")
+				unbuffered.write(" ok\n")
 			else:
-				sys.stdout.write(" fail\n")
+				unbuffered.write(" fail\n")
 
 		#print "sHID::SetFrame - end"
 		return result
@@ -409,7 +413,7 @@ class sHID(object):
 			#*(_DWORD *)a3 = (v6 | (unsigned __int16)(v5 << 8)) & 0x1FF;
 			#    for ( i = 0; i < *(_DWORD *)a3; ++i )
 			#      *(_BYTE *)a2++ = v7[i];
-		new_data=[0]*0x15
+		new_data=[0]*0x111
 		new_numBytes=(buffer[1] << 8 | buffer[2])& 0x1ff;
 		for i in xrange(0, new_numBytes):
 			new_data[i] = buffer[i+3];
@@ -417,20 +421,20 @@ class sHID(object):
 		if self.debug == 2:
 			i=0
 			import sys
-			sys.stdout.write("sHID::GetFrame message: ")
+			unbuffered.write("sHID::GetFrame message: ")
 			for entry in buffer:
-				sys.stdout.write("%.2x" % (buffer[i]))
-				i+=1	
+				unbuffered.write("%.2x" % (buffer[i]))
+				i+=1
 			if result == 1:
-				sys.stdout.write(" ok\n")
+				unbuffered.write(" ok\n")
 			else:
-				sys.stdout.write(" fail\n")
+				unbuffered.write(" fail\n")
 				
 
 		data[0] = new_data
 		numBytes[0] = new_numBytes
-		print new_data
-		print new_numBytes
+		#print new_data
+		#print new_numBytes
 		#print "sHID::GetFrame - end"
 		return result
 
@@ -458,14 +462,14 @@ class sHID(object):
 		if self.debug == 2:
 			i=0
 			import sys
-			sys.stdout.write("sHID::WriteReg: ")
+			unbuffered.write("sHID::WriteReg: ")
 			for entry in buffer:
-				sys.stdout.write("%.2x" % (buffer[i]))
+				unbuffered.write("%.2x" % (buffer[i]))
 				i+=1	
 			if result == 1:
-				sys.stdout.write(" ok\n")
+				unbuffered.write(" ok\n")
 			else:
-				sys.stdout.write(" fail\n")
+				unbuffered.write(" fail\n")
 
 		#print "sHID::WriteReg - end"
 		return result
@@ -491,14 +495,14 @@ class sHID(object):
 		if self.debug == 2:
 			i=0
 			import sys
-			sys.stdout.write("sHID::Execute message: ")
+			unbuffered.write("sHID::Execute message: ")
 			for entry in buffer:
-				sys.stdout.write("%.2x" % (buffer[i]))
+				unbuffered.write("%.2x" % (buffer[i]))
 				i+=1	
 			if result == 1:
-				sys.stdout.write(" ok\n")
+				unbuffered.write(" ok\n")
 			else:
-				sys.stdout.write(" fail\n")
+				unbuffered.write(" fail\n")
 		#print "sHID::Execute - end"
 		return result
 
@@ -523,14 +527,14 @@ class sHID(object):
 		if self.debug == 2:
 			i=0
 			import sys
-			sys.stdout.write("sHID::SetPreamblePattern message: ")
+			unbuffered.write("sHID::SetPreamblePattern message: ")
 			for entry in buffer:
-				sys.stdout.write("%.2x" % (buffer[i]))
+				unbuffered.write("%.2x" % (buffer[i]))
 				i+=1	
 			if result == 1:
-				sys.stdout.write(" ok\n")
+				unbuffered.write(" ok\n")
 			else:
-				sys.stdout.write(" fail\n")
+				unbuffered.write(" fail\n")
 				
 		#print "sHID::SetPreamblePattern - end"
 		return result

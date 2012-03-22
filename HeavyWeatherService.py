@@ -1,6 +1,9 @@
 #!/usr/bin/python
+#1011602060032L
+#01 01 22 02 06 00 50
 
-import pickle #http://docs.python.org/library/pickle.html
+import threading
+import shelve #http://docs.python.org/library/pickle.html
 import sHID
 import time
 #import datetime
@@ -219,9 +222,19 @@ class CDataStore(object):
 		print "isservice x",_isService
 		self.Request = CDataStore.TRequest()
 		self.LastStat = CDataStore.TLastStat()
+
 		self.Settings = CDataStore.TSettings()
 		self.TTransceiverSettings = CDataStore.TTransceiverSettings()
 		print "EDDI: ", self.Request.Type
+
+		ShelveDataStore=shelve.open("WV5DataStore",writeback=True)
+
+		if ShelveDataStore.has_key("Settings"):
+			self.DataStore.Settings = ShelveDataStore["Settings"]
+		else:
+			print ShelveDataStore.keys()
+
+
 		if self.Request:
 		    print "ok"
 
@@ -241,18 +254,23 @@ class CDataStore(object):
 		   and self.LastHistTimeStamp
 		   and self.BufferCheck);
 
+	def getDeviceRegistered(self):
+		print "getDeviceRegistered"
+		return 0
+
+
 	def getRequestType(self):
-		print "getRequestType():",self.Request.Type
+		#print "getRequestType():",self.Request.Type
 		return self.Request.Type
 
 	def getRequestState(self):
-		print "getRequestState():",self.Request.State
+		#print "getRequestState():",self.Request.State
 		return self.Request.State
 
 	def setRequestState(self,state):
-		print "setRequestState():"
+		#print "setRequestState():"
 		self.Request.State = state;
-		print "DEBUG: setRequestState",self.Request.State
+		#print "DEBUG: setRequestState",self.Request.State
 
 	def addHistoryData(self,Data):
 		print "CDataStore::addHistoryData"
@@ -471,7 +489,7 @@ class CWeatherStationConfig(object):
 
 class CCommunicationService(object):
 
-	RepeatCount = None
+	RepeatCount = True
 	RepeatSize = None
 	RepeatInterval = None
 	RepeatTime = None #ptime
@@ -556,6 +574,7 @@ class CCommunicationService(object):
 
 	def __init__(self):
 		self.DataStore = CDataStore(1)
+
 
 	def operator(self):
 		print "self.CCommunicationService,operator"
@@ -773,7 +792,7 @@ class CCommunicationService(object):
 		raise "xxx"
 
 	def CCommunicationService(self):
-		print CDataStore.operator(self.DataStore)
+		print "CDataStore.operator: CDataStore.operator(self.DataStore)"
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.IFMODE]     = 0x00;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.MODULATION] = 0x41;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.ENCODING]   = 0x07;
@@ -825,6 +844,8 @@ class CCommunicationService(object):
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TXRATEMID]  = 0x51;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TXRATELO]   = 0xec;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.TXDRIVER]   = 0x88;
+		print "Here I should start the rf thread"
+	
 
 	def caluculateFrequency(self,Frequency):
 		#print "CCommunicationService::caluculateFrequency"
@@ -860,9 +881,7 @@ class CCommunicationService(object):
 		newBuffer = Buffer[0]
 		if Length[0] != 0:
 			RequestType = CDataStore.getRequestType(self.DataStore)
-			print "RequestType",RequestType
-			# if CDataStore::getDeviceRegistered
-
+			print "CCommunicationService::RequestType",RequestType
 			if CDataStore.getDeviceRegistered(self.DataStore):
 
 				RegisterdID = CDataStore.getDeviceId(self.DataStore)
@@ -913,22 +932,31 @@ class CCommunicationService(object):
 					newLength = 0
 			else:
 				if RequestType == 5:
+					buffer = [None]
+					sHID.ReadConfigFlash(0x1fe, 2, buffer);
+					#    00000000: dd 0a 01 fe 18 f6 aa 01 2a a2 4d 00 00 87 16 
+					TransceiverID = buffer[0][0] << 8;
+					TransceiverID += buffer[0][1];
+					print TransceiverID
+					raise "err"
 					print "RT = 5"
 				else:
 					newLength = 0
 		else:
 			print "GetRequestState try to repeat (implement me)"
-			print "repeatCount",self.RepeatCount
-			if 2 == 1:
+			#print "repeatCount",self.RepeatCount
+			if self.RepeatCount:
+				#print "RS:RepeatCount = ",self.RepeatCount
 				if 2 == 1:
-			#if self.RepeatCount:
 				#if self.RepeatTime > microsec_clock::universal_time:
 					if self.Regenerate:
 						Length[0] = self.buildTimeFrame(Buffer,1);
 					else:
 						print "implementami - copia data su buffer"
 						#Buffer = self.RepeatData, self.RepeatSize
-			time.sleep(0.1)
+			#else:
+			#	print "RS:RepeatCount = ",self.RepeatCount
+			time.sleep(0.2)
 			newLength = 0
 
 		Buffer[0] = newBuffer
@@ -1002,6 +1030,8 @@ class CCommunicationService(object):
 				print "RequestState = %d" % RequestState
 				if RequestState == ERequestState.rsWaitDevice: # == 4
 					print "self.getRequestState == 4"
+					#rel_time = posix_time.microsec_clock.universal_time()
+					#if DeviceWaitEndTime <= rel_time
 					#sleep....
 					#se e' scaduto il tempo di sleep... (DeviceWaitEndTime)
 					#	CDataStore.setRequestState(ERequestState.rsError)
@@ -1011,6 +1041,7 @@ class CCommunicationService(object):
 						if sHID.SetState(0x1e):
 							print "sHID.SetState(0x1e)"
 							CDataStore.setRequestState(self.DataStore,ERequestState.rsPreamble)
+							time.sleep(0.1)
 						#self.getPreambleDuration()
 						#while True:
 						#	if RequestType != self.getRequestType():
@@ -1070,7 +1101,6 @@ class CCommunicationService(object):
 						#goto LABEL_49
 					ReceiverState = 0xc8;
 					timeout = 1000;
-					#while False:
 					while True:
 						print "sono sull'while stronzo"
 						ret = sHID.GetState(StateBuffer);
@@ -1079,25 +1109,24 @@ class CCommunicationService(object):
 						ReceiverState = StateBuffer[0];
 						if ( not StateBuffer[0]) or (ReceiverState == 0x15 ):
 #LABEL_42	
-							if timeout and self.RepeatCount:
-								RepeatCount -= 1;
+							if (timeout >= 0) and self.RepeatCount:
+								self.RepeatCount = False;
 								#*(_QWORD *)&v23 = self.RepeatInterval;
 								#a delay until I get 0x15
 								time.sleep(0.0001)
-							#break;
-							a=1
+							break;
 	
-						--timeout;
+						timeout -= 1;
 						#if ( !timeout )
 							#goto label_42
 #LABEL_49
 				if ReceiverState != 0x15:
 					ret = sHID.SetRX(); #make state from 14 to 15
-					time.sleep(0.1)
+					time.sleep(0.5)
 				
 				if ReceiverState == 0x15:
-					#CDataStore.GetCurrentWeather(self.DataStore)
 					if CDataStore.getRequestType(self.DataStore) == 6:
+						#CDataStore.GetCurrentWeather(self.DataStore)
 						CDataStore.FirstTimeConfig(self.DataStore)
 
 				#if not ret:
