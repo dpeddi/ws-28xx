@@ -342,15 +342,6 @@ class sHID(object):
 	def SetFrame(self,data,numBytes):
 		#print "sHID::SetFrame"
 		import usb
-		#v4 = 0xd5;
-		#  v5 = (unsigned __int8)a3 >> 8;
-		# v6 = a3;
-		#  for ( i = 0; i < a3; ++i )
-		#    v7[i] = *(_BYTE *)a2++;
-
-		#  for ( i = a3 + 3; i < 0x131; ++i )
-		#    *(&v4 + i) = 0;
-		#  if ( (unsigned __int8)HidD_SetFeature(*(_DWORD *)(this + 80), &v4, 273) )
 #    00000000: d5 00 09 f0 f0 03 00 32 00 3f ff ff 00 00 00 00
 #    00000000: d5 00 0c 00 32 c0 00 8f 45 25 15 91 31 20 01 00
 #    00000000: d5 00 09 00 32 00 06 c1 00 3f ff ff 00 00 00 00
@@ -369,6 +360,8 @@ class sHID(object):
 		buffer[0] = 0xd5;
 		buffer[1] = numBytes >> 8;
 		buffer[2] = numBytes;
+		for i in xrange(0, numBytes):
+			buffer[i+3] = data[i]
 
 		try:
 			self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,       # requestType
@@ -381,7 +374,7 @@ class sHID(object):
 		except:
 			result = 0
 
-		if self.debug == 2:
+		if self.debug == 0:#2:
 			i=0
 			import sys
 			unbuffered.write("sHID::SetFrame message: ")

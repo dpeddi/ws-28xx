@@ -40,18 +40,6 @@ def toggleBit(int_type, offset):
     mask = 1 << offset
     return(int_type ^ mask)
 
-# Abstract struct class       
-class Struct:
-    def __init__ (self, *argv, **argd):
-        if len(argd):
-            # Update by dictionary
-            self.__dict__.update (argd)
-        else:
-            # Update by position
-            attrs = filter (lambda x: x[0:2] != "__", dir(self))
-            for n in range(len(argv)):
-                setattr(self, attrs[n], argv[n])
-
 class ws28xxError(IOError):
 	"Used to signal an error condition"
 
@@ -424,7 +412,7 @@ class CDataStore(object):
 		if self.getFlag_FLAG_TRANSCEIVER_PRESENT():
 			self.Settings.DeviceRegistered = 0;
 			self.Settings.DeviceId = None;
-			self.LastStat.LastHistoryIndex = None;
+			self.LastStat.LastHistoryIndex = 0xffff;
 			self.LastStat.OutstandingHistorySets = None;
 
 			self.Request.Type = ERequestType.rtFirstConfig;
@@ -491,16 +479,41 @@ class CWeatherStationConfig(object):
 	_StormThreshold = 0
 	_LCDContrast = 0
 	_LowBatFlags = 0
+	_ResetMinMaxFlags = 0
+
+	def __init__(self):
+		self.logger = logging.getLogger('ws28xx.CWeatherStationConfig')
+
+	def CWeatherStationConfig_buf(self,buf):
+		newbuf = buf
+		#CWeatherStationHighLowAlarm::CWeatherStationHighLowAlarm(&this->_AlarmTempIndoor);
+		#v4 = 0;
+		#CWeatherStationHighLowAlarm::CWeatherStationHighLowAlarm(&thisa->_AlarmTempOutdoor);
+		#LOBYTE(v4) = 1;
+		#CWeatherStationHighLowAlarm::CWeatherStationHighLowAlarm(&thisa->_AlarmHumidityOutdoor);
+		#LOBYTE(v4) = 2;
+		#CWeatherStationHighLowAlarm::CWeatherStationHighLowAlarm(&thisa->_AlarmHumidityIndoor);
+		#LOBYTE(v4) = 3;
+		#CWeatherStationWindAlarm::CWeatherStationWindAlarm(&thisa->_AlarmGust);
+		#LOBYTE(v4) = 4;
+		#CWeatherStationHighLowAlarm::CWeatherStationHighLowAlarm(&thisa->_AlarmPressure);
+		#LOBYTE(v4) = 5;
+		#CWeatherStationHighAlarm::CWeatherStationHighAlarm(&thisa->_AlarmRain24H);
+		#LOBYTE(v4) = 6;
+		#CWeatherStationWindDirectionAlarm::CWeatherStationWindDirectionAlarm(&thisa->_AlarmWindDirection);
+		#LOBYTE(v4) = 7;
+		#std::bitset<23>::bitset<23>(&thisa->_ResetMinMaxFlags);
+		self.read(buf);
 
 	def GetCheckSum(self):
 		print "CWeatherStationConfig::GetCheckSum"
-		CWeatherStationConfig.CalcCheckSumm()
-		#self._CheckSumm
+		self.CalcCheckSumm()
+		return self._CheckSumm
 
 	def CalcCheckSumm(self):
 		print "CWeatherStationConfig::CalcCheckSumm"
 		t = [0]*1024
-		self._CheckSumm = CWeatherStationConfig.write(t);
+		self._CheckSumm = self.write(t);
 		print "CWeatherStationConfig._CheckSumm (should be retrieved) --> ",self._CheckSumm
 
 	def read(self,buf):
@@ -513,12 +526,12 @@ class CWeatherStationConfig(object):
 		print "CWeatherStationConfig::GetResetMinMaxFlags"
 
 	def write(self,buf):
-		print "CWeatherStationConfig::write (ot implemented yet)"
-
-		#CheckSumm = 7;
-		#new_buf[0] = 16 * (self._WindspeedFormat & 0xF) + 8 * (self._RainFormat & 1) + 4 * (self._PressureFormat & 1) + 2 * (self._TemperatureFormat & 1) + self._ClockMode & 1;
-		#new_buf[1] = self._WeatherThreshold & 0xF | 16 * self._StormThreshold & 0xF0;
-		#new_buf[2] = self._LCDContrast & 0xF | 16 * self._LowBatFlags & 0xF0;
+		print "CWeatherStationConfig::write (not implemented yet)"
+		new_buf=buf
+		CheckSumm = 7;
+		new_buf[0] = 16 * (self._WindspeedFormat & 0xF) + 8 * (self._RainFormat & 1) + 4 * (self._PressureFormat & 1) + 2 * (self._TemperatureFormat & 1) + self._ClockMode & 1;
+		new_buf[1] = self._WeatherThreshold & 0xF | 16 * self._StormThreshold & 0xF0;
+		new_buf[2] = self._LCDContrast & 0xF | 16 * self._LowBatFlags & 0xF0;
 		#CWeatherStationConfig::writeAlertFlags(buf + 3);
 		#((void (__thiscall *)(CWeatherStationHighLowAlarm *))thisa->_AlarmTempIndoor.baseclass_0.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmTempIndoor);
 		#v25 = v2;
@@ -559,14 +572,16 @@ class CWeatherStationConfig(object):
 		#((void (__thiscall *)(CWeatherStationHighLowAlarm *))thisa->_AlarmPressure.baseclass_0.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmPressure);
 		#USBHardware::ToPressureBytesShared(buf + 34, Conversions::ToInhg(CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure)), Conversions::ToInhg(CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure)))
 
-		#new_buf[39] = self._ResetMinMaxFlags;
-		#new_buf[40] = BYTE1(self._ResetMinMaxFlags);
-		#new_buf[41] = self._ResetMinMaxFlags >> 16;
+		#print "debugxxx ", type(self._ResetMinMaxFlags)
+		new_buf[39] = (self._ResetMinMaxFlags >>  0) & 0xFF;
+		new_buf[40] = (self._ResetMinMaxFlags >>  8) & 0xFF; #BYTE1(self._ResetMinMaxFlags);
+		new_buf[41] = (self._ResetMinMaxFlags >> 16) & 0xFF;
 
 		#for ( i = 0; i < 39; ++i )
-		#    CheckSumm += new_buf[i];
-		#new_buf[42] = (CheckSumm >>8)  & 0xFF #BYTE1(CheckSumm);
-		#new_buf[43] = (CheckSumm >>0)  & 0xFF #CheckSumm;
+		for i in xrange(0, 38):
+		    CheckSumm += new_buf[i];
+		new_buf[42] = (CheckSumm >> 8) & 0xFF #BYTE1(CheckSumm);
+		new_buf[43] = (CheckSumm >> 0) & 0xFF #CheckSumm;
 		buf[0] = new_buf
 		return CheckSumm
 
@@ -675,22 +690,22 @@ class CCommunicationService(object):
 		#00000000: d5 00 0c 00 32 c0 00 8f 45 25 15 91 31 20 01 00
 		#00000000: d5 00 0c 00 32 c0 06 c1 47 25 15 91 31 20 01 00
 		#                             3  4  5  6  7  8  9 10 11
-		#DeviceCheckSum = CDataStore::GetDeviceConfigCS
-		DeviceCheckSum = 0x27f5
+		DeviceCheckSum = CDataStore.GetDeviceConfigCS(self.DataStore)
 		now = time.time()
 		tm = time.localtime(now)
 		tu = time.gmtime(now)
 
+		new_Buffer=Buffer
 		Second = tm[5]
 		if ( checkMinuteOverflow and (Second <= 5 or Second >= 55) ):
 			if ( Second < 55 ):
 				Second = 6 - Second
 			else:
 				Second = 60 - Second + 6;
-			#v11 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-			#HistoryIndex = CDataStore::getLastHistoryIndex(v11);
-			#CCommunicationService::buildACKFrame(thisa, Buffer, 0, &DeviceCheckSum, &HistoryIndex, Second);
-			print "buildTimeFrame #1 to be implemented"
+			HistoryIndex = CDataStore.getLastHistoryIndex(self.DataStore);
+			self.buildACKFrame(new_Buffer, 0, DeviceCheckSum, HistoryIndex, Second);
+			Buffer[0]=new_Buffer[0]
+			print "buildTimeFrame #1 to be checked"
 		else:
 			new_Buffer[2] = 0xc0
 			new_Buffer[3] = (DeviceCheckSum >>8)  & 0xFF #BYTE1(DeviceCheckSum);
@@ -707,6 +722,7 @@ class CCommunicationService(object):
 			new_Buffer[11] = (tm[0] - 2000) // 10; year
 			self.Regenerate = 1
 			self.TimeSent = 1
+			Buffer[0]=new_Buffer
 
 	def buildConfigFrame(self,Buffer,Data):
 		print "buildConfigFrame (not yet implemented)"
@@ -719,74 +735,72 @@ class CCommunicationService(object):
 
 	def buildACKFrame(self,Buffer, Action, CheckSum, HistoryIndex, ComInt):
 		print "buildACKFrame (not yet implemented)"
-#			if ( !Action && ComInt == -1 ):
-#				v28 = 0;
-#				if ( !Stat.LastCurrentWeatherTime.m_status ):
-#				ATL::COleDateTime::operator_(&now, &ts, &Stat.LastCurrentWeatherTime);
-#				if ( ATL::COleDateTimeSpan::GetTotalSeconds(&ts) >= 8.0 )
-#					Action = 5;
-#				v28 = -1;
-#			Buffer[2] = Action & 0xF;
-#			v7 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-#			v21 = CDataStore::GetDeviceConfigCS(v7);
-#			if ( HistoryIndex >= 0x705 ):
-#				HistoryAddress = -1;
-#			else:
-#			{
-#				v8 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-#				if ( !CDataStore::getBufferCheck(v8) )
-#				{
-#				if ( !ATL::COleDateTime::GetStatus(&Stat.LastHistoryDataTime) )
+		print "HistoryIndex",HistoryIndex
+		newBuffer = [0]
+		newBuffer[0] = Buffer[0]
+#		if ( !Action && ComInt == -1 ):
+#			v28 = 0;
+#			if ( !Stat.LastCurrentWeatherTime.m_status ):
+#			ATL::COleDateTime::operator_(&now, &ts, &Stat.LastCurrentWeatherTime);
+#			if ( ATL::COleDateTimeSpan::GetTotalSeconds(&ts) >= 8.0 )
+#				Action = 5;
+#			v28 = -1;
+		newBuffer[0][2] = Action & 0xF;
+#		v21 = CDataStore::GetDeviceConfigCS(self.DataStore);
+		if ( HistoryIndex >= 0x705 ):
+			HistoryAddress = 0xffff;
+#		else:
+#			if ( !CDataStore.getBufferCheck(self.DataStore) ):
+#				if ( !ATL::COleDateTime::GetStatus(&Stat.LastHistoryDataTime) ):
 #				{
 #					v9 = ATL::COleDateTime::operator_(&now, &result, &Stat.LastHistoryDataTime);
 #					if ( ATL::COleDateTimeSpan::operator>(v9, &BUFFER_OVERFLOW_SPAN) )
 #					{
-#					val = 1;
-#					v10 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-#					CDataStore::setBufferCheck(v10, &val);
+#						val = 1;
+#						v10 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+#						CDataStore::setBufferCheck(self.DataStore, &val);
 #					}
 #				}
-#				}
-#				v11 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-#				if ( CDataStore::getBufferCheck(v11) != 1
-#				&& (v12 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore), CDataStore::getBufferCheck(v12) != 2) )
-#				{
-#				HistoryAddress = 18 * *HistoryIndex + 0x1a0;
-#				}
-#				else
-#				{
-#				if ( *HistoryIndex )
-#					HistoryAddress = 18 * (*HistoryIndex - 1) + 0x1a0;
-#				else
-#					HistoryAddress = 0x7fe8;
-#				v20 = 2;
-#				v13 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-#				CDataStore::setBufferCheck(v13, (CDataStore::TBufferCheck *)&v20);
-#				}
 #			}
-#			(*Buffer)[3] = *(_WORD *)CheckSum >> 8;
-#			(*Buffer)[4] = *(_BYTE *)CheckSum;
-#			if ( ComInt == -1 )
+#			if ( CDataStore::getBufferCheck(self.DataStore) != 1
+#			  && (v12 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore), CDataStore::getBufferCheck(v12) != 2) )
 #			{
-#				v14 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-#				ComInt = CDataStore::getCommModeInterval(v14);
+#				HistoryAddress = 18 * HistoryIndex + 0x1a0;
 #			}
-#			(Buffer)[5] = ComInt >> 4;
-#			(Buffer)[6] = (HistoryAddress >> 16) & 0xF | 16 * (ComInt & 0xF);
-#			(Buffer)[7] = BYTE1(HistoryAddress);
-#			(Buffer)[8] = HistoryAddress;
-#			thisa->Regenerate = 0;
-#		thisa->TimeSent = 0;
-	
+#			else
+#			{
+#			if ( HistoryIndex ):
+#				HistoryAddress = 18 * (HistoryIndex - 1) + 0x1a0;
+#			else:
+#				HistoryAddress = 0x7fe8;
+#			v20 = 2;
+#			v13 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+#			CDataStore::setBufferCheck(v13, (CDataStore::TBufferCheck *)&v20);
+#		}
+		newBuffer[0][3] = (CheckSum >> 8) &0xFF;
+		newBuffer[0][4] = (CheckSum >> 0) &0xFF;
+		if ( ComInt == -1 ):
+			ComInt = CDataStore.getCommModeInterval(self.DataStore);
+		newBuffer[0][5] = (ComInt >> 4) & 0xFF ;
+		newBuffer[0][6] = (HistoryAddress >> 16) & 0xFF | 16 * (ComInt & 0xF);
+		newBuffer[0][7] = (HistoryAddress >> 8 ) & 0xFF # BYTE1(HistoryAddress);
+
+		newBuffer[0][8] = (HistoryAddress >> 0 ) & 0xFF
+		Buffer[0]=newBuffer[0]
+		self.Regenerate = 0;
+		self.TimeSent = 0;
 
 	def handleWsAck():
 		print "handleWsAck (not yet implemented)"
 
 	def handleConfig(self,Buffer,Length):
 		print "handleConfig (not yet implemented)"
+		newBuffer=[0]
+		newBuffer[0] = Buffer[0]
+		RecConfig = None
 		diff = 0;
 		#j__memcpy(t, (char *)Buffer, *Length);
-		#CWeatherStationConfig::CWeatherStationConfig(&c, &t[4]);
+		#CWeatherStationConfig.CWeatherStationConfig(&c, &t[4]);
 		#v73 = 0;
 		#j__memset(t, -52, *Length);
 		#CWeatherStationConfig::write(&c, &t[4]);
@@ -847,7 +861,10 @@ class CCommunicationService(object):
 		#}
 		#v73 = -1;
 		#CWeatherStationConfig::_CWeatherStationConfig(&c);
-		#CWeatherStationConfig::CWeatherStationConfig(&RecConfig, &(*Buffer)[4]);
+		RecConfig = CWeatherStationConfig()
+		confBuffer=[0]
+		confBuffer[0]=[0]*0x111
+		CWeatherStationConfig.CWeatherStationConfig_buf(RecConfig, confBuffer);
 		#v73 = 3;
 		if 1==1: #hack ident
 		#if ( CWeatherStationConfig::operator bool(&RecConfig) )
@@ -865,7 +882,7 @@ class CCommunicationService(object):
 		#	#v43 = (CDataStore::ERequestState)&Quality;
 		#	#CDataStore::setLastLinkQuality(v11, (const unsigned int *)v43);
 		#	#FrontCS = CDataStore::GetFrontEndConfigCS(self.DataStore);
-		#	HistoryIndex = CDataStore.getLastHistoryIndex(self.DataStore);
+			HistoryIndex = CDataStore.getLastHistoryIndex(self.DataStore);
 		#	#v46 = (CWeatherStationConfig *)rt;
 		#		#switch ( rt )
 		#		#{
@@ -964,10 +981,10 @@ class CCommunicationService(object):
 		#		#	#CDataStore::setLastConfigTime(self.DataStore, (ATL::COleDateTime *)v43);
 		#		#	#v43 = (CDataStore::ERequestState)&RecConfig;
 		#		#	#CDataStore::setDeviceConfig(self.DataStore, (CWeatherStationConfig *)v43);
-		#		#	#v58 = CWeatherStationConfig::GetCheckSum(&RecConfig);
-		#		#	#*Length = CCommunicationService::buildACKFrame(thisa, Buffer, 0, &v58, &HistoryIndex, 0xFFFFFFFFu);
-		#		#	#CDataStore::setRequestState(self.DataStore, 2);
-		#		#	#CDataStore::RequestNotify(self.DataStore);
+					v58 = CWeatherStationConfig.GetCheckSum(RecConfig);
+					Length = self.buildACKFrame(newBuffer, 0, v58, HistoryIndex, 0xFFFFFFFF);
+					CDataStore.setRequestState(self.DataStore, 2);
+					CDataStore.RequestNotify(self.DataStore);
 				#elif rt == 6:
 		#		#	#v43 = (CDataStore::ERequestState)&now;
 		#		#	#CDataStore::setLastConfigTime(self.DataStore, (ATL::COleDateTime *)v43);
@@ -985,6 +1002,7 @@ class CCommunicationService(object):
 		#}
 		#v73 = -1;
 		#CWeatherStationConfig::_CWeatherStationConfig(&RecConfig);
+		Buffer[0] = newBuffer[0]
 
 
 	def handleCurrentData():
@@ -1025,12 +1043,9 @@ class CCommunicationService(object):
 		#v3 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 		#rt = CDataStore::getRequestType(v3);
 		rt = CDataStore.getRequestType(self.DataStore)
-		#v4 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#HistoryIndex = CDataStore::getLastHistoryIndex(v4);
-		#v5 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#DeviceCS = CDataStore::GetDeviceConfigCS(v5);
-		#v6 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#CDataStore::setLastSeen(v6, &now);
+		HistoryIndex = CDataStore.getLastHistoryIndex(self.DataStore);
+		DeviceCS = CDataStore.GetDeviceConfigCS(self.DataStore);
+		CDataStore.setLastSeen(self.DataStore, now);
 		Quality = Buffer[3] & 0x7F;
 		print "Quality %d" % Quality
 		#v7 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
@@ -1167,7 +1182,8 @@ class CCommunicationService(object):
 		#else:
 		#    print "CCommunicationService->Buffer=",Buffer
 		
-		newBuffer = Buffer[0]
+		newBuffer = [0]
+		newBuffer[0] = Buffer[0]
 		if Length[0] != 0:
 			RequestType = CDataStore.getRequestType(self.DataStore)
 			print "CCommunicationService::RequestType",RequestType
@@ -1190,7 +1206,8 @@ class CCommunicationService(object):
 					elif responseType == 0x20:
 						#    00000000: 00 00 30 00 32 40
 						if Length[0] == 0x30:
-							self.handleConfig(newBuffer, Length[0]);
+							newLength = Length[0]
+							self.handleConfig(newBuffer, newLength);
 						else:
 							newLength = 0
 					elif responseType == 0x40:
@@ -1253,9 +1270,10 @@ class CCommunicationService(object):
 						newLength = 0
 					else:
 						print "run handleConfig..."
-						newLength = Length[0]
-						newBuffer = Buffer[0]
-						self.handleConfig(newBuffer, newLength);
+						nLength=[0]
+						nLength[0] = Length[0]
+						self.handleConfig(newBuffer, nLength);
+						newLength = nLength[0]
 				else:
 					newLength = 0
 		else:
@@ -1275,7 +1293,7 @@ class CCommunicationService(object):
 			time.sleep(0.2)
 			newLength = 0
 
-		Buffer[0] = newBuffer
+		Buffer[0] = newBuffer[0]
 		Length[0] = newLength
 		if newLength == 0:
 			return 0
@@ -1409,6 +1427,8 @@ class CCommunicationService(object):
 						#LOBYTE(v67) = 0;
 						#CTracer::WriteDump((CTracer *)td, 50, v22, v23, v24);
 					sHID.SetState(0);
+					print "GenerateResp",FrameBuffer[0]
+					print "GenerateResp",DataLength[0]
 					ret = sHID.SetFrame(FrameBuffer[0], DataLength[0]); # send the ackframe prepared by GenerateResponse
 					if ret == None:
 						print "USBDevice->SetFrame returned false"  #it shouldn't be blocking
@@ -1419,25 +1439,29 @@ class CCommunicationService(object):
 						#goto LABEL_49
 					ReceiverState = 0xc8;
 					timeout = 1000;
+					print "entro nell'while stronzo"
 					while True:
-						print "sono sull'while stronzo"
 						ret = sHID.GetState(StateBuffer);
-						if ret == None:
+						CDataStore.RequestTick(self.DataStore);
+						if ret == 0:
 							raise "USBDevice->GetState returned false" #it shouldn't be blocking
 						ReceiverState = StateBuffer[0];
 						if ( not StateBuffer[0]) or (ReceiverState == 0x15 ):
 #LABEL_42	
-							if (timeout >= 0) and self.RepeatCount:
-								self.RepeatCount = False;
-								#*(_QWORD *)&v23 = self.RepeatInterval;
-								#a delay until I get 0x15
-								time.sleep(0.0001)
-							break;
+						#	while (timeout >= 0) and self.RepeatCount:
+						#		self.RepeatCount = False;
+						#		#*(_QWORD *)&v23 = self.RepeatInterval;
+						#		#a delay until I get 0x15
+						#		time.sleep(0.0001)
+						#		timeout -= 1;
+						#if timeout == 0:
+							time.sleep(0.2)
+						break;
 	
-						timeout -= 1;
 						#if ( !timeout )
 							#goto label_42
 #LABEL_49
+					print "sono fuori dall'while stronzo"
 				if ReceiverState != 0x15:
 					ret = sHID.SetRX(); #make state from 14 to 15
 					time.sleep(0.5)
@@ -1480,6 +1504,7 @@ if __name__ == "__main__":
 	myCCommunicationService = CCommunicationService()
 	time.sleep(10)
 	CDataStore.FirstTimeConfig(myCCommunicationService.DataStore)
+	#time.sleep(10)
 	#CDataStore.GetCurrentWeather(myCCommunicationService.DataStore)
 	while 1:
 		pass
