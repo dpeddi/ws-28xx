@@ -27,8 +27,11 @@ class sHID(object):
 
 	debug = 0
 
+	def __init__(self):
+		self.logger = logging.getLogger('ws28xx.sHID')
+
 	def Find(self, vendorID, productID, versionNr):
-		#print "sHID::Find"
+		self.logger.info("Find")
 		try:
 			import usb
 		except Exception, e:
@@ -44,9 +47,9 @@ class sHID(object):
 					self.usbEndpoint = self.usbInterface.endpoints[0]
 
 					self.devh = device.open()
-					print "iManufacturer   %s" % self.devh.getString(device.iManufacturer,30)
-					print "iProduct        %s" % self.devh.getString(device.iProduct,30)
-					print "interfaceNumber %d" % self.usbInterface.interfaceNumber
+					self.logger.info("iManufacturer   %s" % self.devh.getString(device.iManufacturer,30))
+					self.logger.info("iProduct        %s" % self.devh.getString(device.iProduct,30))
+					self.logger.info("interfaceNumber %d" % self.usbInterface.interfaceNumber)
 
 					try:
 					  self.devh.detachKernelDriver(self.usbInterface.interfaceNumber)
@@ -394,7 +397,7 @@ class sHID(object):
 		return result
 
 	def GetFrame(self,data,numBytes):
-		print "sHID::GetFrame (not fully implemented yet)"
+		#print "sHID::GetFrame"
 		import usb
 
 		try:
