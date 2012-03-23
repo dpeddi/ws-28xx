@@ -2,11 +2,14 @@
 #1011602060032L
 #01 01 22 02 06 00 50
 
+
 import threading
 import shelve #http://docs.python.org/library/pickle.html
 import sHID
 import time
-#import datetime
+from datetime import datetime
+from datetime import timedelta
+
 
 usbWait = 0.5
 
@@ -171,9 +174,6 @@ class CDataStore(object):
 		manufacturer	= "LA CROSSE TECHNOLOGY"
 		product		= "Weather Direct Light Wireless Device"
 
-#		def __init__(self):
-#			print "TTransceiverSettings"
-
 	class TRequest:
 		Type = 6
 		State = 6
@@ -182,19 +182,22 @@ class CDataStore(object):
 		CondFinish = 0
 
 	class TLastStat:
-		LastBatteryStatus = [None]
-		LastConfigTime = 0
-		LastHistoryDataTime = 0
+		LastBatteryStatus = None
 		LastHistoryIndex = 0
 		LastLinkQuality = 0
 		OutstandingHistorySets = 0
+		WeatherClubTransmissionErrors = 0
+		LastCurrentWeatherTime = None
+		LastHistoryDataTime = None
+		LastConfigTime = None
+		LastWeatherClubTransmission = None
 
 	class TSettings:
-		CommModeInterval = 0
-		DeviceId = 0
-		DeviceRegistered = 0
-		PreambleDuration = 0
-		RegisterWaitTime = 0
+		CommModeInterval = 4
+		DeviceId = None
+		DeviceRegistered = False
+		PreambleDuration = 5000
+		RegisterWaitTime = 20000
 		TransceiverIdChanged = None
 		TransceiverID = None
 
@@ -233,10 +236,36 @@ class CDataStore(object):
 			self.DataStore.Settings = ShelveDataStore["Settings"]
 		else:
 			print ShelveDataStore.keys()
-
-
 		if self.Request:
-		    print "ok"
+		    print "CDataStore::__init__ ok"
+
+	#def CDataStore::getFlag<FLAG_TRANSCEIVER_SETTING_CHANGE> <4>
+
+	def getFlag_FLAG_FAST_CURRENT_WEATHER(self):		# <2>
+		return self.Flags_FLAG_SERVICE_RUNNING
+
+	def getFlag_FLAG_TRANSCEIVER_PRESENT(self):		# <0>
+		return self.Flags_FLAG_TRANSCEIVER_PRESENT
+
+	#def CDataStore::getFlag<FLAG_SERVICE_RUNNING>		# <3>
+
+	#def setFlag<FLAG_TRANSCEIVER_SETTING_CHANGE>:		# <4>
+		#std::bitset<5>::set(thisa->Flags, 4u, val);
+
+	#def CDataStore::setFlag<FLAG_FAST_CURRENT_WEATHER>#	 <2>
+		#std::bitset<5>::set(thisa->Flags, 2u, val);
+
+	def setFlag_FLAG_TRANSCEIVER_PRESENT(self,val):		# <0>
+		#std::bitset<5>::set(thisa->Flags, 0, val);
+		self.Flags_FLAG_TRANSCEIVER_PRESENT = val
+
+	def setFlag_FLAG_SERVICE_RUNNING(self,val):		# <3>
+		#std::bitset<5>::set(thisa->Flags, 3u, val);
+		self.Flags_FLAG_SERVICE_RUNNING = val
+
+	def RequestNotify(self):
+		print "RequestNotify - implement me"
+		self.Request.CondFinish = 1
 
 	def operator(self):
 		return (self.Guards
@@ -255,9 +284,16 @@ class CDataStore(object):
 		   and self.BufferCheck);
 
 	def getDeviceRegistered(self):
-		print "getDeviceRegistered"
-		return 0
+		#print "getDeviceRegistered",self.Settings.DeviceRegistered
+		return self.Settings.DeviceRegistered
 
+	def setDeviceRegistered(self,registered):
+		print "setDeviceRegistered",registered
+		self.Settings.DeviceRegistered = registered;
+
+	def setDeviceId(self,val):
+		print "setDeviceId",val
+		self.Settings.DeviceRegistered = val
 
 	def getRequestType(self):
 		#print "getRequestType():",self.Request.Type
@@ -266,6 +302,12 @@ class CDataStore(object):
 	def getRequestState(self):
 		#print "getRequestState():",self.Request.State
 		return self.Request.State
+
+	def getPreambleDuration(self):
+		return self.Settings.PreambleDuration
+
+	def getRegisterWaitTime(self):
+		return self.Settings.RegisterWaitTime
 
 	def setRequestState(self,state):
 		#print "setRequestState():"
@@ -348,9 +390,11 @@ class CDataStore(object):
 			self.Request.State = 0;
 			self.Request.TTL = 90000;
 
-	def FirstTimeConfig(self):
+#CDataStore::EErrorType __thiscall CDataStore::FirstTimeConfig(CDataStore *this, unsigned int *ID, const unsigned int *TimeOut);
+	def FirstTimeConfig(self): #getRegisteredWaitTime (timeout= GetRegisterWaitTime GetPreambleDuration)
 		print "CDataStore::FirstTimeConfig"
-		if 1 == 1:  #if ( CSingleInstance::IsRunning(this) && CDataStore::getFlag<0>(thisa) && CDataStore::getDeviceRegistered(thisa) )
+		#if ( CSingleInstance::IsRunning(this) && CDataStore::getFlag<0>(thisa))
+		if self.getFlag_FLAG_TRANSCEIVER_PRESENT():
 			self.Settings.DeviceRegistered = 0;
 			self.Settings.DeviceId = None;
 			self.LastStat.LastHistoryIndex = None;
@@ -362,7 +406,11 @@ class CDataStore(object):
 
 			self.BufferCheck = 0
 
+			#pratiamente occupa condfinisch per il tempo del timeout intanto che il thread gira...
+			#quando passa il timeout reimposta in uno stato farlocco il device
+			#if 1==1:
 			#if not self.Request.CondFinish: #//fixme
+
 			#	if self.Request.State == 2:
 			#		ID = CDataStore.getDeviceId(self.DataStore);
 			#		self.Request.Type = 6;
@@ -394,6 +442,14 @@ class CDataStore(object):
 		#CWeatherStationConfig::_CWeatherStationConfig(&result);
 		#v12 = -1;
 		return CWeatherStationConfig.GetCheckSum()
+
+	def RequestTick(self):
+		if self.Request.Type != 6:
+			self.Request.TTL -= 1
+			if not self.Request.TTL:
+				self.Request.Type = 6
+				self.Request.State = 8
+				print "internal timeout, request aborted"
 
 
 
@@ -937,9 +993,32 @@ class CCommunicationService(object):
 					#    00000000: dd 0a 01 fe 18 f6 aa 01 2a a2 4d 00 00 87 16 
 					TransceiverID = buffer[0][0] << 8;
 					TransceiverID += buffer[0][1];
-					print TransceiverID
-					raise "err"
-					print "RT = 5"
+					print "GenerateResponse: TransceiverID", TransceiverID
+					if (    Length[0]            !=    6
+					    or  Buffer[0][0]         != 0xf0
+					    or  Buffer[0][1]         != 0xf0
+					    or (Buffer[0][0] & 0xe0) != 0xa0
+					    or (Buffer[0][2] & 0x0f) != 1 ):
+						ReceivedId  = Buffer[0][0] <<8;
+						ReceivedId += Buffer[0][1];
+						print "GenerateResponse: ReceivedId",ReceivedId
+						if ( Length[0] != 6 or ReceivedId != TransceiverID or (Buffer[0][2] & 0xE0) != 0xa0 or (Buffer[0][2] & 0xF) != 3 ):
+							if ( Length[0] != 48
+							 or ReceivedId != TransceiverID
+							 or (Buffer[0][2] & 0xE0) != 0x40
+							 or CDataStore.getRequestState(self.DataStore) != 5):
+								newLength = 0;
+							else:
+								if newLength == 9:
+									CDataStore.setDeviceId(self.DataStore,TransceiverID);
+									CDataStore.setDeviceRegistered(self.DataStore, True);
+						else:
+							newLength = self.buildTimeFrame(Buffer,1);
+
+						newLength = 0
+					else:
+						newLength = Length[0]
+						self.handleConfig(newBuffer, newLength);
 				else:
 					newLength = 0
 		else:
@@ -950,13 +1029,13 @@ class CCommunicationService(object):
 				if 2 == 1:
 				#if self.RepeatTime > microsec_clock::universal_time:
 					if self.Regenerate:
-						Length[0] = self.buildTimeFrame(Buffer,1);
+						newLength = self.buildTimeFrame(Buffer,1);
 					else:
 						print "implementami - copia data su buffer"
 						#Buffer = self.RepeatData, self.RepeatSize
 			#else:
 			#	print "RS:RepeatCount = ",self.RepeatCount
-			time.sleep(0.2)
+			#time.sleep(0.2)
 			newLength = 0
 
 		Buffer[0] = newBuffer
@@ -1018,6 +1097,7 @@ class CCommunicationService(object):
 		device = sHID.Find(TransceiverSettings.VendorId,TransceiverSettings.ProductId,TransceiverSettings.VersionNo)
 		if device:
 			self.TransceiverInit()
+			CDataStore.setFlag_FLAG_TRANSCEIVER_PRESENT(self.DataStore, 1);
 			sHID.SetRX()
 		else:
 			raise "no ws"
@@ -1030,29 +1110,30 @@ class CCommunicationService(object):
 				print "RequestState = %d" % RequestState
 				if RequestState == ERequestState.rsWaitDevice: # == 4
 					print "self.getRequestState == 4"
-					#rel_time = posix_time.microsec_clock.universal_time()
-					#if DeviceWaitEndTime <= rel_time
-					#sleep....
-					#se e' scaduto il tempo di sleep... (DeviceWaitEndTime)
-					#	CDataStore.setRequestState(ERequestState.rsError)
+					if DeviceWaitEndTime <= datetime.now():
+						CDataStore.setRequestState(self.DataStore,ERequestState.rsError);
+						CDataStore.RequestNotify(self.DataStore);
 				else:
-				    if ReceiverState == 0x15: #cancellami
-					if sHID.SetPreamblePattern(0xaa):
-						if sHID.SetState(0x1e):
-							print "sHID.SetState(0x1e)"
-							CDataStore.setRequestState(self.DataStore,ERequestState.rsPreamble)
-							time.sleep(0.1)
-						#self.getPreambleDuration()
-						#while True:
-						#	if RequestType != self.getRequestType():
-						#		break
-						#	#RequestTick
-						#	#setFlag
-						#if RequestType == self.getRequestType():
-							CDataStore.setRequestState(self.DataStore,ERequestState.rsWaitDevice)
-						#	
-						#	SetRx()
-							ret = sHID.SetRX(); #make state from 14 to 15
+					sHID.SetPreamblePattern(0xaa)
+					sHID.SetState(0x1e)
+					print "sHID.SetState(0x1e)"
+					CDataStore.setRequestState(self.DataStore,ERequestState.rsPreamble)
+					PreambleDuration = CDataStore.getPreambleDuration(self.DataStore);
+					PreambleEndTime = datetime.now() + timedelta(microseconds=PreambleDuration)
+					while True:
+						if not ( PreambleEndTime >= datetime.now() ):
+							break
+						if RequestType != CDataStore.getRequestType(self.DataStore):
+							break
+						CDataStore.RequestTick(self.DataStore);
+						time.sleep(0.0001) #(thread
+						CDataStore.setFlag_FLAG_SERVICE_RUNNING(self.DataStore, True);
+
+					if RequestType == CDataStore.getRequestType(self.DataStore):
+						CDataStore.setRequestState(self.DataStore,ERequestState.rsWaitDevice)
+						RegisterWaitTime = CDataStore.getRegisterWaitTime(self.DataStore)
+						DeviceWaitEndTime = datetime.now() + timedelta(microseconds=RegisterWaitTime)
+					ret = sHID.SetRX(); #make state from 14 to 15
 
 			DataLength = [0]
 			DataLength[0] = 0
@@ -1129,7 +1210,8 @@ class CCommunicationService(object):
 						#CDataStore.GetCurrentWeather(self.DataStore)
 						CDataStore.FirstTimeConfig(self.DataStore)
 
-				#if not ret:
+			if not ret:
+				CDataStore.setFlag_FLAG_TRANSCEIVER_PRESENT(self.DataStore, 0);
 
 
 #filehandler = open("WV5DataStore", 'w')
