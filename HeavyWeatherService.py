@@ -789,6 +789,7 @@ class CCommunicationService(object):
 		Buffer[0]=newBuffer[0]
 		self.Regenerate = 0;
 		self.TimeSent = 0;
+		return 9
 
 	def handleWsAck():
 		print "handleWsAck (not yet implemented)"
@@ -982,7 +983,7 @@ class CCommunicationService(object):
 		#		#	#v43 = (CDataStore::ERequestState)&RecConfig;
 		#		#	#CDataStore::setDeviceConfig(self.DataStore, (CWeatherStationConfig *)v43);
 					v58 = CWeatherStationConfig.GetCheckSum(RecConfig);
-					Length = self.buildACKFrame(newBuffer, 0, v58, HistoryIndex, 0xFFFFFFFF);
+					newLength = self.buildACKFrame(newBuffer, 0, v58, HistoryIndex, 0xFFFFFFFF);
 					CDataStore.setRequestState(self.DataStore, 2);
 					CDataStore.RequestNotify(self.DataStore);
 				#elif rt == 6:
@@ -1003,6 +1004,7 @@ class CCommunicationService(object):
 		#v73 = -1;
 		#CWeatherStationConfig::_CWeatherStationConfig(&RecConfig);
 		Buffer[0] = newBuffer[0]
+		Length[0] = newLength
 
 
 	def handleCurrentData():
