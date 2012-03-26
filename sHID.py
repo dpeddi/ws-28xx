@@ -10,11 +10,6 @@ import sys
 import logging
 import time
 
-
-import os 
-import sys 
-unbuffered = os.fdopen(sys.stderr.fileno(), 'w', 0)
-
 usbWait =0.5
 
 class sHID(object):
@@ -31,7 +26,7 @@ class sHID(object):
 		self.logger = logging.getLogger('ws28xx.sHID')
 
 	def Find(self, vendorID, productID, versionNr):
-		self.logger.info("Find")
+		self.logger.debug("")
 		try:
 			import usb
 		except Exception, e:
@@ -86,9 +81,8 @@ class sHID(object):
 					
 					while True:
 						try:
-							ret = self.devh.interruptRead(usb.ENDPOINT_IN + 1, 0xf,
-                                           int(15 * 1000))
-							print ret
+							ret = self.devh.interruptRead(usb.ENDPOINT_IN + 1, 0xf, int(15 * 1000))
+							#print ret
 						except:
 							break
 						break
@@ -120,7 +114,6 @@ class sHID(object):
 		return None
 
 	def SetTX(self):
-		#print "sHID::SetTX"
 		import usb
 		buffer = [0]*0x15
 		buffer[0] = 0xd1;
@@ -134,24 +127,16 @@ class sHID(object):
 			result = 1
 		except:
 			result = 0
-	
-		if self.debug == 2:
-			i=0
-			import sys
-			unbuffered.write("sHID::SetTX message: ")
-			for entry in buffer:
-				unbuffered.write("%.2x" % (buffer[i]))
-				i+=1	
-			if result == 1:
-				unbuffered.write(" ok\n")
-			else:
-				unbuffered.write(" fail\n")
 
+		i=0
+		strbuf = ""
+		for entry in buffer:
+			strbuf += str("%.2x" % (buffer[i]))
+			i+=1
+		self.logger.debug("%s" % strbuf)
 		return result
-		#print "sHID::SetTX - end"
 
 	def SetRX(self):
-		#print "sHID::SetRX"
 		import usb
 		buffer = [0]*0x15
 		buffer[0] = 0xD0;
@@ -165,24 +150,16 @@ class sHID(object):
 			result = 1
 		except:
 			result = 0
-			
-		if self.debug == 2:
-			i=0
-			import sys
-			unbuffered.write("sHID::SetRX message: ")
-			for entry in buffer:
-				unbuffered.write("%.2x" % (buffer[i]))
-				i+=1	
-			if result == 1:
-				unbuffered.write(" ok\n")
-			else:
-				unbuffered.write(" fail\n")
-				
+
+		i=0
+		strbuf = ""
+		for entry in buffer:
+			strbuf += str("%.2x" % (buffer[i]))
+			i+=1
+		self.logger.debug("%s" % strbuf)
 		return result
-		#print "sHID::SetRX - end"
 
 	def GetState(self,StateBuffer):
-		#print "sHID::GetState"
 		import usb
 		try:
 			buffer = self.devh.controlMsg(requestType=usb.TYPE_CLASS | usb.RECIP_INTERFACE | usb.ENDPOINT_IN,
@@ -204,24 +181,18 @@ class sHID(object):
 				StateBuffer[0][0]=buffer[1]
 				StateBuffer[0][1]=buffer[2]
 				result =1
-			
-		if self.debug == 2:
-			i=0
-			import sys
-			unbuffered.write("sHID::GetState message: ")
-			for entry in buffer:
-				unbuffered.write("%.2x" % (buffer[i]))
-				i+=1	
-			if result == 1:
-				unbuffered.write(" ok\n")
-			else:
-				unbuffered.write(" fail\n")		
-						
+
+		i=0
+		strbuf = ""
+		for entry in buffer:
+			strbuf += str("%.2x" % (buffer[i]))
+			i+=1
+		self.logger.debug("%s" % strbuf)
+
 		return result
-		#print "sHID::GetState - end"
 
 	def ReadConfigFlash(self,addr,numBytes,data):
-		#print "sHID::ReadConfigFlash"
+		self.logger.debug("")
 		import usb
 		if numBytes <= 512:
 			while ( numBytes ):
@@ -242,19 +213,14 @@ class sHID(object):
 				except:
 					result = 0
 
-				if self.debug == 2:
-					i=0
-					import sys
-					unbuffered.write("sHID::ReadConfigFlash 0xdc message: ")
-					for entry in buffer:
-						unbuffered.write("%.2x" % (buffer[i]))
-						i+=1	
-					if result == 1:
-						unbuffered.write(" ok\n")
-					else:
-						unbuffered.write(" fail\n")				
+				i=0
+				strbuf = ""
+				for entry in buffer:
+					strbuf += str("%.2x" % (buffer[i]))
+					i+=1
+				self.logger.debug("%s" % strbuf)
 
-				time.sleep(0.5)
+				#time.sleep(0.5)
 
 				try:
 					buffer = self.devh.controlMsg(requestType=usb.TYPE_CLASS | usb.RECIP_INTERFACE | usb.ENDPOINT_IN,
@@ -287,27 +253,22 @@ class sHID(object):
 						new_data[i] = buffer[i+4];
 					numBytes -= 16;
 					addr += 16;
+
+				i=0
+				strbuf = ""
+				for entry in buffer:
+					strbuf += str("%.2x" % (buffer[i]))
+					i+=1
+				self.logger.debug("%s" % strbuf)
+
 			result = 1;
 		else:
 			result = 0;
-
-		if self.debug == 2:
-			i=0
-			import sys
-			unbuffered.write("sHID::ReadConfigFlash 0xdd message: ")
-			for entry in new_data:
-				unbuffered.write("%.2x" % (new_data[i]))
-				i+=1
-			if result == 1:
-				unbuffered.write(" ok\n")
-			else:
-				unbuffered.write(" fail\n")
 
 		data[0] = new_data
 		return result
 
 	def SetState(self,state):
-		#print "sHID::SetState"
 		import usb
 		buffer = [0]*0x15
 		buffer[0] = 0xd7;
@@ -323,24 +284,16 @@ class sHID(object):
 		except:
 			result = 0
 
-		if self.debug == 2:
-			i=0
-			import sys
-			unbuffered.write("sHID::SetState message: ")
-			for entry in buffer:
-				unbuffered.write("%.2x" % (buffer[i]))
-				i+=1
-			if result == 1:
-				unbuffered.write(" ok\n")
-			else:
-				unbuffered.write(" fail\n")
-	
-		#print "sHID::SetState - end"
+		i=0
+		strbuf = ""
+		for entry in buffer:
+			strbuf += str("%.2x" % (buffer[i]))
+			i+=1
+		self.logger.debug("%s" % strbuf)
 		return result
 
 
 	def SetFrame(self,data,numBytes):
-		#print "sHID::SetFrame"
 		import usb
 #    00000000: d5 00 09 f0 f0 03 00 32 00 3f ff ff 00 00 00 00
 #    00000000: d5 00 0c 00 32 c0 00 8f 45 25 15 91 31 20 01 00
@@ -374,25 +327,16 @@ class sHID(object):
 		except:
 			result = 0
 
-		if self.debug == 0:#2:
-			i=0
-			import sys
-			unbuffered.write("sHID::SetFrame message: ")
-			for entry in buffer:
-				unbuffered.write("%.2x" % (buffer[i]))
-				i+=1	
-			if result == 1:
-				unbuffered.write(" ok\n")
-			else:
-				unbuffered.write(" fail\n")
-
-		#print "sHID::SetFrame - end"
+		i=0
+		strbuf = ""
+		for entry in buffer:
+			strbuf += str("%.2x" % (buffer[i]))
+			i+=1
+		self.logger.debug("%s" % strbuf)
 		return result
 
 	def GetFrame(self,data,numBytes):
-		#print "sHID::GetFrame"
 		import usb
-
 		try:
 			buffer = self.devh.controlMsg(requestType=usb.TYPE_CLASS | usb.RECIP_INTERFACE | usb.ENDPOINT_IN,
 										  request=usb.REQ_CLEAR_FEATURE,
@@ -409,34 +353,26 @@ class sHID(object):
 			#*(_DWORD *)a3 = (v6 | (unsigned __int16)(v5 << 8)) & 0x1FF;
 			#    for ( i = 0; i < *(_DWORD *)a3; ++i )
 			#      *(_BYTE *)a2++ = v7[i];
-		new_data=[0]*0x111
+		new_data=[0]*0x131
 		new_numBytes=(buffer[1] << 8 | buffer[2])& 0x1ff;
 		for i in xrange(0, new_numBytes):
 			new_data[i] = buffer[i+3];
+		#for i in xrange(0, len(buffer) - 4): #139
+		#	new_data[i] = buffer[i+3];
 
-		if self.debug == 2:
-			i=0
-			import sys
-			unbuffered.write("sHID::GetFrame message: ")
-			for entry in buffer:
-				unbuffered.write("%.2x" % (buffer[i]))
-				i+=1
-			if result == 1:
-				unbuffered.write(" ok\n")
-			else:
-				unbuffered.write(" fail\n")
-				
+		i=0
+		strbuf = ""
+		for entry in buffer:
+			strbuf += str("%.2x" % (buffer[i]))
+			i+=1
+		self.logger.debug("%s" % strbuf)
 
 		data[0] = new_data
 		numBytes[0] = new_numBytes
-		#print new_data
-		#print new_numBytes
-		#print "sHID::GetFrame - end"
 		return result
 
 
 	def WriteReg(self,regAddr,data):
-		#print "sHID::WriteReg"
 		import usb
 		buffer = [0]*0x05
 		buffer[0] = 0xf0;
@@ -455,23 +391,15 @@ class sHID(object):
 		except:
 			result = 0
 
-		if self.debug == 2:
-			i=0
-			import sys
-			unbuffered.write("sHID::WriteReg: ")
-			for entry in buffer:
-				unbuffered.write("%.2x" % (buffer[i]))
-				i+=1	
-			if result == 1:
-				unbuffered.write(" ok\n")
-			else:
-				unbuffered.write(" fail\n")
-
-		#print "sHID::WriteReg - end"
+		i=0
+		strbuf = ""
+		for entry in buffer:
+			strbuf += str("%.2x" % (buffer[i]))
+			i+=1
+		self.logger.debug("%s" % strbuf)
 		return result
 
 	def Execute(self,command):
-		#print "sHID::Execute"
 		import usb
 		buffer = [0]*0x0f #*0x15
 		buffer[0] = 0xd9;
@@ -487,23 +415,16 @@ class sHID(object):
 			result = 1
 		except:
 			result = 0
-			
-		if self.debug == 2:
-			i=0
-			import sys
-			unbuffered.write("sHID::Execute message: ")
-			for entry in buffer:
-				unbuffered.write("%.2x" % (buffer[i]))
-				i+=1	
-			if result == 1:
-				unbuffered.write(" ok\n")
-			else:
-				unbuffered.write(" fail\n")
-		#print "sHID::Execute - end"
+
+		i=0
+		strbuf = ""
+		for entry in buffer:
+			strbuf += str("%.2x" % (buffer[i]))
+			i+=1
+		self.logger.debug("%s" % strbuf)
 		return result
 
 	def SetPreamblePattern(self,pattern):
-		#print "sHID::SetPreamblePattern"
 		import usb
 		buffer = [0]*0x15
 		buffer[0] = 0xd8;
@@ -519,18 +440,11 @@ class sHID(object):
 
 		except:
 			result = 0
-				
-		if self.debug == 2:
-			i=0
-			import sys
-			unbuffered.write("sHID::SetPreamblePattern message: ")
-			for entry in buffer:
-				unbuffered.write("%.2x" % (buffer[i]))
-				i+=1	
-			if result == 1:
-				unbuffered.write(" ok\n")
-			else:
-				unbuffered.write(" fail\n")
-				
-		#print "sHID::SetPreamblePattern - end"
+
+		i=0
+		strbuf = ""
+		for entry in buffer:
+			strbuf += str("%.2x" % (buffer[i]))
+			i+=1
+		self.logger.debug("%s" % strbuf)
 		return result
