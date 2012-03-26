@@ -316,6 +316,10 @@ class CDataStore(object):
 		self.Flags_FLAG_SERVICE_RUNNING = val
 		self.Flags = setBitVal(self.Flags,3,val)
 
+	def setLastLinkQuality(self,Quality):
+		self.logger.debug("Quality=%d",Quality)
+		self.LastStat.LastLinkQuality = Quality
+
 	def RequestNotify(self):
 		self.logger.debug("implement me")
 		self.Request.CondFinish = 1
@@ -1210,9 +1214,8 @@ class CCommunicationService(object):
 		DeviceCS = CDataStore.GetDeviceConfigCS(self.DataStore);
 		CDataStore.setLastSeen(self.DataStore, now);
 		Quality = Buffer[3] & 0x7F;
-		print "Quality %d" % Quality
 		#v7 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#CDataStore::setLastLinkQuality(v7, &Quality);
+		CDataStore.setLastLinkQuality(self.dataStore, Quality);
 		if (Buffer[2] & 0xF) == 2: #(CWeatherStationConfig *)
 			print "handleNextAction Buffer[2] == 2"
 		#	v8 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
@@ -1663,7 +1666,7 @@ if __name__ == "__main__":
 #	logging.basicConfig(format='%(asctime)s %(name)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
 	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
 	#logging.basicConfig(filename="HeavyWeatherService.log",level=logging.DEBUG)
-	logging.debug('This message should go to the log file')
+	#logging.debug('This message should go to the log file')
 
 	myCCommunicationService = CCommunicationService()
 	time.sleep(10)
