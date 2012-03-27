@@ -213,8 +213,7 @@ class CDataStore(object):
 
 	class TSettings:
 		CommModeInterval = 4
-		#DeviceId = -1
-		DeviceId = 0x32 #temp hack
+		DeviceId = -1
 		DeviceRegistered = False
 		PreambleDuration = 5000
 		RegisterWaitTime = 20000
@@ -320,6 +319,14 @@ class CDataStore(object):
 		self.logger.debug("Quality=%d",Quality)
 		self.LastStat.LastLinkQuality = Quality
 
+	def setLastSeen(self,time):
+		self.logger.debug("time=%d",time)
+		self.LastSeen = time
+
+	def getLastSeen(self,time):
+		self.logger.debug("")
+		return self.LastSeen
+
 	def RequestNotify(self):
 		self.logger.debug("implement me")
 		self.Request.CondFinish = 1
@@ -349,10 +356,6 @@ class CDataStore(object):
 	def setDeviceRegistered(self,registered):
 		self.logger.debug("Registered=%i" % registered)
 		self.Settings.DeviceRegistered = registered;
-
-	def setDeviceId(self,val):
-		self.logger.debug("val=%x" % val)
-		self.Settings.DeviceRegistered = val
 
 	def getRequestType(self):
 		self.logger.debug("Request.Type=%d" % self.Request.Type)
@@ -848,9 +851,6 @@ class CCommunicationService(object):
 	def buildTimeFrame(self,Buffer,checkMinuteOverflow):
 		self.logger.debug("checkMinuteOverflow=%x") % checkMinuteOverflow
 
-		#00000000: d5 00 0c 00 32 c0 00 8f 45 25 15 91 31 20 01 00
-		#00000000: d5 00 0c 00 32 c0 06 c1 47 25 15 91 31 20 01 00
-		#                             3  4  5  6  7  8  9 10 11
 		DeviceCheckSum = CDataStore.GetDeviceConfigCS(self.DataStore)
 		now = time.time()
 		tm = time.localtime(now)
@@ -868,6 +868,9 @@ class CCommunicationService(object):
 			Buffer[0]=new_Buffer[0]
 			print "buildTimeFrame #1 to be checked"
 		else:
+		#00000000: d5 00 0c 00 32 c0 00 8f 45 25 15 91 31 20 01 00
+		#00000000: d5 00 0c 00 32 c0 06 c1 47 25 15 91 31 20 01 00
+		#                             3  4  5  6  7  8  9 10 11
 			new_Buffer[2] = 0xc0
 			new_Buffer[3] = (DeviceCheckSum >>8)  & 0xFF #BYTE1(DeviceCheckSum);
 			new_Buffer[4] = (DeviceCheckSum >>0)  & 0xFF #DeviceCheckSum;
@@ -952,6 +955,81 @@ class CCommunicationService(object):
 
 	def handleWsAck():
 		self.logger.error("")
+		#3 = ATL::COleDateTime::GetTickCount(&result);
+		CDataStore.setLastSeen(self.DataStore, time.time());
+		#std::bitset<4>::bitset<4>(&BatteryStat, (*Buffer)[2] & 0xF);
+		#v5 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#CDataStore::setLastBatteryStatus(v5, &BatteryStat);
+		Quality = Buffer[0][3] & 0x7F;
+		CDataStore.setLastLinkQuality(self.DataStore, Quality);
+		ReceivedCS = (Buffer[0][4] << 8) + Buffer[0][5];
+		#v7 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#rt = CDataStore::getRequestType(v7);
+		#v20 = rt;
+		#if ( rt == 3 )
+		#{
+		#	v11 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#	v12 = CDataStore::GetFrontEndConfigCS(v11);
+		#	if ( ReceivedCS == v12 )
+		#	{
+		#		v13 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#		CDataStore::getFrontEndConfig(v13, &c);
+		#		v33 = 5;
+		#		std::bitset<23>::bitset<23>((std::bitset<23> *)&v26, 0);
+		#		v14 = CWeatherStationConfig::GetResetMinMaxFlags(&c);
+		#		v14->_Array[0] = v26;
+		#		v15 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#		CDataStore::setDeviceConfig(v15, &c);
+		#		v16 = ATL::COleDateTime::GetTickCount((ATL::COleDateTime *)&v27);
+		#		v17 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#		CDataStore::setLastConfigTime(v17, v16);
+		#		v18 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#		CDataStore::setRequestState(v18, rsFinished);
+		#		v19 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#		CDataStore::RequestNotify(v19);
+		#		thisa->RepeatCount = 0;
+		#		v33 = -1;
+		#		CWeatherStationConfig::_CWeatherStationConfig(&c);
+		#	}
+		#}
+		#else
+		#{
+		#	if ( v20 == 4 )
+		#	{
+		#		if ( thisa->TimeSent )
+		#		{
+		#			v8 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#			CDataStore::setRequestState(v8, rsFinished);
+		#			v9 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#			CDataStore::RequestNotify(v9);
+		#			thisa->RepeatCount = 0;
+		#			if ( thisa->TimeUpdate )
+		#			{
+		#				thisa->TimeUpdateComplete = 1;
+		#				thisa->TimeUpdate = 0;
+		#				ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(
+		#				    &FuncName,
+		#				    "void __thiscall CCommunicationService::handleWsAck(unsigned char (*const )[300],unsigned int &)");
+		#				v33 = 0;
+		#				ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(
+		#				    &Name,
+		#				    "DataStore->Request->Lock");
+		#				LOBYTE(v33) = 1;
+		#				v10 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		#				CScopedLock::CScopedLock(&lock, &v10->Request->Lock, &Name, &FuncName);
+		#				LOBYTE(v33) = 3;
+		#				ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::_CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(&Name);
+		#				LOBYTE(v33) = 4;
+		#				ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::_CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(&FuncName);
+		#				boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore)->Request->Type = 6;
+		#				boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore)->Request->State = 8;
+		#				v33 = -1;
+		#				CScopedLock::_CScopedLock(&lock);
+		#			}
+		#			}
+		#		}
+		#	}
+		#Length = 0;
 
 	def handleConfig(self,Buffer,Length):
 		self.logger.error("")
@@ -1173,91 +1251,109 @@ class CCommunicationService(object):
 		Length[0] = newLength
 
 
-	def handleCurrentData():
+	def handleCurrentData(self,Buffer,Length):
 		self.logger.error("")
-#			rtGetCurrent     = 0
-#			rtGetHistory     = 1
-#			rtGetConfig      = 2
-#			rtSetConfig      = 3
-#			rtSetTime        = 4
-#			rtFirstConfig    = 5
-#			rtINVALID        = 6
+
+		newBuffer = [0]
+		newBuffer[0] = Buffer[0]
+		#CCurrentWeatherData::CCurrentWeatherData_buf(&Data, &(*Buffer)[6]);
+		print "CurrentData", Buffer[0] #//fixme
+		CDataStore.setLastSeen(self.DataStore, time.time());
+		#CDataStore.setLastCurrentWeatherTime(self.DataStore, time.time())
+		#std::bitset<4>::bitset<4>(&BatteryStat, (*Buffer)[2] & 0xF);
+		#CDataStore::setLastBatteryStatus(v5, &BatteryStat);
+		Quality = Buffer[0][3] & 0x7F;
+		CDataStore.setLastLinkQuality(self.DataStore, Quality);
+		#CDataStore::setCurrentWeather(v7, &Data);
+
+		rt = CDataStore.getRequestType(self.DataStore);
+
+		DeviceCS = CDataStore.GetDeviceConfigCS(self.DataStore)
+
 		if   rt == 0: #rtGetCurrent
-			print "0"
-			#self.buildACKFrame(Buffer, 0, &DeviceCS, &HistoryIndex, 0xFFFFFFFFu);
-		elif rt == 1:
-			print "1"
-		elif rt == 2:
-			print "2"
-		elif rt == 3:
-			print "3"
-		elif rt == 4:
-			print "4"
-		elif rt == 5:
-			print "5"
-		elif rt == 6:
-			print "6"
+			print "0 - rtGetCurrent"
+			CDataStore.setRequestState(self.DataStore, 2);
+			CDataStore.RequestNotify(self.DataStore);
+			newLength[0] = self.buildACKFrame(newBuffer, 0, DeviceCS, HistoryIndex, 0xFFFFFFFF);
+		elif rt == 2: #rtGetConfig
+			print "2 - rtGetConfig"
+			newLength[0] = self.buildACKFrame(newBuffer, 3, DeviceCS, HistoryIndex, 0xFFFFFFFF);
+			CDataStore.setRequestState(self.DataStore, 1);
+		elif rt == 3: #rtSetConfig
+			print "3 - rtSetConfig"
+			newLength[0] = self.buildACKFrame(newBuffer, 2, DeviceCS, HistoryIndex, 0xFFFFFFFF);
+			CDataStore.setRequestState(self.DataStore, 1);
+		elif rt == 1: #rtGetHistory
+			print "1 - rtGetHistory"
+			newLength[0] = self.buildACKFrame(newBuffer, 4, DeviceCS, HistoryIndex, 0xFFFFFFFF);
+			CDataStore.setRequestState(self.DataStore, 1);
+		elif rt == 4: #rtSetTime
+			print "4 - rtSetTime"
+			newLength[0] = self.buildACKFrame(newBuffer, 1, DeviceCS, HistoryIndex, 0xFFFFFFFF);
+			CDataStore.setRequestState(self.DataStore, 1);
+		elif rt == 5 or rt == 6: #rtFirstConfig || #rtINVALID
+			print "5 - rtGetCurrent || 6 - rtINVALID"
+			newLength[0] = self.buildACKFrame(newBuffer, 0, DeviceCS, HistoryIndex, 0xFFFFFFFF);
+
+		Length[0] = newLength[0]
+		Buffer[0] = newBuffer[0]
 
 	def handleHistoryData():
 		self.logger.error("")
 
 	def handleNextAction(self,Buffer,Length):
 		self.logger.error("")
-
-		print "handleNextAction:: Buffer[0] %x" % Buffer[0]
-		print "handleNextAction:: Buffer[1] %x" % Buffer[1]
-		print "handleNextAction:: Buffer[2] %x (CWeatherStationConfig *)" % (Buffer[2] & 0xF)
-		#ATL::COleDateTime::GetTickCount(&now);
-		#v3 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+		newBuffer = [0]
+		newBuffer[0] = Buffer[0]
+		newLength = [0]
+		newLength[0] = Length[0]
+		print "handleNextAction:: Buffer[0] %x" % Buffer[0][0]
+		print "handleNextAction:: Buffer[1] %x" % Buffer[0][1]
+		print "handleNextAction:: Buffer[2] %x (CWeatherStationConfig *)" % (Buffer[0][2] & 0xF)
 		rt = CDataStore.getRequestType(self.DataStore)
 		HistoryIndex = CDataStore.getLastHistoryIndex(self.DataStore);
 		DeviceCS = CDataStore.GetDeviceConfigCS(self.DataStore);
-		CDataStore.setLastSeen(self.DataStore, now);
-		Quality = Buffer[3] & 0x7F;
-		#v7 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		CDataStore.setLastLinkQuality(self.dataStore, Quality);
-		if (Buffer[2] & 0xF) == 2: #(CWeatherStationConfig *)
+		CDataStore.setLastSeen(self.DataStore, time.time());
+		Quality = Buffer[0][3] & 0x7F;
+		CDataStore.setLastLinkQuality(self.DataStore, Quality);
+		if (Buffer[0][2] & 0xF) == 2: #(CWeatherStationConfig *)
 			print "handleNextAction Buffer[2] == 2"
-		#	v8 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#	v16 = CDataStore::getFrontEndConfig(v8, &result);
+		#	v16 = CDataStore::getFrontEndConfig(self.DataStore, &result);
 		#	Data = v16;
-		#	v24 = 0;
-			Length = self.buildConfigFrame(Buffer, v16);
+		#	[0]v24 = 0;
+			newLength[0] = self.buildConfigFrame(newBuffer, v16);
 		#	v24 = -1;
 		#	CWeatherStationConfig::_CWeatherStationConfig(&result);
 		else:
 			print "handleNextAction Buffer[2] == 3"
 			if (Buffer[2] & 0xF) == 3: #(CWeatherStationConfig *)
-				Length = self.buildTimeFrame(Buffer, 1);
+				newLength[0] = self.buildTimeFrame(newBuffer, 1);
 			else:
+				print "handleNextAction Buffer[2] == %x" % (Buffer[0][2] & 0xF)
 				DeviceCS = [None]
 				HistoryIndex = [None]
-				if rt == 2:
-					Length = self.buildACKFrame(Buffer, 3, DeviceCS, HistoryIndex, 0xFFFFFFFF);
-					#v9 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+				if   rt == 2: #rtGetConfig
+					newLength[0] = self.buildACKFrame(newBuffer, 3, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
-				elif rt == 0:
-					Length = self.buildACKFrame(Buffer, 5, DeviceCS, HistoryIndex, 0xFFFFFFFF);
-					#v10 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+				elif rt == 0: #rtGetCurrent
+					newLength[0] = self.buildACKFrame(newBuffer, 5, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
-				elif rt == 1:
-					Length = self.buildACKFrame(Buffer, 4, DeviceCS, HistoryIndex, 0xFFFFFFFF);
-					#v11 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+				elif rt == 1: #rtGetHistory
+					newLength[0] = self.buildACKFrame(newBuffer, 4, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
-				elif rt == 3:
-					Length = self.buildACKFrame(Buffer, 2, DeviceCS, HistoryIndex, 0xFFFFFFFF);
-					#v12 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+				elif rt == 3: #rtSetConfig
+					newLength[0] = self.buildACKFrame(newBuffer, 2, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
-				elif rt == 4:
-					Length = self.buildACKFrame(Buffer, 1, DeviceCS, HistoryIndex, 0xFFFFFFFF);
-					#v13 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
+				elif rt == 4: #rtSetTime
+					newLength[0] = self.buildACKFrame(newBuffer, 1, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
 				else:
-					#v14 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 					if ( CDataStore.getFlag_FLAG_FAST_CURRENT_WEATHER(self.DataStore) ):
-						Length = self.buildACKFrame(Buffer, 5, DeviceCS, HistoryIndex, 0xFFFFFFFF);
+						newLength[0] = self.buildACKFrame(newBuffer, 5, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					else:
-						Length = self.buildACKFrame(Buffer, 0, DeviceCS, HistoryIndex, 0xFFFFFFFF);
+						newLength[0] = self.buildACKFrame(newBuffer, 0, DeviceCS, HistoryIndex, 0xFFFFFFFF);
+		Length[0] = newLength[0]
+		Buffer[0] = newBuffer[0]
 
 	def CCommunicationService(self):
 		self.logger.error("")
@@ -1349,6 +1445,8 @@ class CCommunicationService(object):
 		
 		newBuffer = [0]
 		newBuffer[0] = Buffer[0]
+		newLength = [0]
+		newLength[0] = Length[0]
 		if Length[0] != 0:
 			RequestType = CDataStore.getRequestType(self.DataStore)
 			#self.logger.debug("RequestType=%x",RequestType)
@@ -1361,44 +1459,44 @@ class CCommunicationService(object):
 				if ID == RegisterdID:
 					print ((Buffer[0][2] & 0xE0) - 0x20)
 					responseType = (Buffer[0][2] & 0xE0) - 0x20
-					self.logger.debug("Length %x RegisteredID x%x responseType: x%x" % (Length[0], RegisteredID, responseType))
+					self.logger.debug("Length %x RegisteredID x%x responseType: x%x" % (Length[0], RegisterdID, responseType))
 					if responseType == 0x00:
 						#    00000000: 00 00 06 00 32 20
 						if Length[0] == 0x06:
-							self.handleWsAck(newBuffer, Length[0]);
+							self.handleWsAck(newBuffer, newLength);
 						else:
-							newLength = 0
+							newLength[0] = 0
 					elif responseType == 0x20:
 						#    00000000: 00 00 30 00 32 40
 						if Length[0] == 0x30:
 							newLength = Length[0]
 							self.handleConfig(newBuffer, newLength);
 						else:
-							newLength = 0
+							newLength[0] = 0
 					elif responseType == 0x40:
 						#    00000000: 00 00 d7 00 32 60
 						if Length[0] == 0xd7: #215
-							self.handleCurrentData(newBuffer, Length[0]);
+							self.handleCurrentData(newBuffer, newLength);
 						else:
-							newLength = 0
+							newLength[0] = 0
 					elif responseType == 0x60:
 						#    00000000: 00 00 1e 00 32 80
 						if Length[0] == 0x1e:
-							self.handleHistoryData(newBuffer, Length[0]);
+							self.handleHistoryData(newBuffer, newLength);
 						else:
-							newLength = 0
+							newLength[0] = 0
 					elif responseType == 0x80:
 						#    00000000: 00 00 06 f0 f0 a1
 						#    00000000: 00 00 06 00 32 a3
 						#    00000000: 00 00 06 00 32 a2
 						if Length[0] == 0x06:
-							self.handleNextAction(newBuffer, Length[0]);
+							self.handleNextAction(newBuffer, newLength);
 						else:
-							newLength = 0
+							newLength[0] = 0
 					else:
-						newLength = 0
+						newLength[0] = 0
 				else:
-					newLength = 0
+					newLength[0] = 0
 			else:
 				if RequestType == 5:
 					buffer = [None]
@@ -1422,26 +1520,26 @@ class CCommunicationService(object):
 							 or ReceivedId != TransceiverID
 							 or (Buffer[0][2] & 0xE0) != 0x40
 							 or CDataStore.getRequestState(self.DataStore) != 5):
-								newLength = 0;
+								newLength[0] = 0;
 								print "oouch#1"
 							else:
-								self.handleConfig(newBuffer, nLength);
+								self.handleConfig(newBuffer, newLength);
 								if Length[0] == 9:
 									CDataStore.setDeviceId(self.DataStore,TransceiverID);
 									CDataStore.setDeviceRegistered(self.DataStore, True);
 						else:
-							newLength = self.buildTimeFrame(Buffer,1);
+							newLength[0] = self.buildTimeFrame(Buffer,1);
 
 					else:
 						if RequestType == 5:
 							HistoryIndex = 0xfffff
-							newLength = self.buildACKFrame(newBuffer,3,TransceiverID,HistoryIndex,0xFFFFFFFF)
+							newLength[0] = self.buildACKFrame(newBuffer,3,TransceiverID,HistoryIndex,0xFFFFFFFF)
 							self.RepeatCount = 0
 							CDataStore.setRequestState(self.DataStore,ERequestState.rsWaitDevice)
 						else:
-							newLength = 0
+							newLength[0] = 0
 				else:
-					newLength = 0
+					newLength[0] = 0
 		else: #Length[0] == 0
 			self.logger.debug("try to repeat (implement me)")
 			#print "repeatCount",self.RepeatCount
@@ -1450,18 +1548,18 @@ class CCommunicationService(object):
 				if 2 == 1:
 				#if self.RepeatTime > microsec_clock::universal_time:
 					if self.Regenerate:
-						newLength = self.buildTimeFrame(Buffer,1);
+						newLength[0] = self.buildTimeFrame(newBuffer,1);
 					else:
 						print "implementami - copia data su buffer"
 						#Buffer = self.RepeatData, self.RepeatSize
 			#else:
 			#	print "RS:RepeatCount = ",self.RepeatCount
-			time.sleep(0.2)
-			newLength = 0
+			time.sleep(0.015)
+			newLength[0] = 0
 
 		Buffer[0] = newBuffer[0]
-		Length[0] = newLength
-		if newLength == 0:
+		Length[0] = newLength[0]
+		if newLength[0] == 0:
 			return 0
 		return 1
 

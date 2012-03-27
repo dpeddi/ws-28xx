@@ -348,17 +348,11 @@ class sHID(object):
 			result = 1
 		except:
 			result = 0
-			#pass
 
-			#*(_DWORD *)a3 = (v6 | (unsigned __int16)(v5 << 8)) & 0x1FF;
-			#    for ( i = 0; i < *(_DWORD *)a3; ++i )
-			#      *(_BYTE *)a2++ = v7[i];
 		new_data=[0]*0x131
 		new_numBytes=(buffer[1] << 8 | buffer[2])& 0x1ff;
 		for i in xrange(0, new_numBytes):
 			new_data[i] = buffer[i+3];
-		#for i in xrange(0, len(buffer) - 4): #139
-		#	new_data[i] = buffer[i+3];
 
 		i=0
 		strbuf = ""
