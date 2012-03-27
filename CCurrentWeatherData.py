@@ -34,7 +34,11 @@ class CCurrentWeatherData(object):
 	_AlarmRingingFlags = 0
 	_AlarmMarkedFlags = 0
 
+	def __init__(self):
+		self.logger = logging.getLogger('ws28xx.CCurrentWeatherData')
+
 	def CCurrentWeatherData_buf(self,buf):
+		self.logger.debug("")
 		#CMinMaxMeasurement::CMinMaxMeasurement(&this->_PressureRelative_hPaMinMax);
 		#CMinMaxMeasurement::CMinMaxMeasurement(&thisa->_PressureRelative_inHgMinMax);
 		#CMinMaxMeasurement::CMinMaxMeasurement(&thisa->_WindSpeedMinMax);
@@ -55,6 +59,7 @@ class CCurrentWeatherData(object):
 		self.read(buf);
 
 	def read(self,buf):
+		self.logger.debug("")
 		USBHardware.ReverseByteOrder(buf[0], 0, 2);
 		#CCurrentWeatherData::readAlarmFlags(thisa, buf, &thisa->_AlarmRingingFlags);
 		self._WeatherState = buf[2] & 0xF;

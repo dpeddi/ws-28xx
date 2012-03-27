@@ -853,7 +853,7 @@ class CCommunicationService(object):
 		tm = time.localtime(now)
 		tu = time.gmtime(now)
 
-		new_Buffer=Buffer
+		new_Buffer=Buffer[0]
 		Second = tm[5]
 		if ( checkMinuteOverflow and (Second <= 5 or Second >= 55) ):
 			if ( Second < 55 ):
@@ -877,10 +877,10 @@ class CCommunicationService(object):
 			DayOfWeek = tm[7] - 1;
 			if ( DayOfWeek == 1 ):
 				DayOfWeek = 7;
-			new_Buffer[8] = DayOfWeek % 10 + (0x10 *  tm[2] % 10) #DoW + Day
-			new_Buffer[9] =  (tm[2] // 10) + (0x10 *  tm[1] % 10) #day + month
-			new_Buffer[10] = (tm[1] // 10) + (0x10 * (tm[0] - 2000) % 10); #month + year
-			new_Buffer[11] = (tm[0] - 2000) // 10; year
+			new_Buffer[8] = DayOfWeek % 10 + (0x10 *  tm[2] % 10)          #DoW + Day
+			new_Buffer[9] =  (tm[2] // 10) + (0x10 *  tm[1] % 10)          #day + month
+			new_Buffer[10] = (tm[1] // 10) + (0x10 * (tm[0] - 2000) % 10)  #month + year
+			new_Buffer[11] = (tm[0] - 2000) // 10                          #year
 			self.Regenerate = 1
 			self.TimeSent = 1
 			Buffer[0]=new_Buffer
@@ -900,6 +900,7 @@ class CCommunicationService(object):
 		self.logger.debug("Action=%x, CheckSum=%x, HistoryIndex=%x, ComInt=%x" % (Action, CheckSum, HistoryIndex, ComInt))
 		newBuffer = [0]
 		newBuffer[0] = Buffer[0]
+		#CDataStore::TLastStat::TLastStat(&Stat);
 		#if ( !Action && ComInt == 0xFFFFFFFF ):
 #			v28 = 0;
 #			if ( !Stat.LastCurrentWeatherTime.m_status ):
@@ -960,10 +961,9 @@ class CCommunicationService(object):
 		Quality = Buffer[0][3] & 0x7F;
 		CDataStore.setLastLinkQuality(self.DataStore, Quality);
 		ReceivedCS = (Buffer[0][4] << 8) + Buffer[0][5];
-		#v7 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#rt = CDataStore::getRequestType(v7);
+		rt = CDataStore.getRequestType(self.DataStore)
 		#v20 = rt;
-		#if ( rt == 3 )
+		#if ( rt == 3 ) #rtSetConfig
 		#{
 		#	v11 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 		#	v12 = CDataStore::GetFrontEndConfigCS(v11);
@@ -991,7 +991,7 @@ class CCommunicationService(object):
 		#}
 		#else
 		#{
-		#	if ( v20 == 4 )
+		#	if ( rt == 4 ) #rtSetTime (unused)
 		#	{
 		#		if ( thisa->TimeSent )
 		#		{
@@ -1253,6 +1253,7 @@ class CCommunicationService(object):
 
 		newBuffer = [0]
 		newBuffer[0] = Buffer[0]
+		newLength = [0]
 		#CCurrentWeatherData::CCurrentWeatherData_buf(&Data, &(*Buffer)[6]);
 		print "CurrentData", Buffer[0] #//fixme
 		CDataStore.setLastSeen(self.DataStore, time.time());
@@ -1262,8 +1263,8 @@ class CCommunicationService(object):
 		Quality = Buffer[0][3] & 0x7F;
 		CDataStore.setLastLinkQuality(self.DataStore, Quality);
 		#CDataStore::setCurrentWeather(v7, &Data);
-
 		rt = CDataStore.getRequestType(self.DataStore);
+		HistoryIndex = CDataStore.getLastHistoryIndex(self.DataStore);
 
 		DeviceCS = CDataStore.GetDeviceConfigCS(self.DataStore)
 
