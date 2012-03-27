@@ -17,7 +17,6 @@ def handleError(self, record):
 	traceback.print_stack()
 logging.Handler.handleError = handleError
 
-
 sHID = sHID.sHID()
 USBHardware = USBHardware.USBHardware()
 
@@ -169,8 +168,6 @@ class ERequestType:
 	rtSetTime        = 4
 	rtFirstConfig    = 5
 	rtINVALID        = 6
-
-#ERequestType.rtGetCurrent
 
 class ERequestState:
 	rsQueued         = 0
@@ -849,7 +846,7 @@ class CCommunicationService(object):
 		self.CCommunicationService();
 
 	def buildTimeFrame(self,Buffer,checkMinuteOverflow):
-		self.logger.debug("checkMinuteOverflow=%x") % checkMinuteOverflow
+		self.logger.debug("checkMinuteOverflow=%x" % checkMinuteOverflow)
 
 		DeviceCheckSum = CDataStore.GetDeviceConfigCS(self.DataStore)
 		now = time.time()
@@ -1326,10 +1323,10 @@ class CCommunicationService(object):
 		#	CWeatherStationConfig::_CWeatherStationConfig(&result);
 		else:
 			print "handleNextAction Buffer[2] == 3"
-			if (Buffer[2] & 0xF) == 3: #(CWeatherStationConfig *)
+			if (Buffer[0][2] & 0xF) == 3: #(CWeatherStationConfig *)
 				newLength[0] = self.buildTimeFrame(newBuffer, 1);
 			else:
-				print "handleNextAction Buffer[2] == %x" % (Buffer[0][2] & 0xF)
+				print "handleNextAction Buffer[2] == " , (Buffer[0][2] & 0xF)
 				DeviceCS = [None]
 				HistoryIndex = [None]
 				if   rt == 2: #rtGetConfig
@@ -1764,7 +1761,6 @@ if __name__ == "__main__":
 #	logging.basicConfig(format='%(asctime)s %(name)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
 	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
 	#logging.basicConfig(filename="HeavyWeatherService.log",level=logging.DEBUG)
-	#logging.debug('This message should go to the log file')
 
 	myCCommunicationService = CCommunicationService()
 	time.sleep(10)
@@ -1780,6 +1776,3 @@ if __name__ == "__main__":
 		time.sleep(0.1)
 		pass
 
-	#myCCommunicationService.logger.debug("Started main()")
-	#rim
-	#myCCommunicationService.logger.debug("Finished main()")
