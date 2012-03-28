@@ -51,7 +51,6 @@ class sHID(object):
 					  self.logger.info("Unloaded other driver from interface %d" %
 					      self.usbInterface.interfaceNumber)
 					except usb.USBError, e:
-					    print "exception in detach"
 					    pass
 
 					#self.devh.setAltInterface(0)

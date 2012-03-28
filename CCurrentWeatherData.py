@@ -1,4 +1,12 @@
+#!/usr/bin/python
+
+import time
+import logging
 import USBHardware
+import CWeatherTraits
+
+CWeatherTraits = CWeatherTraits.CWeatherTraits()
+USBHardware = USBHardware.USBHardware()
 
 class CCurrentWeatherData(object):
 	_PressureRelative_hPa = 0
@@ -37,7 +45,7 @@ class CCurrentWeatherData(object):
 	def __init__(self):
 		self.logger = logging.getLogger('ws28xx.CCurrentWeatherData')
 
-	def CCurrentWeatherData_buf(self,buf):
+	def CCurrentWeatherData_buf(self,buf,pos):
 		self.logger.debug("")
 		#CMinMaxMeasurement::CMinMaxMeasurement(&this->_PressureRelative_hPaMinMax);
 		#CMinMaxMeasurement::CMinMaxMeasurement(&thisa->_PressureRelative_inHgMinMax);
@@ -56,17 +64,26 @@ class CCurrentWeatherData(object):
 		#CMinMaxMeasurement::CMinMaxMeasurement(&thisa->_WindchillMinMax);
 		#std::bitset<29>::bitset<29>(&thisa->_AlarmRingingFlags);
 		#std::bitset<29>::bitset<29>(&thisa->_AlarmMarkedFlags);
-		self.read(buf);
+		self.read(buf,pos);
 
-	def read(self,buf):
+	def read(self,buf,pos):
 		self.logger.debug("")
-		USBHardware.ReverseByteOrder(buf[0], 0, 2);
+		newbuf = [0]
+		newbuf[0] = buf[0]
+		USBHardware.ReverseByteOrder(newbuf, pos + 0, 2);
 		#CCurrentWeatherData::readAlarmFlags(thisa, buf, &thisa->_AlarmRingingFlags);
-		self._WeatherState = buf[2] & 0xF;
-		self._WeatherTendency = (buf[2] >> 4) & 0xF;
-		USBHardware.ReverseByteOrder(buf[0], 3, 0x12);
-		v2 = USBHardware.ToTemperature(buf[0], 3, 1);
-		self._IndoorTemp = v2;
+		self._WeatherState = newbuf[0][pos + 2] & 0xF;
+		print "self._WeatherState", self._WeatherState
+
+		self._WeatherTendency = (newbuf[0][pos + 2] >> 4) & 0xF;
+		print "self._WeatherTendency",self._WeatherTendency
+
+		#print "newbuf[0]",newbuf[0]
+		USBHardware.ReverseByteOrder(newbuf, pos + 3, 0x12);
+		#print "newbuf[0]",newbuf[0]
+		#print "provatemp",newbuf[0][pos + 3]
+		self._IndoorTemp = USBHardware.ToTemperature(newbuf, pos + 3, 1)
+		print "self._IndoorTemp", self._IndoorTemp
 		#  v3 = USBHardware::ToTemperature(buf[0], 5, 0);
 		#  thisa->_IndoorTempMinMax._Min._Value = v3;
 		#  v80 = thisa->_IndoorTempMinMax._Min._Value == CWeatherTraits::TemperatureNP();
@@ -105,9 +122,9 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v8 + 1) = HIDWORD(v7->m_dt);
 		#    *((_DWORD *)v8 + 2) = v7->m_status;
 		#  }
-		USBHardware.ReverseByteOrder(buf[0], 21, 0x12);
-		v9 = USBHardware.ToTemperature(buf[0], 21, 1);
-		self._OutdoorTemp = v9;
+		USBHardware.ReverseByteOrder(newbuf, pos + 21, 0x12);
+		self._OutdoorTemp = USBHardware.ToTemperature(newbuf, pos + 21, 1)
+		print "self._OutdoorTemp", self._OutdoorTemp
 		#  v10 = USBHardware::ToTemperature(buf + 23, 0);
 		#  thisa->_OutdoorTempMinMax._Min._Value = v10;
 		#  v80 = thisa->_OutdoorTempMinMax._Min._Value == CWeatherTraits::TemperatureNP();

@@ -1,4 +1,7 @@
 import logging
+import CWeatherTraits
+
+CWeatherTraits = CWeatherTraits.CWeatherTraits()
 
 class USBHardware(object):
 	def __init__(self):
@@ -19,26 +22,29 @@ class USBHardware(object):
 	def ToDateTime(result, buffer, startOnLowNibble):
 		self.logger.debug("")
 
-	def ToTemperature(buffer, start, startOnLowNibble):
+	def ToTemperature(self,buffer, start, startOnLowNibble):
 		self.logger.debug("")
+		if True: #hack ident
 		#if ( USBHardware::IsErr5(buffer, startOnLowNibble) ):
 		#	v2 = CWeatherTraits::TemperatureNP();
 		#else:
+			if True: #hack ident
 		#	if ( USBHardware::IsOFL5(buffer, startOnLowNibble) ):
 		#		v2 = CWeatherTraits::TemperatureOFL();
 		#	else:
-		#		ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(&strValue);
-		#		v10 = 0;
-		#		ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::Format(&strValue, "%01d%01d.%01d%01d%01d");
-		#		v3 = ATL::CSimpleStringT<char_0>::operator char_const__(&strValue.baseclass_0);
-		#		v7 = j__atof(v3);
-		#		v6 = v7;
-		#		v8 = v7 - CWeatherTraits::TemperatureOffset();
-		#		v10 = -1;
-		#		ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::_CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(&strValue);
-		#		v2 = v8;
-		#LODWORD(result) = LODWORD(v2);
-		#return result;
+				print buffer[0][start+0] & 0xf #0  0
+				print buffer[0][start+0] >> 4  #0  0
+				print buffer[0][start+1] & 0xf #4  0
+				print buffer[0][start+1] >> 4  #9  3
+				print buffer[0][start+2] & 0xf #5  5
+				if startOnLowNibble:
+					print "startOnLowNibble #1", startOnLowNibble
+					rawtemp = (buffer[0][start+0] &0xf)*1000+(buffer[0][start+0] >>4 )*100+(buffer[0][start+1] &0xf)*0.1+(buffer[0][start+1] >> 4)+(buffer[0][start+2] &0x0f)*10
+				else:
+					print "startOnLowNibble #2", startOnLowNibble
+					rawtemp = (buffer[0][start+0] &0xf)*100+(buffer[0][start+0] >>4 )*1000+(buffer[0][start+1] &0xf)+(buffer[0][start+1] >> 4)*10+(buffer[0][start+2] &0x0f)*0.1
+				result = rawtemp - CWeatherTraits.TemperatureOffset()
+		return result;
 
 	def ReverseByteOrder(self,buf,start,Count):
 		self.logger.debug("")

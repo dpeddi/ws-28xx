@@ -3,11 +3,12 @@
 import logging
 import traceback
 
+import time
 import threading
 #import shelve #http://docs.python.org/library/pickle.html
 import USBHardware
 import sHID
-import time
+import CCurrentWeatherData
 from datetime import datetime
 from datetime import timedelta
 
@@ -19,6 +20,7 @@ logging.Handler.handleError = handleError
 
 sHID = sHID.sHID()
 USBHardware = USBHardware.USBHardware()
+#CCurrentWeatherData = CCurrentWeatherData.CCurrentWeatherData()
 
 # testBit() returns a nonzero result, 2**offset, if the bit at 'offset' is one.
 def testBit(int_type, offset):
@@ -327,6 +329,10 @@ class CDataStore(object):
 	def RequestNotify(self):
 		self.logger.debug("implement me")
 		self.Request.CondFinish = 1
+
+	def setLastCurrentWeatherTime(self,time):
+		self.logger.debug("time=%d" % time)
+		self.LastStat.LastCurrentWeatherTime = time
 
 	def operator(self):
 		self.logger.debug("")
@@ -853,7 +859,8 @@ class CCommunicationService(object):
 		tm = time.localtime(now)
 		tu = time.gmtime(now)
 
-		new_Buffer=Buffer[0]
+		new_Buffer=[0]
+		new_Buffer[0]=Buffer[0]
 		Second = tm[5]
 		if ( checkMinuteOverflow and (Second <= 5 or Second >= 55) ):
 			if ( Second < 55 ):
@@ -868,22 +875,22 @@ class CCommunicationService(object):
 		#00000000: d5 00 0c 00 32 c0 00 8f 45 25 15 91 31 20 01 00
 		#00000000: d5 00 0c 00 32 c0 06 c1 47 25 15 91 31 20 01 00
 		#                             3  4  5  6  7  8  9 10 11
-			new_Buffer[2] = 0xc0
-			new_Buffer[3] = (DeviceCheckSum >>8)  & 0xFF #BYTE1(DeviceCheckSum);
-			new_Buffer[4] = (DeviceCheckSum >>0)  & 0xFF #DeviceCheckSum;
-			new_Buffer[5] = (tm[5] % 10) + (0x10 * tm[5] // 10); #sec
-			new_Buffer[6] = (tm[4] % 10) + (0x10 * tm[4] // 10); #min
-			new_Buffer[7] = (tm[3] % 10) + (0x10 * tm[3] // 10); #hour
+			new_Buffer[0][2] = 0xc0
+			new_Buffer[0][3] = (DeviceCheckSum >>8)  & 0xFF #BYTE1(DeviceCheckSum);
+			new_Buffer[0][4] = (DeviceCheckSum >>0)  & 0xFF #DeviceCheckSum;
+			new_Buffer[0][5] = (tm[5] % 10) + (0x10 * tm[5] // 10); #sec
+			new_Buffer[0][6] = (tm[4] % 10) + (0x10 * tm[4] // 10); #min
+			new_Buffer[0][7] = (tm[3] % 10) + (0x10 * tm[3] // 10); #hour
 			DayOfWeek = tm[7] - 1;
 			if ( DayOfWeek == 1 ):
 				DayOfWeek = 7;
-			new_Buffer[8] = DayOfWeek % 10 + (0x10 *  tm[2] % 10)          #DoW + Day
-			new_Buffer[9] =  (tm[2] // 10) + (0x10 *  tm[1] % 10)          #day + month
-			new_Buffer[10] = (tm[1] // 10) + (0x10 * (tm[0] - 2000) % 10)  #month + year
-			new_Buffer[11] = (tm[0] - 2000) // 10                          #year
+			new_Buffer[0][8] = DayOfWeek % 10 + (0x10 *  tm[2] % 10)          #DoW + Day
+			new_Buffer[0][9] =  (tm[2] // 10) + (0x10 *  tm[1] % 10)          #day + month
+			new_Buffer[0][10] = (tm[1] // 10) + (0x10 * (tm[0] - 2000) % 10)  #month + year
+			new_Buffer[0][11] = (tm[0] - 2000) // 10                          #year
 			self.Regenerate = 1
 			self.TimeSent = 1
-			Buffer[0]=new_Buffer
+			Buffer[0]=new_Buffer[0]
 			Length = 0x0c
 		return Length
 
@@ -944,8 +951,6 @@ class CCommunicationService(object):
 		newBuffer[0][8] = (HistoryAddress >> 0 ) & 0xFF
 
 		#d5 00 09 f0 f0 03 00 32 00 3f ff ff
-		#print "BuildAckFrame",9
-		#print "BuildAckFrame",newBuffer[0]
 		Buffer[0]=newBuffer[0]
 		self.Regenerate = 0;
 		self.TimeSent = 0;
@@ -1032,12 +1037,14 @@ class CCommunicationService(object):
 		self.logger.error("")
 		newBuffer=[0]
 		newBuffer[0] = Buffer[0]
+		newLength = [0]
 		RecConfig = None
 		diff = 0;
-		t=[0]*300
+		t=[0]
+		t[0]=[0]*300
 		#j__memcpy(t, (char *)Buffer, *Length);
 		for i in xrange(0,Length[0]):
-			t[i]=newBuffer[0][i]
+			t[0][i]=newBuffer[0][i]
 		#CWeatherStationConfig.CWeatherStationConfig_buf(&c, &t[4]);
 		#v73 = 0;
 		#j__memset(t, -52, *Length);
@@ -1184,12 +1191,9 @@ class CCommunicationService(object):
 		#		#		#		#v43 = (CDataStore::ERequestState)&RecConfig;
 		#		#		#		#v25 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 		#		#		#		#CDataStore::setDeviceConfig(v25, (CWeatherStationConfig *)v43);
-		#		#		#		#v55 = CWeatherStationConfig::GetCheckSum(&RecConfig);
-		#		#		#		#*Length = CCommunicationService::buildACKFrame(thisa, Buffer, 5, &v55, &HistoryIndex, 0xFFFFFFFFu);$
-		#		#		#		#v43 = 1;
-		#		#		#		#v26 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#		#		#		#CDataStore::setRequestState(v26, v43);
-		#		#		#		#break;
+					v55 = CWeatherStationConfig.GetCheckSum(RecConfig);
+					newLength[0] = CCommunicationService.buildACKFrame(newBuffer, 5, v55, HistoryIndex, 0xFFFFFFFF);
+					CDataStore.setRequestState(self.DataStore, 1);
 				elif rt == 1:
 					print "handleConfig rt==1"
 		#		#		#		#v43 = (CDataStore::ERequestState)&now;
@@ -1245,8 +1249,7 @@ class CCommunicationService(object):
 		#v73 = -1;
 		#CWeatherStationConfig::_CWeatherStationConfig(&RecConfig);
 		Buffer[0] = newBuffer[0]
-		Length[0] = newLength
-
+		Length[0] = newLength[0]
 
 	def handleCurrentData(self,Buffer,Length):
 		self.logger.error("")
@@ -1254,15 +1257,18 @@ class CCommunicationService(object):
 		newBuffer = [0]
 		newBuffer[0] = Buffer[0]
 		newLength = [0]
-		#CCurrentWeatherData::CCurrentWeatherData_buf(&Data, &(*Buffer)[6]);
+		myCCurrentWeatherData = CCurrentWeatherData.CCurrentWeatherData()
+		myCCurrentWeatherData.CCurrentWeatherData_buf(newBuffer, 6);
 		print "CurrentData", Buffer[0] #//fixme
 		CDataStore.setLastSeen(self.DataStore, time.time());
-		#CDataStore.setLastCurrentWeatherTime(self.DataStore, time.time())
+		CDataStore.setLastCurrentWeatherTime(self.DataStore, time.time())
 		#std::bitset<4>::bitset<4>(&BatteryStat, (*Buffer)[2] & 0xF);
 		#CDataStore::setLastBatteryStatus(v5, &BatteryStat);
 		Quality = Buffer[0][3] & 0x7F;
 		CDataStore.setLastLinkQuality(self.DataStore, Quality);
-		#CDataStore::setCurrentWeather(v7, &Data);
+		#CDataStore.setCurrentWeather(self.DataStore, myCCurrentWeatherData);
+		#self.setCurrentWeather(self.DataStore,Data)
+
 		rt = CDataStore.getRequestType(self.DataStore);
 		HistoryIndex = CDataStore.getLastHistoryIndex(self.DataStore);
 
@@ -1296,8 +1302,9 @@ class CCommunicationService(object):
 		Length[0] = newLength[0]
 		Buffer[0] = newBuffer[0]
 
-	def handleHistoryData():
+	def handleHistoryData(self,Buffer,Length):
 		self.logger.error("")
+		print "handleHistoryData: non ancora implementato"
 
 	def handleNextAction(self,Buffer,Length):
 		self.logger.error("")
@@ -1467,7 +1474,6 @@ class CCommunicationService(object):
 					elif responseType == 0x20:
 						#    00000000: 00 00 30 00 32 40
 						if Length[0] == 0x30:
-							newLength = Length[0]
 							self.handleConfig(newBuffer, newLength);
 						else:
 							newLength[0] = 0
@@ -1762,6 +1768,8 @@ if __name__ == "__main__":
 #	logging.basicConfig(format='%(asctime)s %(name)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
 	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
 	#logging.basicConfig(filename="HeavyWeatherService.log",level=logging.DEBUG)
+
+	print "Press [v] key on Weather Station"
 
 	myCCommunicationService = CCommunicationService()
 	time.sleep(10)
