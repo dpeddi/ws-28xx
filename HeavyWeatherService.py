@@ -566,7 +566,8 @@ class CWeatherStationConfig(object):
 		print "CWeatherStationConfig::GetResetMinMaxFlags"
 
 	def CWeatherStationConfig_buf(self,buf):
-		newbuf = buf
+		newbuf=[0]
+		newbuf[0] = buf[0]
 		#CWeatherStationHighLowAlarm::CWeatherStationHighLowAlarm(&this->_AlarmTempIndoor);
 		#v4 = 0;
 		#CWeatherStationHighLowAlarm::CWeatherStationHighLowAlarm(&thisa->_AlarmTempOutdoor);
@@ -584,7 +585,7 @@ class CWeatherStationConfig(object):
 		#CWeatherStationWindDirectionAlarm::CWeatherStationWindDirectionAlarm(&thisa->_AlarmWindDirection);
 		#LOBYTE(v4) = 7;
 		#std::bitset<23>::bitset<23>(&thisa->_ResetMinMaxFlags);
-		self.read(buf[0]);
+		self.read(newbuf);
 
 	def GetCheckSum(self):
 		self.logger.debug("")
@@ -602,25 +603,24 @@ class CWeatherStationConfig(object):
 	def read(self,buf):
 		self.logger.debug("")
 		nbuf=[0]
-		print "read",buf
-		CheckSumm = buf[43] | (buf[42] << 8);
+		nbuf[0]=buf[0]
+		print "read",nbuf[0]
+		CheckSumm = nbuf[0][43] | (nbuf[0][42] << 8);
 		self._CheckSumm = CheckSumm;
 		CheckSumm -= 7;
-		self._ClockMode = buf[0] & 1;
-		self._TemperatureFormat = (buf[0] >> 1) & 1;
-		self._PressureFormat = (buf[0] >> 2) & 1;
-		self._RainFormat = (buf[0] >> 3) & 1;
-		self._WindspeedFormat = (buf[0] >> 4) & 0xF;
-		self._WeatherThreshold = buf[1] & 0xF;
-		self._StormThreshold = (buf[1] >> 4) & 0xF;
-		self._LCDContrast = buf[2] & 0xF;
-		self._LowBatFlags = (buf[2] >> 4) & 0xF;
-		nbuf[0]=buf
+		self._ClockMode = nbuf[0][0] & 1;
+		self._TemperatureFormat = (nbuf[0][0] >> 1) & 1;
+		self._PressureFormat = (nbuf[0][0] >> 2) & 1;
+		self._RainFormat = (nbuf[0][0] >> 3) & 1;
+		self._WindspeedFormat = (nbuf[0][0] >> 4) & 0xF;
+		self._WeatherThreshold = nbuf[0][1] & 0xF;
+		self._StormThreshold = (nbuf[0][1] >> 4) & 0xF;
+		self._LCDContrast = nbuf[0][2] & 0xF;
+		self._LowBatFlags = (nbuf[0][2] >> 4) & 0xF;
 		USBHardware.ReverseByteOrder(nbuf,3, 4)
-		buf=nbuf[0]
-		print "read",buf
+		#buf=nbuf[0]
 		#CWeatherStationConfig::readAlertFlags(thisa, buf + 3);
-		USBHardware.ReverseByteOrder(buf, 7, 5);
+		USBHardware.ReverseByteOrder(nbuf, 7, 5);
 		#v2 = USBHardware.ToTemperature(buf + 7, 1);
 		#CWeatherStationHighLowAlarm::SetLowAlarm(&self._AlarmTempIndoor, v2);
 		#v3 = USBHardware.ToTemperature(buf + 9, 0);
@@ -628,7 +628,7 @@ class CWeatherStationConfig(object):
 		#  (CWeatherStationAlarm *)&self._AlarmTempIndoor,
 		#  LODWORD(v3));
 		#j___RTC_CheckEsp(v4);
-		USBHardware.ReverseByteOrder(buf, 12, 5);
+		USBHardware.ReverseByteOrder(nbuf, 12, 5);
 		#v5 = USBHardware.ToTemperature(buf + 12, 1);
 		#CWeatherStationHighLowAlarm::SetLowAlarm(&self._AlarmTempOutdoor, v5);
 		#v6 = USBHardware.ToTemperature(buf + 14, 0);
@@ -667,7 +667,7 @@ class CWeatherStationConfig(object):
 		#  CTracer::WriteTrace(v18, 30, "low pressure alarm difference: %f");
 		#}
 		#CWeatherStationHighLowAlarm::SetLowAlarm(&self._AlarmPressure, a);
-		USBHardware.ReverseByteOrder(buf, 34, 5);
+		USBHardware.ReverseByteOrder(nbuf, 34, 5);
 		#USBHardware.ReadPressureShared(buf + 34, &a, &b);
 		#v19 = Conversions::ToInhg(a);
 		#v25 = b - v19;
@@ -680,16 +680,16 @@ class CWeatherStationConfig(object):
 		#self._AlarmPressure.baseclass_0.baseclass_0.vfptr[2].__vecDelDtor(
 		#  (CWeatherStationAlarm *)&self._AlarmPressure,
 		#  LODWORD(a));
-		t = buf[39];
+		t = nbuf[0][39];
 		t <<= 8;
-		t |= buf[40];
+		t |= nbuf[0][40];
 		t <<= 8;
-		t |= buf[41];
+		t |= nbuf[0][41];
 		#std::bitset<23>::bitset<23>((std::bitset<23> *)&v26, t);
 		#self._ResetMinMaxFlags._Array[0] = v22;
 		#for ( i = 0; i < 0x27; ++i )
 		for i in xrange(0, 38):
-			CheckSumm -= buf[i];
+			CheckSumm -= nbuf[0][i];
 		if ( CheckSumm ):
 			self._CheckSumm = -1;
 		return 1;
@@ -758,7 +758,7 @@ class CWeatherStationConfig(object):
 class CCommunicationService(object):
 
 	RepeatCount = True
-	RepeatSize = None
+	RepeatSize = 0
 	RepeatInterval = None
 	RepeatTime = datetime.now() #ptime
 
@@ -1545,12 +1545,12 @@ class CCommunicationService(object):
 			#print "repeatCount",self.RepeatCount
 			if self.RepeatCount:
 				#print "RS:RepeatCount = ",self.RepeatCount
-				#if 2 == 1:
-				if datetime.now() > self.RepeatTime:
+				if 2 == 1:
+				#if datetime.now() > self.RepeatTime and False: #at the moment should be always false
 					if self.Regenerate:
 						newLength[0] = self.buildTimeFrame(newBuffer,1);
 					else:
-						print "implementami - copia data su buffer"
+						self.logger.debug("implementami - copia data su buffer")
 					#	newBuffer[0] = self.RepeatData#, self.RepeatSize
 					newLength[0] = self.RepeatSize;
 			#else:
