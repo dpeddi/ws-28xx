@@ -84,6 +84,7 @@ class CCurrentWeatherData(object):
 		#print "provatemp",newbuf[0][pos + 3]
 		self._IndoorTemp = USBHardware.ToTemperature(newbuf, pos + 3, 1)
 		print "self._IndoorTemp", self._IndoorTemp
+		self.logger.debug("self._IndoorTemp=%d" % self._IndoorTemp)
 		#  v3 = USBHardware::ToTemperature(buf[0], 5, 0);
 		#  thisa->_IndoorTempMinMax._Min._Value = v3;
 		#  v80 = thisa->_IndoorTempMinMax._Min._Value == CWeatherTraits::TemperatureNP();
@@ -96,35 +97,28 @@ class CCurrentWeatherData(object):
 		#  thisa->_IndoorTempMinMax._Max._IsError = v80;
 		#  v80 = thisa->_IndoorTempMinMax._Max._Value == CWeatherTraits::TemperatureOFL();
 		#  thisa->_IndoorTempMinMax._Max._IsOverflow = v80;
-		#  if ( CMinMaxMeasurement::IsMinValueError(&thisa->_IndoorTempMinMax)
-		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_IndoorTempMinMax) )
-		#  {
+		#if ( CMinMaxMeasurement::IsMinValueError(&thisa->_IndoorTempMinMax)
+		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_IndoorTempMinMax) ):
 		#    ATL::COleDateTime::SetStatus(&thisa->_IndoorTempMinMax._Min._Time, partial);
-		#  }
-		#  else
-		#  {
+		#else:
 		#    v5 = USBHardware::ToDateTime(&result, buf + 10, 0);
 		#    v6 = (char *)&thisa->_IndoorTempMinMax._Min._Time;
 		#    LODWORD(thisa->_IndoorTempMinMax._Min._Time.m_dt) = LODWORD(v5->m_dt);
 		#    *((_DWORD *)v6 + 1) = HIDWORD(v5->m_dt);
 		#    *((_DWORD *)v6 + 2) = v5->m_status;
-		#  }
-		#  if ( CMinMaxMeasurement::IsMaxValueError(&thisa->_IndoorTempMinMax)
-		#    || CMinMaxMeasurement::IsMaxValueOverflow(&thisa->_IndoorTempMinMax) )
-		#  {
+		#if ( CMinMaxMeasurement::IsMaxValueError(&thisa->_IndoorTempMinMax)
+		#    || CMinMaxMeasurement::IsMaxValueOverflow(&thisa->_IndoorTempMinMax) ):
 		#    ATL::COleDateTime::SetStatus(&thisa->_IndoorTempMinMax._Max._Time, partial);
-		#  }
-		#  else
-		#  {
+		#else:
 		#    v7 = USBHardware::ToDateTime((ATL::COleDateTime *)&v82, buf + 15, 0);
 		#    v8 = (char *)&thisa->_IndoorTempMinMax._Max._Time;
 		#    LODWORD(thisa->_IndoorTempMinMax._Max._Time.m_dt) = LODWORD(v7->m_dt);
 		#    *((_DWORD *)v8 + 1) = HIDWORD(v7->m_dt);
 		#    *((_DWORD *)v8 + 2) = v7->m_status;
-		#  }
 		USBHardware.ReverseByteOrder(newbuf, pos + 21, 0x12);
 		self._OutdoorTemp = USBHardware.ToTemperature(newbuf, pos + 21, 1)
 		print "self._OutdoorTemp", self._OutdoorTemp
+		self.logger.debug("self._OutdoorTemp=%d" % self._OutdoorTemp)
 		#  v10 = USBHardware::ToTemperature(buf + 23, 0);
 		#  thisa->_OutdoorTempMinMax._Min._Value = v10;
 		#  v80 = thisa->_OutdoorTempMinMax._Min._Value == CWeatherTraits::TemperatureNP();
@@ -245,9 +239,13 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v29 + 1) = HIDWORD(v28->m_dt);
 		#    *((_DWORD *)v29 + 2) = v28->m_status;
 		#  }
-		#  USBHardware.ReverseByteOrder(buf[0], 75, 0xD);
-		#  v30 = USBHardware::ToHumidity(buf + 75, 1);
-		#  thisa->_IndoorHumidity = v30;
+
+		USBHardware.ReverseByteOrder(newbuf, pos + 75, 0xD);
+		v30 = USBHardware.ToHumidity(buf, pos + 75, 1);
+		self._IndoorHumidity = v30;
+		print "self._IndoorHumidity", self._IndoorHumidity
+		self.logger.debug("self._IndoorHumidity=%d" % self._IndoorHumidity)
+
 		#  v31 = USBHardware::ToHumidity(buf + 76, 1);
 		#  thisa->_IndoorHumidityMinMax._Min._Value = v31;
 		#  v80 = thisa->_IndoorHumidityMinMax._Min._Value == CWeatherTraits::HumidityNP();
@@ -286,9 +284,13 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v36 + 1) = HIDWORD(v35->m_dt);
 		#    *((_DWORD *)v36 + 2) = v35->m_status;
 		#  }
-		#  USBHardware::ReverseByteOrder(buf + 88, 0xDu);
-		#  v37 = USBHardware::ToHumidity(buf + 88, 1);
-		#  thisa->_OutdoorHumidity = v37;
+
+		USBHardware.ReverseByteOrder(newbuf, pos + 88, 0xD);
+		v37 = USBHardware.ToHumidity(buf,pos + 88, 1);
+		self._OutdoorHumidity = v37;
+		print "self._OutdoorHumidity", self._OutdoorHumidity
+		self.logger.debug("self._OutdoorHumidity=%d" % self._OutdoorHumidity)
+
 		#  v38 = USBHardware::ToHumidity(buf + 89, 1);
 		#  thisa->_OutdoorHumidityMinMax._Min._Value = v38;
 		#  v80 = thisa->_OutdoorHumidityMinMax._Min._Value == CWeatherTraits::HumidityNP();
