@@ -5,7 +5,8 @@ import traceback
 
 import time
 import threading
-#import shelve
+#import shelve 
+#import mmap #http://docs.python.org/library/mmap.html
 import USBHardware
 import sHID
 import CCurrentWeatherData
@@ -170,67 +171,74 @@ class ERequestState:
 
 class CDataStore(object):
 
-	class TTransceiverSettings:
-		VendorId	= 0x6666
-		ProductId	= 0x5555
-		VersionNo	= 1
-		Frequency	= 905000000
-		manufacturer	= "LA CROSSE TECHNOLOGY"
-		product		= "Weather Direct Light Wireless Device"
+	class TTransceiverSettings(object): 
+		# void __thiscall CDataStore::TTransceiverSettings::TTransceiverSettings(CDataStore::TTransceiverSettings *this);
+		def __init__(self):
+			self.VendorId	= 0x6666
+			self.ProductId	= 0x5555
+			self.VersionNo	= 1
+			self.Frequency	= 905000000
+			self.manufacturer	= "LA CROSSE TECHNOLOGY"
+			self.product		= "Weather Direct Light Wireless Device"
 
-	class TRequest:
-		Type = 6
-		State = 6
-		TTL = 90000
-		Lock = 0
-		CondFinish = threading.Condition()
+	class TRequest(object):
+		# void __thiscall CDataStore::TRequest::TRequest(CDataStore::TRequest *this);
+		def __init__(self):
+			self.Type = 6
+			self.State = 6
+			self.TTL = 90000
+			self.Lock = 0
+			self.CondFinish = threading.Condition()
 
+	class TLastStat(object):
+		# void __thiscall CDataStore::TLastStat::TLastStat(CDataStore::TLastStat *this);
+		def __init__(self):
+			self.LastBatteryStatus = None
+			self.LastHistoryIndex = 0
+			self.LastLinkQuality = 0
+			self.OutstandingHistorySets = 0
+			self.WeatherClubTransmissionErrors = 0
+			self.LastCurrentWeatherTime = None
+			self.LastHistoryDataTime = None
+			self.LastConfigTime = None
+			self.LastWeatherClubTransmission = None
 
-	class TLastStat:
-		LastBatteryStatus = None
-		LastHistoryIndex = 0
-		LastLinkQuality = 0
-		OutstandingHistorySets = 0
-		WeatherClubTransmissionErrors = 0
-		LastCurrentWeatherTime = None
-		LastHistoryDataTime = None
-		LastConfigTime = None
-		LastWeatherClubTransmission = None
+	class TSettings(object):
+		#void __thiscall CDataStore::TSettings::TSettings(CDataStore::TSettings *this);
+		def __init__(self):
+			self.CommModeInterval = 4
+			self.DeviceId = -1
+			self.DeviceRegistered = False
+			self.PreambleDuration = 5000
+			self.RegisterWaitTime = 20000
+			self.TransceiverIdChanged = None
+			self.TransceiverID = -1
 
-	class TSettings:
-		CommModeInterval = 4
-		DeviceId = -1
-		DeviceRegistered = False
-		PreambleDuration = 5000
-		RegisterWaitTime = 20000
-		TransceiverIdChanged = None
-		TransceiverID = -1
-
-	TransceiverSerNo = None
-	TransceiveID = None
-
-	isService = 0
-	Guards = 0;
-	HistoryData = 0;
-	Flags = 0;
-	Settings = 0;
-	TransceiverSettings = 0;
-	WeatherClubSettings = 0;
-	LastSeen = 0;
-	CurrentWeather = 0;
-	DeviceConfig = 0;
-	FrontEndConfig = 0;
-	LastStat = 0;
-	Request = 0;
-
-	LastHistTimeStamp = 0;
-	BufferCheck = 0;
-
+	# void __thiscall CDataStore::CDataStore(CDataStore *this, bool _isService);
 	def __init__(self,_isService):
 		self.logger = logging.getLogger('ws28xx.CDataStore')
 		self.logger.debug("isservice=%x" %_isService)
+		self.isService = _isService
+		#self.MemSegment = shelve???? o mmap??
+		#self.DataStoreAllocator = shelve???? mmap???
+		self.Guards = 0;
+		self.HistoryData = 0;
+		self.Flags = 0;
+		self.Settings = 0;
+		self.TransceiverSettings = 0;
+		self.WeatherClubSettings = 0;
+		self.LastSeen = 0;
+		self.CurrentWeather = 0;
+		self.DeviceConfig = 0;
+		self.FrontEndConfig = 0;
+		self.LastStat = 0;
+		self.Request = 0;
+		self.LastHistTimeStamp = 0;
+		self.BufferCheck = 0;
+
 		self.Request = CDataStore.TRequest()
-		#self.Request.CondFinish = threading.Condition()
+
+		self.Request.CondFinish = threading.Condition()
 
 		self.LastStat = CDataStore.TLastStat()
 
@@ -238,6 +246,9 @@ class CDataStore(object):
 		self.TransceiverSettings = CDataStore.TTransceiverSettings()
 
 		self.DeviceConfig = CWeatherStationConfig()
+
+		self.TransceiverSerNo = None
+		self.TransceiveID = None
 
 		#ShelveDataStore=shelve.open("WV5DataStore",writeback=True)
 
@@ -317,7 +328,6 @@ class CDataStore(object):
 
 	def RequestNotify(self):
 		self.logger.debug("implement me")
-		self.Request.CondFinish = 1
 		#ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(
 		#    &FuncName,
 		#    "void __thiscall CDataStore::RequestNotify(void) const");
@@ -333,7 +343,7 @@ class CDataStore(object):
 		#ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::_CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(&FuncName);
 		#boost::interprocess::interprocess_condition::notify_all(&thisa->Request->CondFinish);
 		#v6 = -1;
-		self.Request.CondFinish.notifyAll()
+		#self.Request.CondFinish.notifyAll()
 		#CScopedLock::_CScopedLock(&lock);
 
 	def setLastCurrentWeatherTime(self,time):
@@ -583,20 +593,19 @@ class CDataStore(object):
 				print "internal timeout, request aborted"
 
 class CWeatherStationConfig(object):
-	_CheckSumm = 0
-	_ClockMode = 0
-	_TemperatureFormat = 0
-	_PressureFormat = 0
-	_RainFormat = 0
-	_WindspeedFormat = 0
-	_WeatherThreshold = 0
-	_StormThreshold = 0
-	_LCDContrast = 0
-	_LowBatFlags = 0
-	_ResetMinMaxFlags = 0
-
 	def __init__(self):
 		self.logger = logging.getLogger('ws28xx.CWeatherStationConfig')
+		self._CheckSumm = 0
+		self._ClockMode = 0
+		self._TemperatureFormat = 0
+		self._PressureFormat = 0
+		self._RainFormat = 0
+		self._WindspeedFormat = 0
+		self._WeatherThreshold = 0
+		self._StormThreshold = 0
+		self._LCDContrast = 0
+		self._LowBatFlags = 0
+		self._ResetMinMaxFlags = 0
 
 	def readAlertFlags(self,buf):
 		print "CWeatherStationConfig::readAlertFlags"
@@ -795,22 +804,7 @@ class CWeatherStationConfig(object):
 
 class CCommunicationService(object):
 
-	RepeatCount = 0
-	RepeatSize = 0
-	RepeatInterval = None
-	RepeatTime = datetime.now() #ptime
-
-	Regenerate = 0
-	GetConfig = 0
-
-	TimeSent = 0
-	TimeUpdate = 0
-	TimeUpdateComplete = 0
-
-	DataStore = None
-
 	AX5051RegisterNames_map = dict()
-
 
 	class AX5051RegisterNames:
 		REVISION         = 0x0
@@ -882,6 +876,21 @@ class CCommunicationService(object):
 	def __init__(self):
 		self.logger = logging.getLogger('ws28xx.CCommunicationService')
 		self.logger.debug("")
+
+		self.RepeatCount = 0
+		self.RepeatSize = 0
+		self.RepeatInterval = None
+		self.RepeatTime = datetime.now() #ptime
+	
+		self.Regenerate = 0
+		self.GetConfig = 0
+
+		self.TimeSent = 0
+		self.TimeUpdate = 0
+		self.TimeUpdateComplete = 0
+
+		self.DataStore = None
+
 		self.DataStore = CDataStore(1)
 		self.Instance = self.CCommunicationService()
 
@@ -1009,7 +1018,6 @@ class CCommunicationService(object):
 		CDataStore.setLastLinkQuality(self.DataStore, Quality);
 		ReceivedCS = (Buffer[0][4] << 8) + Buffer[0][5];
 		rt = CDataStore.getRequestType(self.DataStore)
-		#v20 = rt;
 		#if ( rt == 3 ) #rtSetConfig
 		#{
 		#	v11 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
@@ -1667,7 +1675,7 @@ class CCommunicationService(object):
 	def TransceiverInit(self):
 		self.logger.debug("")
 
-		t=CDataStore.TTransceiverSettings
+		t=self.DataStore.TransceiverSettings
 		self.caluculateFrequency(t.Frequency);
 
 		buffer = [None]
@@ -1707,7 +1715,7 @@ class CCommunicationService(object):
 
 		CDataStore.setFlag_FLAG_TRANSCEIVER_SETTING_CHANGE(self.DataStore,1)
 
-		TransceiverSettings=CDataStore.TTransceiverSettings
+		TransceiverSettings=self.DataStore.TransceiverSettings
 		device = sHID.Find(TransceiverSettings.VendorId,TransceiverSettings.ProductId,TransceiverSettings.VersionNo)
 		if device:
 			self.TransceiverInit()
@@ -1876,12 +1884,13 @@ if __name__ == "__main__":
 	CDataStore.setDeviceRegistered(myCCommunicationService.DataStore, True); #temp hack
 	CDataStore.setDeviceId(myCCommunicationService.DataStore, 0x32); #temp hack
 
+	Weather = [0]
+	Weather[0]=[0]
+
 	TimeOut = CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
-	CDataStore.GetCurrentWeather(myCCommunicationService.DataStore,TimeOut)
+	CDataStore.GetCurrentWeather(myCCommunicationService.DataStore,Weather,TimeOut)
 	time.sleep(1)
 
-	Weather = [0]
-	Wheather[0]=[0]
 	while True:
 		if CDataStore.getRequestState(myCCommunicationService.DataStore) == ERequestState.rsFinished \
 		   or CDataStore.getRequestState(myCCommunicationService.DataStore) == ERequestState.rsINVALID:
