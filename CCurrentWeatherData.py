@@ -4,46 +4,61 @@ import time
 import logging
 import USBHardware
 import CWeatherTraits
+import CMinMaxMeasurement
 
 CWeatherTraits = CWeatherTraits.CWeatherTraits()
 USBHardware = USBHardware.USBHardware()
 
 class CCurrentWeatherData(object):
-	_PressureRelative_hPa = 0
-	_PressureRelative_hPaMinMax = 0
-	_PressureRelative_inHg = 0
-	_WindSpeed = 0
-	_WindDirection = 16
-	_WindDirection1 = 16
-	_WindDirection2 = 16
-	_WindDirection3 = 16
-	_WindDirection4 = 16
-	_WindDirection5 = 16
-	_Gust = 0
-	_GustDirection = 16
-	_GustDirection1 = 16
-	_GustDirection2 = 16
-	_GustDirection3 = 16
-	_GustDirection4 = 16
-	_GustDirection5 = 16
-	_Rain1H =0
-	_Rain24H =0
-	_RainLastWeek =0
-	_RainLastMonth =0
-	_RainTotal =0
-	_IndoorTemp =0
-	_OutdoorTemp =0
-	_IndoorHumidity =0
-	_OutdoorHumidity =0
-	_Dewpoint =0
-	_Windchill =0
-	_WeatherState = 3
-	_WeatherTendency = 3
-	_AlarmRingingFlags = 0
-	_AlarmMarkedFlags = 0
 
 	def __init__(self):
 		self.logger = logging.getLogger('ws28xx.CCurrentWeatherData')
+
+		self._PressureRelative_hPa = CWeatherTraits.PressureNP()
+		self._PressureRelative_hPaMinMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._PressureRelative_inHg = CWeatherTraits.PressureNP()
+		self._PressureRelative_inHgMinMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._WindSpeed = CWeatherTraits.WindNP()
+		self._WindSpeedMinMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._WindDirection = 16
+		self._WindDirection1 = 16
+		self._WindDirection2 = 16
+		self._WindDirection3 = 16
+		self._WindDirection4 = 16
+		self._WindDirection5 = 16
+		self._Gust = CWeatherTraits.WindNP()
+		self._GustDirection = 16
+		self._GustDirection1 = 16
+		self._GustDirection2 = 16
+		self._GustDirection3 = 16
+		self._GustDirection4 = 16
+		self._GustDirection5 = 16
+		self._Rain1H = CWeatherTraits.RainNP()
+		self._Rain1HMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._Rain24H = CWeatherTraits.RainNP()
+		self._Rain24HMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._RainLastWeek = CWeatherTraits.RainNP()
+		self._RainLastWeekMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._RainLastMonth = CWeatherTraits.RainNP()
+		self._RainLastMonthMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._RainTotal = CWeatherTraits.RainNP()
+		self._LastRainReset = time.time()
+		self._IndoorTemp = CWeatherTraits.TemperatureNP()
+		self._IndoorTempMinMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._OutdoorTemp = CWeatherTraits.TemperatureNP()
+		self._OutdoorTempMinMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._IndoorHumidity = CWeatherTraits.HumidityNP()
+		self._IndoorHumidityMinMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._OutdoorHumidity = CWeatherTraits.HumidityNP()
+		self._OutdoorHumidityMinMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._Dewpoint = CWeatherTraits.TemperatureNP()
+		self._DewpointMinMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._Windchill = CWeatherTraits.TemperatureNP()
+		self._WindchillMinMax = CMinMaxMeasurement.CMinMaxMeasurement()
+		self._WeatherState = 3
+		self._WeatherTendency = 3
+		self._AlarmRingingFlags = 0
+		self._AlarmMarkedFlags = 0
 
 	def CCurrentWeatherData_buf(self,buf,pos):
 		self.logger.debug("")
