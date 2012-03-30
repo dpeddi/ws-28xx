@@ -470,8 +470,7 @@ class CDataStore(object):
 		else:
 			print "SetTime - warning: flag False or getDeviceRegistered false"
 
-#CDataStore::EErrorType __thiscall CDataStore::FirstTimeConfig(CDataStore *this, unsigned int *ID, const unsigned int *TimeOut);
-	def FirstTimeConfig(self): #getRegisteredWaitTime (timeout= GetRegisterWaitTime GetPreambleDuration)
+	def FirstTimeConfig(self,ID,TimeOut):
 		print "CDataStore::FirstTimeConfig"
 		#if ( CSingleInstance::IsRunning(this) && CDataStore::getFlag<0>(thisa))
 		if self.getFlag_FLAG_TRANSCEIVER_PRESENT():
@@ -486,23 +485,24 @@ class CDataStore(object):
 
 			self.BufferCheck = 0
 
-			#pratiamente occupa condfinisch per il tempo del timeout intanto che il thread gira...
-			#quando passa il timeout reimposta in uno stato farlocco il device
-			#if 1==1:
+			time.sleep(timedelta(milliseconds=25000).seconds)
 			#if not self.Request.CondFinish: #//fixme
-
-			#	if self.Request.State == 2:
-			#		ID = CDataStore.getDeviceId(self.DataStore);
-			#		self.Request.Type = 6;
-			#		self.Request.State = 8;
+			if True:
+				print "e' passato il timeout lo state e':",self.Request.State
+				print "e' passato il timeout lo state e':",ERequestState.rsFinished
+				if self.Request.State == ERequestState.rsFinished: #2
+					ID[0] = self.getDeviceId();
+					self.Request.Type = ERequestType.rtINVALID #6;
+					self.Request.State = ERequestState.rsINVALID #8;
 			#		v23 = 0;
 			#		v30 = -1;
-			#		print "ID %x" % ID #e allora?
-			#	else:
-			#		self.Request.Type = 6;
-			#		self.Request.State = 8;
+					print "FirstTimeConfig found an ID"
+				else:
+					self.Request.Type = ERequestType.rtINVALID #6;
+					self.Request.State = ERequestState.rsINVALID #8;
 			#		v24 = 1;
 			#		v30 = -1;
+					print "FirstTimeConfig failed"
 			#else:
 			#	self.Request.Type = 6;
 			#	self.Request.State = 8;
@@ -900,7 +900,9 @@ class CCommunicationService(object):
 	def buildACKFrame(self,Buffer, Action, CheckSum, HistoryIndex, ComInt):
 		self.logger.debug("Action=%x, CheckSum=%x, HistoryIndex=%x, ComInt=%x" % (Action, CheckSum, HistoryIndex, ComInt))
 		newBuffer = [0]
-		newBuffer[0] = Buffer[0]
+		newBuffer[0] = [0]*9
+		for i in xrange(0,2):
+			newBuffer[0][i] = Buffer[0][i]
 		#CDataStore::TLastStat::TLastStat(&Stat);
 #		if ( !Action && ComInt == 0xFFFFFFFF ):
 #			v28 = 0;
@@ -1470,7 +1472,7 @@ class CCommunicationService(object):
 					TransceiverID += buffer[0][1];
 					print "GenerateResponse: TransceiverID", TransceiverID
 					print "GenerateResponse: Length[0]",Length[0]
-					print "Buffer[0]", Buffer[0]
+					#print "Buffer[0]", Buffer[0]
 					if (    Length[0]            !=    6
 					    or  Buffer[0][0]         != 0xf0
 					    or  Buffer[0][1]         != 0xf0
@@ -1513,12 +1515,12 @@ class CCommunicationService(object):
 			#print "repeatCount",self.RepeatCount
 			if self.RepeatCount:
 				#print "RS:RepeatCount = ",self.RepeatCount
-				if 1 == 1:
-				#if datetime.now() > self.RepeatTime and False: #at the moment should be always false
+				#if 1 == 1:
+				if (datetime.now() - self.RepeatTime).seconds >1:
 					if self.Regenerate:
 						newLength[0] = self.buildTimeFrame(newBuffer,1);
-					else:
-						self.logger.debug("implementami - copia data su buffer")
+					#else:
+					#	self.logger.debug("implementami - copia data su buffer")
 					#	newBuffer[0] = self.RepeatData, self.RepeatSize
 					#newLength[0] = self.RepeatSize;
 			#else:
@@ -1594,6 +1596,9 @@ class CCommunicationService(object):
 					if RequestState == ERequestState.rsWaitDevice: # == 4
 						self.logger.debug("self.getRequestState == 4")
 						if DeviceWaitEndTime <= datetime.now():
+							print "now=",datetime.now()
+							print "DeviceWaitEndTime=",DeviceWaitEndTime
+							print "DeviceWaitEndTime < now"
 							CDataStore.setRequestState(self.DataStore,ERequestState.rsError);
 							CDataStore.RequestNotify(self.DataStore);
 				else:
@@ -1602,7 +1607,7 @@ class CCommunicationService(object):
 					sHID.SetState(0x1e)
 					CDataStore.setRequestState(self.DataStore,ERequestState.rsPreamble)
 					PreambleDuration = CDataStore.getPreambleDuration(self.DataStore);
-					PreambleEndTime = datetime.now() + timedelta(microseconds=PreambleDuration)
+					PreambleEndTime = datetime.now() + timedelta(milliseconds=PreambleDuration)
 					while True:
 						if not ( PreambleEndTime >= datetime.now() ):
 							break
@@ -1615,7 +1620,8 @@ class CCommunicationService(object):
 					if RequestType == CDataStore.getRequestType(self.DataStore):
 						CDataStore.setRequestState(self.DataStore,ERequestState.rsWaitDevice)
 						RegisterWaitTime = CDataStore.getRegisterWaitTime(self.DataStore)
-						DeviceWaitEndTime = datetime.now() + timedelta(microseconds=RegisterWaitTime)
+						DeviceWaitEndTime = datetime.now() + timedelta(milliseconds=RegisterWaitTime)
+						print "DeviceWaitEndTime=",DeviceWaitEndTime
 					ret = sHID.SetRX(); #make state from 14 to 15
 
 			DataLength = [0]
@@ -1667,7 +1673,7 @@ class CCommunicationService(object):
 						#goto LABEL_49
 					ReceiverState = 0xc8;
 					timeout = 1000;
-					print "entro nell'while stronzo"
+					#print "entro nell'while stronzo"
 					while True:
 						ret = sHID.GetState(StateBuffer);
 						CDataStore.RequestTick(self.DataStore);
@@ -1690,7 +1696,7 @@ class CCommunicationService(object):
 						#if ( !timeout )
 							#goto label_42
 #LABEL_49
-					print "sono fuori dall'while stronzo"
+					#print "sono fuori dall'while stronzo"
 				if ReceiverState != 0x15:
 					ret = sHID.SetRX(); #make state from 14 to 15
 					time.sleep(0.5)
@@ -1734,10 +1740,13 @@ if __name__ == "__main__":
 
 	myCCommunicationService = CCommunicationService()
 	CDataStore.setCommModeInterval(myCCommunicationService.DataStore,3) #move me to setfrontendalive
-	time.sleep(7)
+	time.sleep(5)
 
-	#CDataStore.FirstTimeConfig(myCCommunicationService.DataStore)
-	#time.sleep(20)
+	TimeOut = CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
+	print "FirstTimeConfig Timeout=%d" % TimeOut
+	ID=[0]
+	ID[0]=0
+	CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
 
 	CDataStore.setDeviceRegistered(myCCommunicationService.DataStore, True); #temp hack
 	CDataStore.setDeviceId(myCCommunicationService.DataStore, 0x32); #temp hack
