@@ -465,9 +465,9 @@ class CDataStore(object):
 			self.BufferCheck = 0
 
 			try:
-			    self.Request.CondFinish.acquire()
+				self.Request.CondFinish.acquire()
 			except:
-			    pass
+				pass
 			if self.Request.CondFinish.wait(timedelta(milliseconds=TimeOut).seconds):
 				print "e' passato il timeout lo state e':",self.Request.State
 				print "e' passato il timeout lo state e':",ERequestState.rsFinished
@@ -489,6 +489,7 @@ class CDataStore(object):
 			#	self.Request.State = 8;
 			#	v25 = 1;
 			#	v30 = -1;
+			self.Request.CondFinish.release()
 
 
 	def GetCurrentWeather(self,Weather,TimeOut):
@@ -514,6 +515,7 @@ class CDataStore(object):
 				self.Request.State = ERequestState.rsINVALID #8;
 		#		v24 = 1;
 		#		v30 = -1;
+			self.Request.CondFinish.release()
 
 	def GetHistory(self,TimeOut):
 		print "CDataStore::GetHistory"
@@ -538,6 +540,7 @@ class CDataStore(object):
 				self.Request.State = ERequestState.rsINVALID #8;
 		#		v24 = 1;
 		#		v30 = -1;
+			self.Request.CondFinish.release()
 
 	def GetConfig(self):
 		print "CDataStore::GetConfig"
