@@ -93,11 +93,7 @@ class CCurrentWeatherData(object):
 		self._WeatherTendency = (newbuf[0][pos + 2] >> 4) & 0xF;
 		print "self._WeatherTendency",self._WeatherTendency
 
-		#print "newbuf[0]",newbuf[0]
 		USBHardware.ReverseByteOrder(newbuf, pos + 3, 0x12);
-		#print "newbuf[0]",newbuf[0]
-		#print "provatemp",newbuf[0][pos + 3]
-
 		self._IndoorTemp = USBHardware.ToTemperature(newbuf, pos + 3, 1)
 		print "self._IndoorTemp", self._IndoorTemp
 		self.logger.debug("self._IndoorTemp=%d" % self._IndoorTemp)
@@ -270,23 +266,32 @@ class CCurrentWeatherData(object):
 		#  }
 
 		USBHardware.ReverseByteOrder(newbuf, pos + 75, 0xD);
-		v30 = USBHardware.ToHumidity(buf, pos + 75, 1);
-		self._IndoorHumidity = v30;
+		self._IndoorHumidity = USBHardware.ToHumidity(buf, pos + 75, 1)
 		print "self._IndoorHumidity", self._IndoorHumidity
 		self.logger.debug("self._IndoorHumidity=%d" % self._IndoorHumidity)
 
-		#  v31 = USBHardware::ToHumidity(buf + 76, 1);
-		#  thisa->_IndoorHumidityMinMax._Min._Value = v31;
-		#  v80 = thisa->_IndoorHumidityMinMax._Min._Value == CWeatherTraits::HumidityNP();
-		#  thisa->_IndoorHumidityMinMax._Min._IsError = v80;
-		#  v80 = thisa->_IndoorHumidityMinMax._Min._Value == CWeatherTraits::HumidityOFL();
-		#  thisa->_IndoorHumidityMinMax._Min._IsOverflow = v80;
-		#  v32 = USBHardware::ToHumidity(buf + 77, 1);
-		#  thisa->_IndoorHumidityMinMax._Max._Value = v32;
-		#  v80 = thisa->_IndoorHumidityMinMax._Max._Value == CWeatherTraits::HumidityNP();
-		#  thisa->_IndoorHumidityMinMax._Max._IsError = v80;
-		#  v80 = thisa->_IndoorHumidityMinMax._Max._Value == CWeatherTraits::HumidityOFL();
-		#  thisa->_IndoorHumidityMinMax._Max._IsOverflow = v80;
+		self._IndoorHumidityMinMax._Min._Value = USBHardware.ToHumidity(newbuf, pos + 76, 1)
+		print "self._IndoorHumidityMinMax._Min._Value", self._IndoorHumidityMinMax._Min._Value
+		self.logger.debug("self._IndoorHumidityMinMax._Min._Value=%d" % self._IndoorHumidityMinMax._Min._Value)
+		if self._IndoorHumidityMinMax._Min._Value == CWeatherTraits.HumidityNP():
+			self._IndoorHumidityMinMax._Min._IsError = 1
+		else:
+			self._IndoorHumidityMinMax._Min._IsError = 0
+		if self._IndoorHumidityMinMax._Min._Value == CWeatherTraits.HumidityOFL():
+			self._IndoorHumidityMinMax._Min._IsOverflow = 1
+		else:
+			self._IndoorHumidityMinMax._Min._IsOverflow = 0
+		self._IndoorHumidityMinMax._Max._Value = USBHardware.ToHumidity(newbuf, pos + 77, 1)
+		print "self._IndoorHumidityMinMax._Max._Value", self._IndoorHumidityMinMax._Max._Value
+		self.logger.debug("self._IndoorHumidityMinMax._Max._Value=%d" % self._IndoorHumidityMinMax._Max._Value)
+		if self._IndoorHumidityMinMax._Max._Value == CWeatherTraits.HumidityNP():
+			self._IndoorHumidityMinMax._Max._IsError = 1
+		else:
+			self._IndoorHumidityMinMax._Max._IsError = 0
+		if self._IndoorHumidityMinMax._Max._Value == CWeatherTraits.HumidityOFL():
+			self._IndoorHumidityMinMax._Max._IsOverflow = 1
+		else:
+			self._IndoorHumidityMinMax._Max._IsOverflow = 0
 		#  if ( CMinMaxMeasurement::IsMinValueError(&thisa->_IndoorHumidityMinMax)
 		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_IndoorHumidityMinMax) )
 		#  {
@@ -315,17 +320,30 @@ class CCurrentWeatherData(object):
 		#  }
 
 		USBHardware.ReverseByteOrder(newbuf, pos + 88, 0xD);
-		v37 = USBHardware.ToHumidity(buf,pos + 88, 1);
-		self._OutdoorHumidity = v37;
+		self._OutdoorHumidity = USBHardware.ToHumidity(buf,pos + 88, 1)
 		print "self._OutdoorHumidity", self._OutdoorHumidity
 		self.logger.debug("self._OutdoorHumidity=%d" % self._OutdoorHumidity)
 
-		#  thisa->_OutdoorHumidityMinMax._Min._Value = USBHardware::ToHumidity(buf + 89, 1);
-		#  thisa->_OutdoorHumidityMinMax._Min._IsError = CWeatherTraits::HumidityNP();
-		#  thisa->_OutdoorHumidityMinMax._Min._IsOverflow = CWeatherTraits::HumidityOFL();
-		#  thisa->_OutdoorHumidityMinMax._Max._Value = USBHardware::ToHumidity(buf + 90, 1);
-		#  thisa->_OutdoorHumidityMinMax._Max._IsError = CWeatherTraits::HumidityNP();
-		#  thisa->_OutdoorHumidityMinMax._Max._IsOverflow = CWeatherTraits::HumidityOFL();
+		self._OutdoorHumidityMinMax._Min._Value = USBHardware.ToHumidity(newbuf, pos + 89, 1);
+		if self._OutdoorHumidityMinMax._Min._Value == CWeatherTraits.HumidityNP():
+			self._OutdoorHumidityMinMax._Min._IsError = 1
+		else:
+			self._OutdoorHumidityMinMax._Min._IsError = 0
+		if self._OutdoorHumidityMinMax._Min._Value == CWeatherTraits.HumidityOFL():
+			self._OutdoorHumidityMinMax._Min._IsOverflow = 1
+		else:
+			self._OutdoorHumidityMinMax._Min._IsOverflow = 0
+
+		self._OutdoorHumidityMinMax._Max._Value = USBHardware.ToHumidity(newbuf, pos + 90, 1);
+		if self._OutdoorHumidityMinMax._Max._Value == CWeatherTraits.HumidityNP():
+			self._OutdoorHumidityMinMax._Max._IsError = 1
+		else:
+			self._OutdoorHumidityMinMax._Max._IsError = 0
+		if self._OutdoorHumidityMinMax._Max._Value == CWeatherTraits.HumidityOFL():
+			self._OutdoorHumidityMinMax._Max._IsOverflow = 1
+		else:
+			self._OutdoorHumidityMinMax._Max._IsOverflow = 0
+
 		#  if ( CMinMaxMeasurement::IsMinValueError(&thisa->_OutdoorHumidityMinMax)
 		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_OutdoorHumidityMinMax) )
 		#  {
