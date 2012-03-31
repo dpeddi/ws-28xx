@@ -1396,7 +1396,7 @@ class CCommunicationService(object):
 			#	CDataStore.setOutsatndingHistorySets(self.DataStore, LatestHistoryIndex + 18 - ThisHistoryIndex)
 			pass
 
-		RequestType = CDataStore.getRequestType(self.DataStore)
+		rt = CDataStore.getRequestType(self.DataStore)
 		DeviceCS = CDataStore.GetDeviceConfigCS(self.DataStore)
 		if   rt == 0: #rtGetCurrent
 		      newLength[0] = self.buildACKFrame(Buffer, 5, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);

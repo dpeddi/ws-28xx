@@ -19,9 +19,9 @@ class USBHardware(object):
 			#print "startOnLowNibble #1", startOnLowNibble
 			rawpre = (buffer[0][start] & 0xf) + (buffer[0][start] >> 4) *10
 		else:
-			print "To2Pre:",buffer[0][start + 0] #86  &f 
-			print "To2Pre:",buffer[0][start + 1] #66  >> 4
-			self.logger.debug("startOnLowNibble #2")
+			#print "To2Pre:",buffer[0][start + 0] #86  &f 
+			#print "To2Pre:",buffer[0][start + 1] #66  >> 4
+			#self.logger.debug("startOnLowNibble #2")
 			print "startOnLowNibble #2", startOnLowNibble
 			rawpre = (buffer[0][start] >> 4) + (buffer[0][start + 1] & 0xf) *10
 		return rawpre
@@ -68,13 +68,13 @@ class USBHardware(object):
 					#print "startOnLowNibble #1", startOnLowNibble
 					rawtemp = (buffer[0][start+0] &0xf)*0.001+(buffer[0][start+0] >>4 )*0.01+(buffer[0][start+1] &0xf)*0.1+(buffer[0][start+1] >> 4)+(buffer[0][start+2] &0x0f)*10
 				else:
-					print "ToTemp:",buffer[0][start+0] #>> 4  #0  0
-					print "ToTemp:",buffer[0][start+1] #& 0xf #4  0
-					print "ToTemp:",buffer[0][start+1] #>> 4  #9  3
-					print "ToTemp:",buffer[0][start+2] #& 0xf #5  5
-					self.logger.debug("startOnLowNibble #2")
-					print "startOnLowNibble #2", startOnLowNibble
-					rawtemp = (buffer[0][start+0] &0xf)*100+(buffer[0][start+0] >>4 )*1000+(buffer[0][start+1] &0xf)+(buffer[0][start+1] >> 4)*10+(buffer[0][start+2] &0x0f)*0.1
+					#print "ToTemp:",buffer[0][start+0] #>> 4  #0  0
+					#print "ToTemp:",buffer[0][start+1] #& 0xf #4  0
+					#print "ToTemp:",buffer[0][start+1] #>> 4  #9  3
+					#print "ToTemp:",buffer[0][start+2] #& 0xf #5  5
+					#self.logger.debug("startOnLowNibble #2")
+					#print "startOnLowNibble #2", startOnLowNibble
+					rawtemp = (buffer[0][start+0] >> 4 )*0.01+(buffer[0][start+1] & 0xf )*.1+(buffer[0][start+1] >>4)*1+(buffer[0][start+2] &0xf)*10
 				result = rawtemp - CWeatherTraits.TemperatureOffset()
 		return result;
 
