@@ -59,22 +59,9 @@ class USBHardware(object):
 		#		v2 = CWeatherTraits::TemperatureOFL();
 		#	else:
 				if startOnLowNibble:
-					#print buffer[0][start+0] & 0xf #0  0
-					#print buffer[0][start+0] >> 4  #0  0
-					#print buffer[0][start+1] & 0xf #4  0
-					#print buffer[0][start+1] >> 4  #9  3
-					#print buffer[0][start+2] & 0xf #5  5
-					#self.logger.debug("startOnLowNibble #1")
-					#print "startOnLowNibble #1", startOnLowNibble
 					rawtemp = (buffer[0][start+0] &0xf)*0.001+(buffer[0][start+0] >>4 )*0.01+(buffer[0][start+1] &0xf)*0.1+(buffer[0][start+1] >> 4)+(buffer[0][start+2] &0x0f)*10
 				else:
-					#print "ToTemp:",buffer[0][start+0] #>> 4  #0  0
-					#print "ToTemp:",buffer[0][start+1] #& 0xf #4  0
-					#print "ToTemp:",buffer[0][start+1] #>> 4  #9  3
-					#print "ToTemp:",buffer[0][start+2] #& 0xf #5  5
-					#self.logger.debug("startOnLowNibble #2")
-					#print "startOnLowNibble #2", startOnLowNibble
-					rawtemp = (buffer[0][start+0] >> 4 )*0.01+(buffer[0][start+1] & 0xf )*.1+(buffer[0][start+1] >>4)*1+(buffer[0][start+2] &0xf)*10
+					rawtemp = (buffer[0][start+0] >> 4 )*0.001+(buffer[0][start+1] & 0xf )*0.01+(buffer[0][start+1] >>4)*0.1+(buffer[0][start+2] &0xf)+(buffer[0][start+2] >> 4)*10
 				result = rawtemp - CWeatherTraits.TemperatureOffset()
 		return result;
 

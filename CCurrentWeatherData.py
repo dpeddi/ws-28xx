@@ -105,14 +105,26 @@ class CCurrentWeatherData(object):
 		self._IndoorTempMinMax._Min._Value = USBHardware.ToTemperature(newbuf, pos + 5, 0);
 		print "self._IndoorTempMinMax._Min._Value", self._IndoorTempMinMax._Min._Value
 		self.logger.debug("self._IndoorTempMinMax._Min._Value=%d" % self._IndoorTempMinMax._Min._Value)
-		self._IndoorTempMinMax._Min._IsError = CWeatherTraits.TemperatureNP();
-		self._IndoorTempMinMax._Min._IsOverflow = CWeatherTraits.TemperatureOFL();
+		if self._IndoorTempMinMax._Min._Value == CWeatherTraits.TemperatureNP():
+			self._IndoorTempMinMax._Min._IsError = 1
+		else:
+			self._IndoorTempMinMax._Min._IsError = 1
+		if self._IndoorTempMinMax._Min._IsOverflow == CWeatherTraits.TemperatureOFL():
+			self._IndoorTempMinMax._Min._IsOverflow = 1
+		else:
+			self._IndoorTempMinMax._Min._IsOverflow = 0
 
 		self._IndoorTempMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 8, 1)
 		print "self._IndoorTempMinMax._Max._Value", self._IndoorTempMinMax._Max._Value
 		self.logger.debug("self._IndoorTempMinMax._Max._Value=%d" % self._IndoorTempMinMax._Max._Value)
-		self._IndoorTempMinMax._Max._IsError = CWeatherTraits.TemperatureNP();
-		self._IndoorTempMinMax._Max._IsOverflow = CWeatherTraits.TemperatureOFL();
+		if self._IndoorTempMinMax._Max._IsError == CWeatherTraits.TemperatureNP():
+			self._IndoorTempMinMax._Max._IsError = 1
+		else:
+			self._IndoorTempMinMax._Max._IsError = 0
+		if self._IndoorTempMinMax._Max._IsOverflow == CWeatherTraits.TemperatureOFL():
+			self._IndoorTempMinMax._Max._IsOverflow = 1
+		else:
+			self._IndoorTempMinMax._Max._IsOverflow = 0
 
 		#if ( CMinMaxMeasurement::IsMinValueError(&thisa->_IndoorTempMinMax)
 		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_IndoorTempMinMax) ):
@@ -141,14 +153,26 @@ class CCurrentWeatherData(object):
 		self._OutdoorTempMinMax._Min._Value = USBHardware.ToTemperature(newbuf, pos + 23, 0);
 		print "self._OutdoorTempMinMax._Min._Value", self._OutdoorTempMinMax._Min._Value
 		self.logger.debug("self._OutdoorTempMinMax._Min._Value=%d" % self._OutdoorTempMinMax._Min._Value)
-		self._OutdoorTempMinMax._Min._IsError = CWeatherTraits.TemperatureNP();
-		self._OutdoorTempMinMax._Min._IsOverflow = CWeatherTraits.TemperatureOFL();
+		if self._OutdoorTempMinMax._Min._IsError == CWeatherTraits.TemperatureNP():
+			self._OutdoorTempMinMax._Min._IsError = 1
+		else:
+			self._OutdoorTempMinMax._Min._IsError = 0
+		if self._OutdoorTempMinMax._Min._IsOverflow == CWeatherTraits.TemperatureOFL():
+			self._OutdoorTempMinMax._Min._IsOverflow = 1
+		else:
+			self._OutdoorTempMinMax._Min._IsOverflow = 0
 
 		self._OutdoorTempMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 26, 1)
 		print "self._OutdoorTempMinMax._Max._Value", self._OutdoorTempMinMax._Max._Value
 		self.logger.debug("self._OutdoorTempMinMax._Max._Value=%d" % self._OutdoorTempMinMax._Max._Value)
-		self._OutdoorTempMinMax._Max._IsError = CWeatherTraits.TemperatureNP();
-		self._OutdoorTempMinMax._Max._IsOverflow = CWeatherTraits.TemperatureOFL();
+		if self._OutdoorTempMinMax._Max._IsError == CWeatherTraits.TemperatureNP():
+			self._OutdoorTempMinMax._Max._IsError = 1
+		else:
+			self._OutdoorTempMinMax._Max._IsError == 0
+		if self._OutdoorTempMinMax._Max._IsOverflow == CWeatherTraits.TemperatureOFL():
+			self._OutdoorTempMinMax._Max._IsOverflow = 1
+		else:
+			self._OutdoorTempMinMax._Max._IsOverflow = 0
 
 		#  if ( CMinMaxMeasurement::IsMinValueError(&thisa->_OutdoorTempMinMax)
 		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_OutdoorTempMinMax) )
