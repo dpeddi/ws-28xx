@@ -105,7 +105,7 @@ class CCurrentWeatherData(object):
 			self._IndoorTempMinMax._Min._IsError = 1
 		else:
 			self._IndoorTempMinMax._Min._IsError = 1
-		if self._IndoorTempMinMax._Min._IsOverflow == CWeatherTraits.TemperatureOFL():
+		if self._IndoorTempMinMax._Min._Value == CWeatherTraits.TemperatureOFL():
 			self._IndoorTempMinMax._Min._IsOverflow = 1
 		else:
 			self._IndoorTempMinMax._Min._IsOverflow = 0
@@ -113,11 +113,11 @@ class CCurrentWeatherData(object):
 		self._IndoorTempMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 8, 1)
 		print "self._IndoorTempMinMax._Max._Value", self._IndoorTempMinMax._Max._Value
 		self.logger.debug("self._IndoorTempMinMax._Max._Value=%d" % self._IndoorTempMinMax._Max._Value)
-		if self._IndoorTempMinMax._Max._IsError == CWeatherTraits.TemperatureNP():
+		if self._IndoorTempMinMax._Max._Value == CWeatherTraits.TemperatureNP():
 			self._IndoorTempMinMax._Max._IsError = 1
 		else:
 			self._IndoorTempMinMax._Max._IsError = 0
-		if self._IndoorTempMinMax._Max._IsOverflow == CWeatherTraits.TemperatureOFL():
+		if self._IndoorTempMinMax._Max._Value == CWeatherTraits.TemperatureOFL():
 			self._IndoorTempMinMax._Max._IsOverflow = 1
 		else:
 			self._IndoorTempMinMax._Max._IsOverflow = 0
@@ -149,11 +149,11 @@ class CCurrentWeatherData(object):
 		self._OutdoorTempMinMax._Min._Value = USBHardware.ToTemperature(newbuf, pos + 23, 0);
 		print "self._OutdoorTempMinMax._Min._Value", self._OutdoorTempMinMax._Min._Value
 		self.logger.debug("self._OutdoorTempMinMax._Min._Value=%d" % self._OutdoorTempMinMax._Min._Value)
-		if self._OutdoorTempMinMax._Min._IsError == CWeatherTraits.TemperatureNP():
+		if self._OutdoorTempMinMax._Min._Value == CWeatherTraits.TemperatureNP():
 			self._OutdoorTempMinMax._Min._IsError = 1
 		else:
 			self._OutdoorTempMinMax._Min._IsError = 0
-		if self._OutdoorTempMinMax._Min._IsOverflow == CWeatherTraits.TemperatureOFL():
+		if self._OutdoorTempMinMax._Min._Value == CWeatherTraits.TemperatureOFL():
 			self._OutdoorTempMinMax._Min._IsOverflow = 1
 		else:
 			self._OutdoorTempMinMax._Min._IsOverflow = 0
@@ -161,49 +161,54 @@ class CCurrentWeatherData(object):
 		self._OutdoorTempMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 26, 1)
 		print "self._OutdoorTempMinMax._Max._Value", self._OutdoorTempMinMax._Max._Value
 		self.logger.debug("self._OutdoorTempMinMax._Max._Value=%d" % self._OutdoorTempMinMax._Max._Value)
-		if self._OutdoorTempMinMax._Max._IsError == CWeatherTraits.TemperatureNP():
+		if self._OutdoorTempMinMax._Max._Value == CWeatherTraits.TemperatureNP():
 			self._OutdoorTempMinMax._Max._IsError = 1
 		else:
-			self._OutdoorTempMinMax._Max._IsError == 0
-		if self._OutdoorTempMinMax._Max._IsOverflow == CWeatherTraits.TemperatureOFL():
+			self._OutdoorTempMinMax._Max._IsError = 0
+		if self._OutdoorTempMinMax._Max._Value == CWeatherTraits.TemperatureOFL():
 			self._OutdoorTempMinMax._Max._IsOverflow = 1
 		else:
 			self._OutdoorTempMinMax._Max._IsOverflow = 0
 
 		#  if ( CMinMaxMeasurement::IsMinValueError(&thisa->_OutdoorTempMinMax)
-		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_OutdoorTempMinMax) )
-		#  {
+		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_OutdoorTempMinMax) ):
 		#    ATL::COleDateTime::SetStatus(&thisa->_OutdoorTempMinMax._Min._Time, partial);
-		#  }
-		#  else
-		#  {
+		#  else:
 		#    v12 = USBHardware::ToDateTime((ATL::COleDateTime *)&v83, buf + 28, 0);
 		#    v13 = (char *)&thisa->_OutdoorTempMinMax._Min._Time;
 		#    LODWORD(thisa->_OutdoorTempMinMax._Min._Time.m_dt) = LODWORD(v12->m_dt);
 		#    *((_DWORD *)v13 + 1) = HIDWORD(v12->m_dt);
 		#    *((_DWORD *)v13 + 2) = v12->m_status;
-		#  }
 		#  if ( CMinMaxMeasurement::IsMaxValueError(&thisa->_OutdoorTempMinMax)
-		#    || CMinMaxMeasurement::IsMaxValueOverflow(&thisa->_OutdoorTempMinMax) )
-		#  {
+		#    || CMinMaxMeasurement::IsMaxValueOverflow(&thisa->_OutdoorTempMinMax) ):
 		#    ATL::COleDateTime::SetStatus(&thisa->_OutdoorTempMinMax._Max._Time, partial);
-		#  }
-		#  else
-		#  {
+		#  else:
 		#    v14 = USBHardware::ToDateTime((ATL::COleDateTime *)&v84, buf + 33, 0);
 		#    v15 = (char *)&thisa->_OutdoorTempMinMax._Max._Time;
 		#    LODWORD(thisa->_OutdoorTempMinMax._Max._Time.m_dt) = LODWORD(v14->m_dt);
 		#    *((_DWORD *)v15 + 1) = HIDWORD(v14->m_dt);
 		#    *((_DWORD *)v15 + 2) = v14->m_status;
-		#  }
-		#USBHardware.ReverseByteOrder(buf[0], 39, 0x12);
-		#  thisa->_Windchill = USBHardware::ToTemperature(buf + 39, 1);
-		#  thisa->_WindchillMinMax._Min._Value = USBHardware::ToTemperature(buf + 41, 0);
-		#  thisa->_WindchillMinMax._Min._IsError = CWeatherTraits::TemperatureNP();
-		#  thisa->_WindchillMinMax._Min._IsOverflow = CWeatherTraits::TemperatureOFL();
-		#  thisa->_WindchillMinMax._Max._Value = USBHardware::ToTemperature(buf + 44, 1);
-		#  thisa->_WindchillMinMax._Max._IsError = CWeatherTraits::TemperatureNP();
-		#  thisa->_WindchillMinMax._Max._IsOverflow = CWeatherTraits::TemperatureOFL();
+		USBHardware.ReverseByteOrder(newbuf, pos + 39, 0x12);
+		self._Windchill = USBHardware.ToTemperature(newbuf, pos + 39, 1);
+		print "self._Windchill", self._Windchill
+		self.logger.debug("self._Windchill=%d" % self._Windchill)
+		self._WindchillMinMax._Min._Value = USBHardware.ToTemperature(newbuf, pos + 41, 0);
+		print "self._WindchillMinMax._Min._Value", self._WindchillMinMax._Min._Value
+		self.logger.debug("self._WindchillMinMax._Min._Value=%d" % self._WindchillMinMax._Min._Value)
+		if self._WindchillMinMax._Min._Value == CWeatherTraits.TemperatureNP():
+			self._WindchillMinMax._Min._IsError = 1
+		else:
+			self._WindchillMinMax._Min._IsError = 0
+		if self._WindchillMinMax._Min._Value == CWeatherTraits.TemperatureOFL():
+			self._WindchillMinMax._Min._IsOverflow = 1
+		else:
+			self._WindchillMinMax._Min._IsOverflow = 0
+		self._WindchillMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 44, 1);
+		print "self._WindchillMinMax._Max._Value", self._WindchillMinMax._Max._Value
+		self.logger.debug("self._WindchillMinMax._Max._Value=%d" % self._WindchillMinMax._Max._Value)
+		#  self._WindchillMinMax._Max._IsError = CWeatherTraits.TemperatureNP();
+		#  self._WindchillMinMax._Max._IsOverflow = CWeatherTraits.TemperatureOFL();
+
 		#  if ( CMinMaxMeasurement::IsMinValueError(&thisa->_WindchillMinMax)
 		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_WindchillMinMax) )
 		#  {
@@ -231,13 +236,32 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v22 + 2) = v21->m_status;
 		#  }
 		USBHardware.ReverseByteOrder(newbuf, pos + 57, 0x12);
-		#  thisa->_Dewpoint = USBHardware::ToTemperature(buf + 57, 1);
-		#  thisa->_DewpointMinMax._Min._Value = USBHardware::ToTemperature(buf + 59, 0);
-		#  thisa->_DewpointMinMax._Min._IsError = CWeatherTraits::TemperatureNP();
-		#  thisa->_DewpointMinMax._Min._IsOverflow = CWeatherTraits::TemperatureOFL();
-		#  thisa->_DewpointMinMax._Max._Value = USBHardware::ToTemperature(buf + 62, 1);
-		#  thisa->_DewpointMinMax._Max._IsError = CWeatherTraits::TemperatureNP();
-		#  thisa->_DewpointMinMax._Max._IsOverflow = CWeatherTraits::TemperatureOFL();
+		self._Dewpoint = USBHardware.ToTemperature(newbuf, pos + 57, 1);
+		print "self._Dewpoint", self._Dewpoint
+		self.logger.debug("self._Dewpoint=%d" % self._Dewpoint)
+		self._DewpointMinMax._Min._Value = USBHardware.ToTemperature(newbuf, pos + 59, 0);
+		print "self._DewpointMinMax._Min._Value", self._DewpointMinMax._Min._Value
+		self.logger.debug("self._DewpointMinMax._Min._Value=%d" % self._DewpointMinMax._Min._Value)
+		if self._DewpointMinMax._Min._Value == CWeatherTraits.TemperatureNP():
+			self._DewpointMinMax._Min._IsError = 1
+		else:
+			self._DewpointMinMax._Min._IsError = 0
+		if self._DewpointMinMax._Min._Value == CWeatherTraits.TemperatureOFL():
+			self._DewpointMinMax._Min._IsOverflow = 1
+		else:
+			self._DewpointMinMax._Min._IsOverflow = 0
+		self._DewpointMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 62, 1);
+		print "self._DewpointMinMax._Max._Value", self._DewpointMinMax._Max._Value
+		self.logger.debug("self._DewpointMinMax._Max._Value=%d" % self._DewpointMinMax._Max._Value)
+		if self._DewpointMinMax._Max._Value == CWeatherTraits.TemperatureNP():
+			self._DewpointMinMax._Max._IsError = 1
+		else:
+			self._DewpointMinMax._Max._IsError = 0
+		if self._DewpointMinMax._Max._Value == CWeatherTraits.TemperatureOFL():
+			self._DewpointMinMax._Max._IsOverflow = 1
+		else:
+			self._DewpointMinMax._Max._IsOverflow = 0
+
 		#  if ( CMinMaxMeasurement::IsMinValueError(&thisa->_DewpointMinMax)
 		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_DewpointMinMax) )
 		#  {
@@ -325,6 +349,8 @@ class CCurrentWeatherData(object):
 		self.logger.debug("self._OutdoorHumidity=%d" % self._OutdoorHumidity)
 
 		self._OutdoorHumidityMinMax._Min._Value = USBHardware.ToHumidity(newbuf, pos + 89, 1);
+		print "self._OutdoorHumidityMinMax._Min._Value", self._OutdoorHumidityMinMax._Min._Value
+		self.logger.debug("self._OutdoorHumidityMinMax._Min._Value=%d" % self._OutdoorHumidityMinMax._Min._Value)
 		if self._OutdoorHumidityMinMax._Min._Value == CWeatherTraits.HumidityNP():
 			self._OutdoorHumidityMinMax._Min._IsError = 1
 		else:
@@ -335,6 +361,8 @@ class CCurrentWeatherData(object):
 			self._OutdoorHumidityMinMax._Min._IsOverflow = 0
 
 		self._OutdoorHumidityMinMax._Max._Value = USBHardware.ToHumidity(newbuf, pos + 90, 1);
+		print "self._OutdoorHumidityMinMax._Max._Value", self._OutdoorHumidityMinMax._Max._Value
+		self.logger.debug("self._OutdoorHumidityMinMax._Max._Value=%d" % self._OutdoorHumidityMinMax._Max._Value)
 		if self._OutdoorHumidityMinMax._Max._Value == CWeatherTraits.HumidityNP():
 			self._OutdoorHumidityMinMax._Max._IsError = 1
 		else:
@@ -370,9 +398,9 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v43 + 1) = HIDWORD(v42->m_dt);
 		#    *((_DWORD *)v43 + 2) = v42->m_status;
 		#  }
-		#  USBHardware::ReverseByteOrder(buf + 101, 0xBu);
-		#  thisa->_RainLastMonth = USBHardware::To4Pre2Post(buf + 101);
-		#  thisa->_RainLastMonthMax._Value = USBHardware::To4Pre2Post(buf + 104);
+		USBHardware.ReverseByteOrder(newbuf, pos + 101, 0xB);
+		#thisa->_RainLastMonth = USBHardware::To4Pre2Post(buf + 101);
+		#thisa->_RainLastMonthMax._Value = USBHardware::To4Pre2Post(buf + 104);
 		#  thisa->_RainLastMonthMax._IsError = CWeatherTraits::RainNP();
 		#  thisa->_RainLastMonthMax._IsOverflow = CWeatherTraits::RainOFL();
 		#  if ( CMeasurement::IsError(&thisa->_RainLastMonthMax) || CMeasurement::IsOverflow(&thisa->_RainLastMonthMax) )
@@ -387,7 +415,7 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v47 + 1) = HIDWORD(v46->m_dt);
 		#    *((_DWORD *)v47 + 2) = v46->m_status;
 		#  }
-		#  USBHardware::ReverseByteOrder(buf + 112, 0xBu);
+		USBHardware.ReverseByteOrder(newbuf, pos + 112, 0xB);
 		#  v48 = USBHardware::To4Pre2Post(buf + 112);
 		#  thisa->_RainLastWeek = v48;
 		#  v49 = USBHardware::To4Pre2Post(buf + 115);
@@ -408,9 +436,8 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v51 + 1) = HIDWORD(v50->m_dt);
 		#    *((_DWORD *)v51 + 2) = v50->m_status;
 		#  }
-		#  USBHardware::ReverseByteOrder(buf + 123, 0xBu);
-		#  v52 = USBHardware::To4Pre2Post(buf + 123);
-		#  thisa->_Rain24H = v52;
+		USBHardware.ReverseByteOrder(newbuf, pos + 123, 0xB)
+		#  thisa->_Rain24H = USBHardware::To4Pre2Post(buf + 123);
 		#  v53 = USBHardware::To4Pre2Post(buf + 126);
 		#  thisa->_Rain24HMax._Value = v53;
 		#  v80 = thisa->_Rain24HMax._Value == CWeatherTraits::RainNP();
@@ -429,7 +456,7 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v55 + 1) = HIDWORD(v54->m_dt);
 		#    *((_DWORD *)v55 + 2) = v54->m_status;
 		#  }
-		#  USBHardware::ReverseByteOrder(buf + 134, 0xBu);
+		USBHardware.ReverseByteOrder(newbuf, pos + 134, 0xB);
 		#  v56 = USBHardware::To4Pre2Post(buf + 134);
 		#  thisa->_Rain1H = v56;
 		#  v57 = USBHardware::To4Pre2Post(buf + 137);
@@ -450,7 +477,7 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v59 + 1) = HIDWORD(v58->m_dt);
 		#    *((_DWORD *)v59 + 2) = v58->m_status;
 		#  }
-		#  USBHardware::ReverseByteOrder(buf + 145, 9u);
+		USBHardware.ReverseByteOrder(newbuf, pos + 145, 9);
 		#  v60 = USBHardware::To4Pre3Post(buf + 145);
 		#  thisa->_RainTotal = v60;
 		#  v61 = USBHardware::ToDateTime((ATL::COleDateTime *)&v97, buf + 148, 0);
@@ -458,7 +485,7 @@ class CCurrentWeatherData(object):
 		#  LODWORD(thisa->_LastRainReset.m_dt) = LODWORD(v61->m_dt);
 		#  *((_DWORD *)v62 + 1) = HIDWORD(v61->m_dt);
 		#  *((_DWORD *)v62 + 2) = v61->m_status;
-		#  USBHardware::ReverseByteOrder(buf + 154, 0xFu);
+		USBHardware.ReverseByteOrder(newbuf, pos + 154, 0xF);
 		#  v63 = USBHardware::ToWindspeed(buf + 154);
 		#  thisa->_WindSpeed = v63;
 		#  v64 = USBHardware::ToWindspeed(buf + 157);
@@ -501,11 +528,9 @@ class CCurrentWeatherData(object):
 		#    &thisa->_WindDirection3,
 		#    &thisa->_WindDirection4,
 		#    &thisa->_WindDirection5);
-		#  USBHardware::ReverseByteOrder(buf + 169, 0xFu);
-		#  v67 = USBHardware::ToWindspeed(buf + 169);
-		#  thisa->_Gust = v67;
-		#  v68 = USBHardware::ToWindspeed(buf + 172);
-		#  thisa->_GustMinMax._Max._Value = v68;
+		USBHardware.ReverseByteOrder(newbuf, pos + 169, 0xF);
+		#  thisa->_Gust = USBHardware::ToWindspeed(buf + 169);
+		#  thisa->_GustMinMax._Max._Value = USBHardware::ToWindspeed(buf + 172);
 		#  v80 = thisa->_GustMinMax._Min._Value == CWeatherTraits::WindNP();
 		#  thisa->_GustMinMax._Max._IsError = v80;
 		#  v80 = thisa->_GustMinMax._Min._Value == CWeatherTraits::WindOFL();
@@ -544,7 +569,7 @@ class CCurrentWeatherData(object):
 		#    &thisa->_GustDirection3,
 		#    &thisa->_GustDirection4,
 		#    &thisa->_GustDirection5);
-		#  USBHardware::ReverseByteOrder(buf + 184, 0x19u);
+		USBHardware.ReverseByteOrder(newbuf, pos + 184, 0x19)
 		#  USBHardware::ReadPressureShared(buf + 184, &thisa->_PressureRelative_hPa, &thisa->_PressureRelative_inHg);
 		#  USBHardware::ReadPressureShared(buf + 189, &min_hPa, &min_inHg);
 		#  USBHardware::ReadPressureShared(buf + 194, &max_hPa, &max_inHg);

@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+#self._WeatherState 2     -> freccia su sole
+#self._WeatherTendency 1  ->
+
+
 import logging
 import traceback
 
@@ -654,7 +658,7 @@ class CWeatherStationConfig(object):
 		self.logger.debug("wsconfig")
 		nbuf=[0]
 		nbuf[0]=buf[0]
-		print "read",nbuf[0]
+		#print "read",nbuf[0]
 		CheckSumm = nbuf[0][43+start] | (nbuf[0][42+start] << 8);
 		self._CheckSumm = CheckSumm;
 		CheckSumm -= 7;
@@ -1285,7 +1289,7 @@ class CCommunicationService(object):
 		newLength = [0]
 		myCCurrentWeatherData = CCurrentWeatherData.CCurrentWeatherData()
 		myCCurrentWeatherData.CCurrentWeatherData_buf(newBuffer, 6);
-		print "CurrentData", Buffer[0] #//fixme
+		#print "CurrentData", Buffer[0] #//fixme
 		CDataStore.setLastSeen(self.DataStore, time.time());
 		CDataStore.setLastCurrentWeatherTime(self.DataStore, time.time())
 		#std::bitset<4>::bitset<4>(&BatteryStat, (*Buffer)[2] & 0xF);
@@ -1450,8 +1454,6 @@ class CCommunicationService(object):
 				newLength[0] = self.buildTimeFrame(newBuffer, 1);
 			else:
 				self.logger.error("handleNextAction Buffer[2] == %x" % (Buffer[0][2] & 0xF))
-				DeviceCS = [None]
-				HistoryIndex = [None]
 				if   rt == 0: #rtGetCurrent
 					newLength[0] = self.buildACKFrame(newBuffer, 5, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
@@ -1630,27 +1632,27 @@ class CCommunicationService(object):
 						ReceivedId  = Buffer[0][0] <<8;
 						ReceivedId += Buffer[0][1];
 						if ( Length[0] != 6 or ReceivedId != TransceiverID or (Buffer[0][2] & 0xE0) != 0xa0 or (Buffer[0][2] & 0xF) != 3 ):
-							print "#1"
+							#print "#1"
 							if ( Length[0] != 48
 							 or ReceivedId != TransceiverID
 							 or (Buffer[0][2] & 0xE0) != 0x40
 							 or CDataStore.getRequestState(self.DataStore) != ERequestState.rsWaitConfig): #5
 								newLength[0] = 0;
-								print "#2"
+								#print "#2"
 							else:
-								print "#3"
+								#print "#3"
 								self.handleConfig(newBuffer, newLength); #temporary commented out
 								if Length[0] == 9:
-									print "#4"
+									#print "#4"
 									CDataStore.setDeviceId(self.DataStore,TransceiverID);
 									CDataStore.setDeviceRegistered(self.DataStore, True);
 						else:
-							print "#5"
+							#print "#5"
 							newLength[0] = self.buildTimeFrame(newBuffer,0);
 
 					else:
 						if RequestType == 5:
-							print "#6"
+							#print "#6"
 							HistoryIndex = 0xfffff
 							newLength[0] = self.buildACKFrame(newBuffer,3,TransceiverID,HistoryIndex,0xFFFFFFFF)
 							self.RepeatCount = 0
