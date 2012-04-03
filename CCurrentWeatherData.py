@@ -593,9 +593,13 @@ class CCurrentWeatherData(object):
 		#    &thisa->_GustDirection4,
 		#    &thisa->_GustDirection5);
 		USBHardware.ReverseByteOrder(newbuf, pos + 184, 0x19)
-		#  USBHardware::ReadPressureShared(buf + 184, &thisa->_PressureRelative_hPa, &thisa->_PressureRelative_inHg);
-		#  USBHardware::ReadPressureShared(buf + 189, &min_hPa, &min_inHg);
-		#  USBHardware::ReadPressureShared(buf + 194, &max_hPa, &max_inHg);
+		self._PressureRelative_hPa, self._PressureRelative_inHg = USBHardware.ReadPressureShared(newbuf, pos + 184)
+		print "self._PressureRelative_hPa", self._PressureRelative_hPa
+		self.logger.debug("self._PressureRelative_hPa=%d" % self._PressureRelative_hPa)
+		print "self._PressureRelative_inHg", self._PressureRelative_inHg
+		self.logger.debug("self._PressureRelative_inHg=%d" % self._PressureRelative_inHg)
+		(min_hPa,min_inHg) = USBHardware.ReadPressureShared(newbuf, pos + 189)
+		(max_hPa,max_inHg) = USBHardware.ReadPressureShared(newbuf, pos + 194)
 		#  thisa->_PressureRelative_hPaMinMax._Min._Value = CWeatherTraits::PressureOFL();
 		#  thisa->_PressureRelative_hPaMinMax._Min._IsError = 1;
 		#  thisa->_PressureRelative_hPaMinMax._Min._IsOverflow = 1;

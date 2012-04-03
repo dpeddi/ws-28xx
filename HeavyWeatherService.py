@@ -17,7 +17,7 @@ import threading
 import USBHardware
 import sHID
 import CCurrentWeatherData
-import CWeatherStationConfig
+from CWeatherStationConfig import CWeatherStationConfig
 import CWeatherTraits
 from datetime import datetime
 from datetime import timedelta
@@ -31,7 +31,7 @@ logging.Handler.handleError = handleError
 sHID = sHID.sHID()
 USBHardware = USBHardware.USBHardware()
 #CCurrentWeatherData = CCurrentWeatherData.CCurrentWeatherData()
-CWeatherStationConfig = CWeatherStationConfig.CWeatherStationConfig()
+#CWeatherStationConfig = CWeatherStationConfig.CWeatherStationConfig()
 CWeatherTraits = CWeatherTraits.CWeatherTraits()
 
 #def equal(a, b):
