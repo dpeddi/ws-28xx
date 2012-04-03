@@ -572,6 +572,9 @@ class CCurrentWeatherData(object):
 		(g ,g1) = USBHardware.ReadWindDirectionShared(newbuf, pos + 181)
 		(g2,g3) = USBHardware.ReadWindDirectionShared(newbuf, pos + 182)
 		(g4,g5) = USBHardware.ReadWindDirectionShared(newbuf, pos + 183)
+		print "g=%d , g1=%d, g2=%d, g3=%d, g4=%d, g5=%d" % (g, g1, g2, g3, g4, g5)
+		print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (windDirMap[g], windDirMap[g1], windDirMap[g2], windDirMap[g3], windDirMap[g4], windDirMap[g5])
+		print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (windDirMap_c[g], windDirMap_c[g1], windDirMap_c[g2], windDirMap_c[g3], windDirMap_c[g4], windDirMap_c[g5])
 		self._GustDirection = g;
 		self._GustDirection1 = g1;
 		self._GustDirection2 = g2;
