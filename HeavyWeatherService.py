@@ -3,6 +3,9 @@
 #self._WeatherState 2     -> freccia su sole
 #self._WeatherTendency 1  ->
 
+#self._WeatherState 1     -> 
+#self._WeatherTendency 2  ->
+
 
 import logging
 import traceback
@@ -28,6 +31,11 @@ sHID = sHID.sHID()
 USBHardware = USBHardware.USBHardware()
 #CCurrentWeatherData = CCurrentWeatherData.CCurrentWeatherData()
 CWeatherTraits = CWeatherTraits.CWeatherTraits()
+
+#def equal(a, b):
+    #return abs(a - b) < 1e-6
+#
+#if equal(f1, f2):
 
 # testBit() returns a nonzero result, 2**offset, if the bit at 'offset' is one.
 def testBit(int_type, offset):
@@ -126,6 +134,9 @@ class EWindDirection:
 	 wdNNW            = 0x0F
 	 wdERR            = 0x10
 	 wdInvalid        = 0x11
+windDirMap = { 0:"N", 1:"NNE", 2:"NE", 3:"ENE", 4:"E", 5:"ESE", 6:"SE", 7:"SSE",
+              8:"S", 9:"SSW", 10:"SW", 11:"WSW", 12:"W", 13:"WNW", 14:"NW", 15:"NWN", 16:"err", 17:"inv" }
+
 
 class EResetMinMaxFlags:
 	 rmTempIndoorHi   = 0
@@ -329,6 +340,10 @@ class CDataStore(object):
 	def getLastSeen(self):
 		self.logger.debug("LastSeen=%d",self.LastSeen)
 		return self.LastSeen
+
+	def setCurrentWeather(self,Data):
+		self.logger.debug("")
+		self.CurrentWeather = Data
 
 	def RequestNotify(self):
 		self.logger.debug("implement me")
@@ -1287,8 +1302,8 @@ class CCommunicationService(object):
 		newBuffer = [0]
 		newBuffer[0] = Buffer[0]
 		newLength = [0]
-		myCCurrentWeatherData = CCurrentWeatherData.CCurrentWeatherData()
-		myCCurrentWeatherData.CCurrentWeatherData_buf(newBuffer, 6);
+		Data = CCurrentWeatherData.CCurrentWeatherData()
+		Data.CCurrentWeatherData_buf(newBuffer, 6);
 		#print "CurrentData", Buffer[0] #//fixme
 		CDataStore.setLastSeen(self.DataStore, time.time());
 		CDataStore.setLastCurrentWeatherTime(self.DataStore, time.time())
@@ -1296,7 +1311,7 @@ class CCommunicationService(object):
 		#CDataStore::setLastBatteryStatus(v5, &BatteryStat);
 		Quality = Buffer[0][3] & 0x7F;
 		CDataStore.setLastLinkQuality(self.DataStore, Quality);
-		#CDataStore.setCurrentWeather(self.DataStore, myCCurrentWeatherData);
+		CDataStore.setCurrentWeather(self.DataStore, Data);
 		#self.setCurrentWeather(self.DataStore,Data)
 
 		rt = CDataStore.getRequestType(self.DataStore);

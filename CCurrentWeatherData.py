@@ -9,6 +9,13 @@ import CMinMaxMeasurement
 CWeatherTraits = CWeatherTraits.CWeatherTraits()
 USBHardware = USBHardware.USBHardware()
 
+windDirMap = { 0:"N", 1:"NNE", 2:"NE", 3:"ENE", 4:"E", 5:"ESE", 6:"SE", 7:"SSE",
+              8:"S", 9:"SSW", 10:"SW", 11:"WSW", 12:"W", 13:"WNW", 14:"NW", 15:"NWN", 16:"err", 17:"inv" }
+
+#I have my wind sensor not oriented to south so I need a correction map
+windDirMap_c = { 4:"N", 5:"NNE", 6:"NE", 7:"ENE", 8:"E", 9:"ESE", 10:"SE", 11:"SSE",
+              12:"S", 13:"SSW", 14:"SW", 15:"WSW",  0:"W",  1:"WNW",  2:"NW",  3:"NWN", 16:"err", 17:"inv" }
+
 class CCurrentWeatherData(object):
 
 	def __init__(self):
@@ -206,8 +213,14 @@ class CCurrentWeatherData(object):
 		self._WindchillMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 44, 1);
 		print "self._WindchillMinMax._Max._Value", self._WindchillMinMax._Max._Value
 		self.logger.debug("self._WindchillMinMax._Max._Value=%d" % self._WindchillMinMax._Max._Value)
-		#  self._WindchillMinMax._Max._IsError = CWeatherTraits.TemperatureNP();
-		#  self._WindchillMinMax._Max._IsOverflow = CWeatherTraits.TemperatureOFL();
+		if self._WindchillMinMax._Max._Value == CWeatherTraits.TemperatureNP():
+			self._WindchillMinMax._Max._IsError = 1
+		else:
+			self._WindchillMinMax._Max._IsError = 0
+		if self._WindchillMinMax._Max._Value == CWeatherTraits.TemperatureOFL():
+			self._WindchillMinMax._Max._IsOverflow = 1
+		else:
+			self._WindchillMinMax._Max._IsOverflow = 0
 
 		#  if ( CMinMaxMeasurement::IsMinValueError(&thisa->_WindchillMinMax)
 		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_WindchillMinMax) )
@@ -235,7 +248,9 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v22 + 1) = HIDWORD(v21->m_dt);
 		#    *((_DWORD *)v22 + 2) = v21->m_status;
 		#  }
+		#print newbuf[0][pos+57:pos+75]
 		USBHardware.ReverseByteOrder(newbuf, pos + 57, 0x12);
+		#print newbuf[0][pos+57:pos+75]
 		self._Dewpoint = USBHardware.ToTemperature(newbuf, pos + 57, 1);
 		print "self._Dewpoint", self._Dewpoint
 		self.logger.debug("self._Dewpoint=%d" % self._Dewpoint)
@@ -344,7 +359,7 @@ class CCurrentWeatherData(object):
 		#  }
 
 		USBHardware.ReverseByteOrder(newbuf, pos + 88, 0xD);
-		self._OutdoorHumidity = USBHardware.ToHumidity(buf,pos + 88, 1)
+		self._OutdoorHumidity = USBHardware.ToHumidity(newbuf,pos + 88, 1)
 		print "self._OutdoorHumidity", self._OutdoorHumidity
 		self.logger.debug("self._OutdoorHumidity=%d" % self._OutdoorHumidity)
 
@@ -486,8 +501,10 @@ class CCurrentWeatherData(object):
 		#  *((_DWORD *)v62 + 1) = HIDWORD(v61->m_dt);
 		#  *((_DWORD *)v62 + 2) = v61->m_status;
 		USBHardware.ReverseByteOrder(newbuf, pos + 154, 0xF);
-		#  v63 = USBHardware::ToWindspeed(buf + 154);
-		#  thisa->_WindSpeed = v63;
+		self._WindSpeed = USBHardware.ToWindspeed(newbuf,pos + 154);
+		#print newbuf[0][pos+154:pos+154+6]
+		print "self._WindSpeed", self._WindSpeed * 3.6
+		self.logger.debug("self._WindSpeed=%d" % self._WindSpeed)
 		#  v64 = USBHardware::ToWindspeed(buf + 157);
 		#  thisa->_WindSpeedMinMax._Max._Value = v64;
 		#  v80 = thisa->_WindSpeedMinMax._Min._Value == CWeatherTraits::WindNP();
@@ -508,15 +525,18 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v66 + 2) = v65->m_status;
 		#  }
 		#  WindErrFlags = buf[165];
-		#  USBHardware::ReadWindDirectionShared(buf + 166, (int *)&w, (int *)&w1);
-		#  USBHardware::ReadWindDirectionShared(buf + 167, (int *)&w2, (int *)&w3);
-		#  USBHardware::ReadWindDirectionShared(buf + 168, (int *)&w4, (int *)&w5);
-		#  thisa->_WindDirection = w;
-		#  thisa->_WindDirection1 = w1;
-		#  thisa->_WindDirection2 = w2;
-		#  thisa->_WindDirection3 = w3;
-		#  thisa->_WindDirection4 = w4;
-		#  thisa->_WindDirection5 = w5;
+		(w ,w1) = USBHardware.ReadWindDirectionShared(newbuf, pos + 166)
+		(w2,w3) = USBHardware.ReadWindDirectionShared(newbuf, pos + 167)
+		(w4,w5) = USBHardware.ReadWindDirectionShared(newbuf, pos + 168)
+		print "w=%d , w1=%d, w2=%d, w3=%d, w4=%d, w5=%d" % (w, w1, w2, w3, w4, w5)
+		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (windDirMap[w], windDirMap[w1], windDirMap[w2], windDirMap[w3], windDirMap[w4], windDirMap[w5])
+		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (windDirMap_c[w], windDirMap_c[w1], windDirMap_c[w2], windDirMap_c[w3], windDirMap_c[w4], windDirMap_c[w5])
+		self._WindDirection = w;
+		self._WindDirection1 = w1;
+		self._WindDirection2 = w2;
+		self._WindDirection3 = w3;
+		self._WindDirection4 = w4;
+		self._WindDirection5 = w5;
 		#  CCurrentWeatherData::CheckWindErrFlags(
 		#    thisa,
 		#    WindErrFlags,
@@ -548,16 +568,16 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v70 + 1) = HIDWORD(v69->m_dt);
 		#    *((_DWORD *)v70 + 2) = v69->m_status;
 		#  }
-		#  GustErrFlags = buf[180];
-		#  USBHardware::ReadWindDirectionShared(buf + 181, (int *)&g, (int *)&g1);
-		#  USBHardware::ReadWindDirectionShared(buf + 182, (int *)&g2, (int *)&g3);
-		#  USBHardware::ReadWindDirectionShared(buf + 183, (int *)&g4, (int *)&g5);
-		#  thisa->_GustDirection = g;
-		#  thisa->_GustDirection1 = g1;
-		#  thisa->_GustDirection2 = g2;
-		#  thisa->_GustDirection3 = g3;
-		#  thisa->_GustDirection4 = g4;
-		#  thisa->_GustDirection5 = g5;
+		GustErrFlags = newbuf[0][180];
+		(g ,g1) = USBHardware.ReadWindDirectionShared(newbuf, pos + 181)
+		(g2,g3) = USBHardware.ReadWindDirectionShared(newbuf, pos + 182)
+		(g4,g5) = USBHardware.ReadWindDirectionShared(newbuf, pos + 183)
+		self._GustDirection = g;
+		self._GustDirection1 = g1;
+		self._GustDirection2 = g2;
+		self._GustDirection3 = g3;
+		self._GustDirection4 = g4;
+		self._GustDirection5 = g5;
 		#  CCurrentWeatherData::CheckWindErrFlags(
 		#    thisa,
 		#    GustErrFlags,
