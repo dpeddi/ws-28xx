@@ -31,6 +31,7 @@ logging.Handler.handleError = handleError
 sHID = sHID.sHID()
 USBHardware = USBHardware.USBHardware()
 #CCurrentWeatherData = CCurrentWeatherData.CCurrentWeatherData()
+CWeatherStationConfig = CWeatherStationConfig.CWeatherStationConfig()
 CWeatherTraits = CWeatherTraits.CWeatherTraits()
 
 #def equal(a, b):
@@ -261,7 +262,7 @@ class CDataStore(object):
 		self.Settings = CDataStore.TSettings()
 		self.TransceiverSettings = CDataStore.TTransceiverSettings()
 
-		self.DeviceConfig = CWeatherStationConfig.CWeatherStationConfig()
+		self.DeviceConfig = CWeatherStationConfig()
 
 		self.TransceiverSerNo = None
 		self.TransceiveID = None
@@ -591,6 +592,7 @@ class CDataStore(object):
 			self.Request.TTL = 90000;
 		else:
 			print "SetTime - warning: flag False or getDeviceRegistered false"
+
 	def GetDeviceConfigCS(self):
 		self.logger.debug("")
 		print "CDataStore::GetDeviceConfigCS"
