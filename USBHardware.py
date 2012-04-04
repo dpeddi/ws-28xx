@@ -224,7 +224,7 @@ class USBHardware(object):
 		self.logger.debug("")
 		return ( self.ToPressure(buffer,start,1) , self.ToPressureInhg(buffer,start,0))
 
-	def ToPressure(buffer,start,startOnLowNibble):
+	def ToPressure(self,buffer,start,startOnLowNibble):
 		if ( self.IsErr5(buffer, startOnLowNibble) ):
 			result = CWeatherTraits.PressureNP();
 		else:

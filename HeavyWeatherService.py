@@ -245,7 +245,7 @@ class CDataStore(object):
 		self.TransceiverSettings = 0;
 		self.WeatherClubSettings = 0;
 		self.LastSeen = 0;
-		self.CurrentWeather = 0;
+		self.CurrentWeather = CCurrentWeatherData.CCurrentWeatherData();
 		self.DeviceConfig = 0;
 		self.FrontEndConfig = 0;
 		self.LastStat = 0;
@@ -793,7 +793,6 @@ class CCommunicationService(object):
 #					if ( ATL::COleDateTimeSpan::operator>(v9, &BUFFER_OVERFLOW_SPAN) )
 #					{
 #						val = 1;
-#						v10 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 #						CDataStore.setBufferCheck(self.DataStore, &val);
 #					}
 #				}

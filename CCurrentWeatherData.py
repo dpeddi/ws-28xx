@@ -549,7 +549,7 @@ class CCurrentWeatherData(object):
 		#    &thisa->_WindDirection4,
 		#    &thisa->_WindDirection5);
 		USBHardware.ReverseByteOrder(newbuf, pos + 169, 0xF);
-		#  thisa->_Gust = USBHardware::ToWindspeed(buf + 169);
+		self._Gust = USBHardware.ToWindspeed(newbuf, pos + 169);
 		#  thisa->_GustMinMax._Max._Value = USBHardware::ToWindspeed(buf + 172);
 		#  v80 = thisa->_GustMinMax._Min._Value == CWeatherTraits::WindNP();
 		#  thisa->_GustMinMax._Max._IsError = v80;
