@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-#self._WeatherState 2     -> freccia su sole
+#self._WeatherState 2     -> arrow up - sunny
 #self._WeatherTendency 1  ->
 
-#self._WeatherState 1     -> 
+#self._WeatherState 1     ->
 #self._WeatherTendency 2  ->
 
 
@@ -21,8 +21,6 @@ from CWeatherStationConfig import CWeatherStationConfig
 import CWeatherTraits
 from datetime import datetime
 from datetime import timedelta
-
-usbWait = 0.5
 
 def handleError(self, record):
 	traceback.print_stack()
@@ -136,6 +134,7 @@ class EWindDirection:
 	 wdNNW            = 0x0F
 	 wdERR            = 0x10
 	 wdInvalid        = 0x11
+
 windDirMap = { 0:"N", 1:"NNE", 2:"NE", 3:"ENE", 4:"E", 5:"ESE", 6:"SE", 7:"SSE",
               8:"S", 9:"SSW", 10:"SW", 11:"WSW", 12:"W", 13:"WNW", 14:"NW", 15:"NWN", 16:"err", 17:"inv" }
 
@@ -727,6 +726,8 @@ class CCommunicationService(object):
 		new_Buffer=[0]
 		new_Buffer[0]=Buffer[0]
 		Second = tm[5]
+		if Second > 59:
+			Second = 0 # I don't know if La Crosse support leap seconds...
 		if ( checkMinuteOverflow and (Second <= 5 or Second >= 55) ):
 			if ( Second < 55 ):
 				Second = 6 - Second
@@ -745,9 +746,10 @@ class CCommunicationService(object):
 			new_Buffer[0][5] = (tm[5] % 10) + (0x10 * tm[5] // 10); #sec
 			new_Buffer[0][6] = (tm[4] % 10) + (0x10 * tm[4] // 10); #min
 			new_Buffer[0][7] = (tm[3] % 10) + (0x10 * tm[3] // 10); #hour
-			DayOfWeek = tm[7] - 1;
-			if ( DayOfWeek == 1 ):
-				DayOfWeek = 7;
+			#DayOfWeek = tm[7] - 1; #ole from 1 - 7 - 1=Sun... 0-6 0=Sun
+			DayOfWeek = tm[7];      #py  prom 0 - 6 - 0=Mon
+			#if ( DayOfWeek == 1 ): # this was for OLE::Time
+			#	DayOfWeek = 7;  # this was for OLE::Time
 			new_Buffer[0][8] = DayOfWeek % 10 + (0x10 *  tm[2] % 10)          #DoW + Day
 			new_Buffer[0][9] =  (tm[2] // 10) + (0x10 *  tm[1] % 10)          #day + month
 			new_Buffer[0][10] = (tm[1] // 10) + (0x10 * (tm[0] - 2000) % 10)  #month + year
@@ -1200,7 +1202,7 @@ class CCommunicationService(object):
 			#v21 = CHistoryDataSet::GetTime(&Data);
 			#CDataStore::setLastHistTimeStamp(self.DataStore, v21);
 			#CDataStore::addHistoryData(self.DataStore, &Data);
-			#CDataStore.setLastHistoryIndex(self.DataStore, ThisHistoryIndex);
+			CDataStore.setLastHistoryIndex(self.DataStore, ThisHistoryIndex);
 			#if ( LatestHistoryIndex >= ThisHistoryIndex ):
 			#	CDataStore.setOutsatndingHistorySets(self.DataStore, LatestHistoryIndex - ThisHistoryIndex)
 			#else:

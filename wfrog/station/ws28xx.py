@@ -34,6 +34,8 @@ class WS28xxStation(object):
 
 		#import HeavyWeatherService
 		#print(dir(HeavyWeatherService))
+		
+		CWeatherTraits = CWeatherTraits.CWeatherTraits()
 
 		myCCommunicationService = HeavyWeatherService.CCommunicationService()
 		HeavyWeatherService.CDataStore.setCommModeInterval(myCCommunicationService.DataStore,3) #move me to setfrontendalive
@@ -74,6 +76,12 @@ class WS28xxStation(object):
 					e.value = myCCommunicationService.DataStore.CurrentWeather._IndoorHumidity
 					send_event(e)
 
+				#if abs(CWeatherTraits.HumidityNP() - myCCommunicationService.DataStore.CurrentWeather._IndoorHumidity ) > 0.001:
+				#	e = generate_event('press')
+				#	e.sensor = 0
+				#	e.value = myCCommunicationService.DataStore.CurrentWeather._IndoorHumidity
+				#	send_event(e)
+
 				if abs(CWeatherTraits.TemperatureNP() - myCCommunicationService.DataStore.CurrentWeather._OutdoorTemp ) > 0.001:
 					e = generate_event('temp')
 					e.sensor = 1
@@ -86,12 +94,18 @@ class WS28xxStation(object):
 					e.value = myCCommunicationService.DataStore.CurrentWeather._OutdoorHumidity
 					send_event(e)
 
-				e = generate_event('wind')
-				if CWeatherTraits.WindNP == myCCommunicationService.DataStore.CurrentWeather._WindSpeed:
+				if abs(CWeatherTraits.HumidityNP() - myCCommunicationService.DataStore.CurrentWeather._OutdoorHumidity ) > 0.001:
+					e = generate_event('press')
+					e.sensor = 1
+					e.value = myCCommunicationService.DataStore.CurrentWeather._OutdoorHumidity
+					send_event(e)
+
+				if CWeatherTraits.WindNP() != myCCommunicationService.DataStore.CurrentWeather._WindSpeed:
+					e = generate_event('wind')
 					e.create_child('mean')
 					e.mean.speed = myCCommunicationService.DataStore.CurrentWeather._WindSpeed
 					e.mean.dir = myCCommunicationService.DataStore.CurrentWeather._WindDirection * 360 / 16
-				if CWeatherTraits.WindNP == myCCommunicationService.DataStore.CurrentWeather._Gust:
+					#if CWeatherTraits.WindNP() == myCCommunicationService.DataStore.CurrentWeather._Gust:
 					e.create_child('gust')
 					e.gust.speed = myCCommunicationService.DataStore.CurrentWeather._Gust
 					e.gust.dir = myCCommunicationService.DataStore.CurrentWeather._GustDirection * 360 / 16

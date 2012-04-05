@@ -95,19 +95,13 @@ class CCurrentWeatherData(object):
 		USBHardware.ReverseByteOrder(newbuf, pos + 0, 2);
 		#CCurrentWeatherData::readAlarmFlags(thisa, buf, &thisa->_AlarmRingingFlags);
 		self._WeatherState = newbuf[0][pos + 2] & 0xF;
-		print "self._WeatherState", self._WeatherState
 
 		self._WeatherTendency = (newbuf[0][pos + 2] >> 4) & 0xF;
-		print "self._WeatherTendency",self._WeatherTendency
 
 		USBHardware.ReverseByteOrder(newbuf, pos + 3, 0x12);
 		self._IndoorTemp = USBHardware.ToTemperature(newbuf, pos + 3, 1)
-		print "self._IndoorTemp", self._IndoorTemp
-		self.logger.debug("self._IndoorTemp=%d" % self._IndoorTemp)
 
 		self._IndoorTempMinMax._Min._Value = USBHardware.ToTemperature(newbuf, pos + 5, 0);
-		print "self._IndoorTempMinMax._Min._Value", self._IndoorTempMinMax._Min._Value
-		self.logger.debug("self._IndoorTempMinMax._Min._Value=%d" % self._IndoorTempMinMax._Min._Value)
 		if self._IndoorTempMinMax._Min._Value == CWeatherTraits.TemperatureNP():
 			self._IndoorTempMinMax._Min._IsError = 1
 		else:
@@ -118,8 +112,6 @@ class CCurrentWeatherData(object):
 			self._IndoorTempMinMax._Min._IsOverflow = 0
 
 		self._IndoorTempMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 8, 1)
-		print "self._IndoorTempMinMax._Max._Value", self._IndoorTempMinMax._Max._Value
-		self.logger.debug("self._IndoorTempMinMax._Max._Value=%d" % self._IndoorTempMinMax._Max._Value)
 		if self._IndoorTempMinMax._Max._Value == CWeatherTraits.TemperatureNP():
 			self._IndoorTempMinMax._Max._IsError = 1
 		else:
@@ -150,12 +142,8 @@ class CCurrentWeatherData(object):
 
 		USBHardware.ReverseByteOrder(newbuf, pos + 21, 0x12);
 		self._OutdoorTemp = USBHardware.ToTemperature(newbuf, pos + 21, 1)
-		print "self._OutdoorTemp", self._OutdoorTemp
-		self.logger.debug("self._OutdoorTemp=%d" % self._OutdoorTemp)
 
 		self._OutdoorTempMinMax._Min._Value = USBHardware.ToTemperature(newbuf, pos + 23, 0);
-		print "self._OutdoorTempMinMax._Min._Value", self._OutdoorTempMinMax._Min._Value
-		self.logger.debug("self._OutdoorTempMinMax._Min._Value=%d" % self._OutdoorTempMinMax._Min._Value)
 		if self._OutdoorTempMinMax._Min._Value == CWeatherTraits.TemperatureNP():
 			self._OutdoorTempMinMax._Min._IsError = 1
 		else:
@@ -166,8 +154,6 @@ class CCurrentWeatherData(object):
 			self._OutdoorTempMinMax._Min._IsOverflow = 0
 
 		self._OutdoorTempMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 26, 1)
-		print "self._OutdoorTempMinMax._Max._Value", self._OutdoorTempMinMax._Max._Value
-		self.logger.debug("self._OutdoorTempMinMax._Max._Value=%d" % self._OutdoorTempMinMax._Max._Value)
 		if self._OutdoorTempMinMax._Max._Value == CWeatherTraits.TemperatureNP():
 			self._OutdoorTempMinMax._Max._IsError = 1
 		else:
@@ -197,11 +183,7 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v15 + 2) = v14->m_status;
 		USBHardware.ReverseByteOrder(newbuf, pos + 39, 0x12);
 		self._Windchill = USBHardware.ToTemperature(newbuf, pos + 39, 1);
-		print "self._Windchill", self._Windchill
-		self.logger.debug("self._Windchill=%d" % self._Windchill)
 		self._WindchillMinMax._Min._Value = USBHardware.ToTemperature(newbuf, pos + 41, 0);
-		print "self._WindchillMinMax._Min._Value", self._WindchillMinMax._Min._Value
-		self.logger.debug("self._WindchillMinMax._Min._Value=%d" % self._WindchillMinMax._Min._Value)
 		if self._WindchillMinMax._Min._Value == CWeatherTraits.TemperatureNP():
 			self._WindchillMinMax._Min._IsError = 1
 		else:
@@ -211,8 +193,6 @@ class CCurrentWeatherData(object):
 		else:
 			self._WindchillMinMax._Min._IsOverflow = 0
 		self._WindchillMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 44, 1);
-		print "self._WindchillMinMax._Max._Value", self._WindchillMinMax._Max._Value
-		self.logger.debug("self._WindchillMinMax._Max._Value=%d" % self._WindchillMinMax._Max._Value)
 		if self._WindchillMinMax._Max._Value == CWeatherTraits.TemperatureNP():
 			self._WindchillMinMax._Max._IsError = 1
 		else:
@@ -248,15 +228,9 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v22 + 1) = HIDWORD(v21->m_dt);
 		#    *((_DWORD *)v22 + 2) = v21->m_status;
 		#  }
-		#print newbuf[0][pos+57:pos+75]
 		USBHardware.ReverseByteOrder(newbuf, pos + 57, 0x12);
-		#print newbuf[0][pos+57:pos+75]
 		self._Dewpoint = USBHardware.ToTemperature(newbuf, pos + 57, 1);
-		print "self._Dewpoint", self._Dewpoint
-		self.logger.debug("self._Dewpoint=%d" % self._Dewpoint)
 		self._DewpointMinMax._Min._Value = USBHardware.ToTemperature(newbuf, pos + 59, 0);
-		print "self._DewpointMinMax._Min._Value", self._DewpointMinMax._Min._Value
-		self.logger.debug("self._DewpointMinMax._Min._Value=%d" % self._DewpointMinMax._Min._Value)
 		if self._DewpointMinMax._Min._Value == CWeatherTraits.TemperatureNP():
 			self._DewpointMinMax._Min._IsError = 1
 		else:
@@ -266,8 +240,6 @@ class CCurrentWeatherData(object):
 		else:
 			self._DewpointMinMax._Min._IsOverflow = 0
 		self._DewpointMinMax._Max._Value = USBHardware.ToTemperature(newbuf, pos + 62, 1);
-		print "self._DewpointMinMax._Max._Value", self._DewpointMinMax._Max._Value
-		self.logger.debug("self._DewpointMinMax._Max._Value=%d" % self._DewpointMinMax._Max._Value)
 		if self._DewpointMinMax._Max._Value == CWeatherTraits.TemperatureNP():
 			self._DewpointMinMax._Max._IsError = 1
 		else:
@@ -306,12 +278,8 @@ class CCurrentWeatherData(object):
 
 		USBHardware.ReverseByteOrder(newbuf, pos + 75, 0xD);
 		self._IndoorHumidity = USBHardware.ToHumidity(buf, pos + 75, 1)
-		print "self._IndoorHumidity", self._IndoorHumidity
-		self.logger.debug("self._IndoorHumidity=%d" % self._IndoorHumidity)
 
 		self._IndoorHumidityMinMax._Min._Value = USBHardware.ToHumidity(newbuf, pos + 76, 1)
-		print "self._IndoorHumidityMinMax._Min._Value", self._IndoorHumidityMinMax._Min._Value
-		self.logger.debug("self._IndoorHumidityMinMax._Min._Value=%d" % self._IndoorHumidityMinMax._Min._Value)
 		if self._IndoorHumidityMinMax._Min._Value == CWeatherTraits.HumidityNP():
 			self._IndoorHumidityMinMax._Min._IsError = 1
 		else:
@@ -321,8 +289,6 @@ class CCurrentWeatherData(object):
 		else:
 			self._IndoorHumidityMinMax._Min._IsOverflow = 0
 		self._IndoorHumidityMinMax._Max._Value = USBHardware.ToHumidity(newbuf, pos + 77, 1)
-		print "self._IndoorHumidityMinMax._Max._Value", self._IndoorHumidityMinMax._Max._Value
-		self.logger.debug("self._IndoorHumidityMinMax._Max._Value=%d" % self._IndoorHumidityMinMax._Max._Value)
 		if self._IndoorHumidityMinMax._Max._Value == CWeatherTraits.HumidityNP():
 			self._IndoorHumidityMinMax._Max._IsError = 1
 		else:
@@ -360,12 +326,8 @@ class CCurrentWeatherData(object):
 
 		USBHardware.ReverseByteOrder(newbuf, pos + 88, 0xD);
 		self._OutdoorHumidity = USBHardware.ToHumidity(newbuf,pos + 88, 1)
-		print "self._OutdoorHumidity", self._OutdoorHumidity
-		self.logger.debug("self._OutdoorHumidity=%d" % self._OutdoorHumidity)
 
 		self._OutdoorHumidityMinMax._Min._Value = USBHardware.ToHumidity(newbuf, pos + 89, 1);
-		print "self._OutdoorHumidityMinMax._Min._Value", self._OutdoorHumidityMinMax._Min._Value
-		self.logger.debug("self._OutdoorHumidityMinMax._Min._Value=%d" % self._OutdoorHumidityMinMax._Min._Value)
 		if self._OutdoorHumidityMinMax._Min._Value == CWeatherTraits.HumidityNP():
 			self._OutdoorHumidityMinMax._Min._IsError = 1
 		else:
@@ -376,8 +338,6 @@ class CCurrentWeatherData(object):
 			self._OutdoorHumidityMinMax._Min._IsOverflow = 0
 
 		self._OutdoorHumidityMinMax._Max._Value = USBHardware.ToHumidity(newbuf, pos + 90, 1);
-		print "self._OutdoorHumidityMinMax._Max._Value", self._OutdoorHumidityMinMax._Max._Value
-		self.logger.debug("self._OutdoorHumidityMinMax._Max._Value=%d" % self._OutdoorHumidityMinMax._Max._Value)
 		if self._OutdoorHumidityMinMax._Max._Value == CWeatherTraits.HumidityNP():
 			self._OutdoorHumidityMinMax._Max._IsError = 1
 		else:
@@ -502,9 +462,6 @@ class CCurrentWeatherData(object):
 		#  *((_DWORD *)v62 + 2) = v61->m_status;
 		USBHardware.ReverseByteOrder(newbuf, pos + 154, 0xF);
 		self._WindSpeed = USBHardware.ToWindspeed(newbuf,pos + 154);
-		#print newbuf[0][pos+154:pos+154+6]
-		print "self._WindSpeed", self._WindSpeed * 3.6
-		self.logger.debug("self._WindSpeed=%d" % self._WindSpeed)
 		#  v64 = USBHardware::ToWindspeed(buf + 157);
 		#  thisa->_WindSpeedMinMax._Max._Value = v64;
 		#  v80 = thisa->_WindSpeedMinMax._Min._Value == CWeatherTraits::WindNP();
@@ -528,9 +485,6 @@ class CCurrentWeatherData(object):
 		(w ,w1) = USBHardware.ReadWindDirectionShared(newbuf, pos + 166)
 		(w2,w3) = USBHardware.ReadWindDirectionShared(newbuf, pos + 167)
 		(w4,w5) = USBHardware.ReadWindDirectionShared(newbuf, pos + 168)
-		print "w=%d , w1=%d, w2=%d, w3=%d, w4=%d, w5=%d" % (w, w1, w2, w3, w4, w5)
-		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (windDirMap[w], windDirMap[w1], windDirMap[w2], windDirMap[w3], windDirMap[w4], windDirMap[w5])
-		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (windDirMap_c[w], windDirMap_c[w1], windDirMap_c[w2], windDirMap_c[w3], windDirMap_c[w4], windDirMap_c[w5])
 		self._WindDirection = w;
 		self._WindDirection1 = w1;
 		self._WindDirection2 = w2;
@@ -572,9 +526,6 @@ class CCurrentWeatherData(object):
 		(g ,g1) = USBHardware.ReadWindDirectionShared(newbuf, pos + 181)
 		(g2,g3) = USBHardware.ReadWindDirectionShared(newbuf, pos + 182)
 		(g4,g5) = USBHardware.ReadWindDirectionShared(newbuf, pos + 183)
-		print "g=%d , g1=%d, g2=%d, g3=%d, g4=%d, g5=%d" % (g, g1, g2, g3, g4, g5)
-		print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (windDirMap[g], windDirMap[g1], windDirMap[g2], windDirMap[g3], windDirMap[g4], windDirMap[g5])
-		print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (windDirMap_c[g], windDirMap_c[g1], windDirMap_c[g2], windDirMap_c[g3], windDirMap_c[g4], windDirMap_c[g5])
 		self._GustDirection = g;
 		self._GustDirection1 = g1;
 		self._GustDirection2 = g2;
@@ -594,10 +545,6 @@ class CCurrentWeatherData(object):
 		#    &thisa->_GustDirection5);
 		USBHardware.ReverseByteOrder(newbuf, pos + 184, 0x19)
 		self._PressureRelative_hPa, self._PressureRelative_inHg = USBHardware.ReadPressureShared(newbuf, pos + 184)
-		print "self._PressureRelative_hPa", self._PressureRelative_hPa
-		self.logger.debug("self._PressureRelative_hPa=%d" % self._PressureRelative_hPa)
-		print "self._PressureRelative_inHg", self._PressureRelative_inHg
-		self.logger.debug("self._PressureRelative_inHg=%d" % self._PressureRelative_inHg)
 		(min_hPa,min_inHg) = USBHardware.ReadPressureShared(newbuf, pos + 189)
 		(max_hPa,max_inHg) = USBHardware.ReadPressureShared(newbuf, pos + 194)
 		#  thisa->_PressureRelative_hPaMinMax._Min._Value = CWeatherTraits::PressureOFL();
@@ -652,3 +599,42 @@ class CCurrentWeatherData(object):
 		#  thisa->_PressureRelative_inHgMinMax._Max._IsOverflow = 1;
 		#  std::bitset<29>::bitset<29>((std::bitset<29> *)&v102, 0);
 		#  thisa->_AlarmMarkedFlags._Array[0] = v102;
+
+		self.logger.debug("self._IndoorTemp=%d" % self._IndoorTemp)
+		self.logger.debug("self._IndoorTempMinMax._Min._Value=%d" % self._IndoorTempMinMax._Min._Value)
+		self.logger.debug("self._IndoorTempMinMax._Max._Value=%d" % self._IndoorTempMinMax._Max._Value)
+		self.logger.debug("self._OutdoorTemp=%d" % self._OutdoorTemp)
+		self.logger.debug("self._OutdoorTempMinMax._Min._Value=%d" % self._OutdoorTempMinMax._Min._Value)
+		self.logger.debug("self._OutdoorTempMinMax._Max._Value=%d" % self._OutdoorTempMinMax._Max._Value)
+		self.logger.debug("self._Windchill=%d" % self._Windchill)
+		self.logger.debug("self._WindchillMinMax._Min._Value=%d" % self._WindchillMinMax._Min._Value)
+		self.logger.debug("self._WindchillMinMax._Max._Value=%d" % self._WindchillMinMax._Max._Value)
+		self.logger.debug("self._Dewpoint=%d" % self._Dewpoint)
+		self.logger.debug("self._DewpointMinMax._Min._Value=%d" % self._DewpointMinMax._Min._Value)
+		self.logger.debug("self._DewpointMinMax._Max._Value=%d" % self._DewpointMinMax._Max._Value)
+		self.logger.debug("self._IndoorHumidity=%d" % self._IndoorHumidity)
+		self.logger.debug("self._IndoorHumidityMinMax._Min._Value=%d" % self._IndoorHumidityMinMax._Min._Value)
+		self.logger.debug("self._IndoorHumidityMinMax._Max._Value=%d" % self._IndoorHumidityMinMax._Max._Value)
+		self.logger.debug("self._OutdoorHumidity=%d" % self._OutdoorHumidity)
+		self.logger.debug("self._OutdoorHumidityMinMax._Min._Value=%d" % self._OutdoorHumidityMinMax._Min._Value)
+		self.logger.debug("self._OutdoorHumidityMinMax._Max._Value=%d" % self._OutdoorHumidityMinMax._Max._Value)
+		self.logger.debug("self._WindSpeed=%d" % self._WindSpeed)
+		self.logger.debug("self._Gust=%d" % self._Gust)
+		self.logger.debug("self._PressureRelative_hPa=%d" % self._PressureRelative_hPa)
+		self.logger.debug("self._PressureRelative_inHg=%d" % self._PressureRelative_inHg)
+		print "_WeatherState=%d _WeatherTendency=%d" % (self._WeatherState, self._WeatherTendency)
+		print "_IndoorTemp=%7.2f _Min=%7.2f _Max=%7.2f" % (self._IndoorTemp, self._IndoorTempMinMax._Min._Value, self._IndoorTempMinMax._Max._Value)
+		print "_IndoorHumidity=%7.2f _Min=%7.2f _Max=%7.2f" % (self._IndoorHumidity, self._IndoorHumidityMinMax._Min._Value,self._IndoorHumidityMinMax._Max._Value)
+		print "_OutdoorTemp=%7.2f _Min=%7.2f Max=%7.2f" % (self._OutdoorTemp, self._OutdoorTempMinMax._Min._Value, self._OutdoorTempMinMax._Max._Value)
+		print "_OutdoorHumidity=%7.2f _Min=%7.2f _Max=%7.2f" % (self._OutdoorHumidity, self._OutdoorHumidityMinMax._Min._Value,self._OutdoorHumidityMinMax._Max._Value)
+		print "_Windchill=%7.2f _Min=%7.2f _Max=%7.2f" % (self._Windchill, self._WindchillMinMax._Min._Value, self._WindchillMinMax._Max._Value)
+		print "_Dewpoint=%7.2f _Min=%7.2f _Max=%7.2f" % (self._Dewpoint, self._DewpointMinMax._Min._Value, self._DewpointMinMax._Max._Value)
+		print "_WindSpeed=%7.2f _Gust=%7.2f" % (self._WindSpeed * 3.6,self._Gust * 3.6)
+		print "w=%d , w1=%d, w2=%d, w3=%d, w4=%d, w5=%d" % (w, w1, w2, w3, w4, w5)
+		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (windDirMap[w], windDirMap[w1], windDirMap[w2], windDirMap[w3], windDirMap[w4], windDirMap[w5])
+#		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (windDirMap_c[w], windDirMap_c[w1], windDirMap_c[w2], windDirMap_c[w3], windDirMap_c[w4], windDirMap_c[w5])
+		print "g=%d , g1=%d, g2=%d, g3=%d, g4=%d, g5=%d" % (g, g1, g2, g3, g4, g5)
+		print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (windDirMap[g], windDirMap[g1], windDirMap[g2], windDirMap[g3], windDirMap[g4], windDirMap[g5])
+#		print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (windDirMap_c[g], windDirMap_c[g1], windDirMap_c[g2], windDirMap_c[g3], windDirMap_c[g4], windDirMap_c[g5])
+		print "self._PressureRelative_hPa", self._PressureRelative_hPa
+		print "self._PressureRelative_inHg", self._PressureRelative_inHg
