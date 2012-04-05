@@ -428,10 +428,8 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v55 + 2) = v54->m_status;
 		#  }
 		USBHardware.ReverseByteOrder(newbuf, pos + 134, 0xB);
-		#  v56 = USBHardware::To4Pre2Post(buf + 134);
-		#  thisa->_Rain1H = v56;
-		#  v57 = USBHardware::To4Pre2Post(buf + 137);
-		#  thisa->_Rain1HMax._Value = v57;
+		self._Rain1H = USBHardware.To4Pre2Post(newbuf,pos + 134);
+		self._Rain1HMax._Value = USBHardware.To4Pre2Post(newbuf,pos + 137);
 		#  v80 = thisa->_Rain1HMax._Value == CWeatherTraits::RainNP();
 		#  thisa->_Rain1HMax._IsError = v80;
 		#  v80 = thisa->_Rain1HMax._Value == CWeatherTraits::RainOFL();
@@ -449,8 +447,7 @@ class CCurrentWeatherData(object):
 		#    *((_DWORD *)v59 + 2) = v58->m_status;
 		#  }
 		USBHardware.ReverseByteOrder(newbuf, pos + 145, 9);
-		#  v60 = USBHardware::To4Pre3Post(buf + 145);
-		#  thisa->_RainTotal = v60;
+		self._RainTotal = USBHardware.To4Pre3Post(newbuf, pos + 145);
 		#  v61 = USBHardware::ToDateTime((ATL::COleDateTime *)&v97, buf + 148, 0);
 		#  v62 = (char *)&thisa->_LastRainReset;
 		#  LODWORD(thisa->_LastRainReset.m_dt) = LODWORD(v61->m_dt);
@@ -618,6 +615,8 @@ class CCurrentWeatherData(object):
 		self.logger.debug("self._Gust=%d" % self._Gust)
 		self.logger.debug("self._PressureRelative_hPa=%d" % self._PressureRelative_hPa)
 		self.logger.debug("self._PressureRelative_inHg=%d" % self._PressureRelative_inHg)
+		self.logger.debug("self._Rain1H=%d" % self._Rain1H)
+		self.logger.debug("self._Rain1HMax._Value=%d" % self._Rain1HMax._Value)
 		print "_WeatherState=%d _WeatherTendency=%d" % (self._WeatherState, self._WeatherTendency)
 		print "_IndoorTemp=     %7.2f _Min=%7.2f _Max=%7.2f" % (self._IndoorTemp, self._IndoorTempMinMax._Min._Value, self._IndoorTempMinMax._Max._Value)
 		print "_IndoorHumidity= %7.2f _Min=%7.2f _Max=%7.2f" % (self._IndoorHumidity, self._IndoorHumidityMinMax._Min._Value,self._IndoorHumidityMinMax._Max._Value)
@@ -626,6 +625,9 @@ class CCurrentWeatherData(object):
 		print "_Windchill=      %7.2f _Min=%7.2f _Max=%7.2f" % (self._Windchill, self._WindchillMinMax._Min._Value, self._WindchillMinMax._Max._Value)
 		print "_Dewpoint=       %7.2f _Min=%7.2f _Max=%7.2f" % (self._Dewpoint, self._DewpointMinMax._Min._Value, self._DewpointMinMax._Max._Value)
 		print "_WindSpeed=%7.2f _Gust=%7.2f" % (self._WindSpeed * 3.6,self._Gust * 3.6)
+		print "_Rain1H=%7.2f" % self._Rain1H
+		print "_Rain1HMax._Value=%7.2f" % self._Rain1HMax._Value
+		print "_RainTotal=%7.2f" % self._RainTotal
 		print "w=%d , w1=%d, w2=%d, w3=%d, w4=%d, w5=%d" % (w, w1, w2, w3, w4, w5)
 		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (windDirMap[w], windDirMap[w1], windDirMap[w2], windDirMap[w3], windDirMap[w4], windDirMap[w5])
 		print "g=%d , g1=%d, g2=%d, g3=%d, g4=%d, g5=%d" % (g, g1, g2, g3, g4, g5)

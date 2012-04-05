@@ -47,8 +47,8 @@ class WS28xxStation(object):
 		ID[0]=0
 		HeavyWeatherService.CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
 
-		HeavyWeatherService.CDataStore.setDeviceRegistered(myCCommunicationService.DataStore, True); #temp hack
-		HeavyWeatherService.CDataStore.setDeviceId(myCCommunicationService.DataStore, 0x32); #temp hack
+		HeavyWeatherService.CDataStore.setDeviceRegistered(myCCommunicationService.DataStore, True);	#temp hack
+		HeavyWeatherService.CDataStore.setDeviceId(myCCommunicationService.DataStore, 0x32); 		#temp hack
 
 		Weather = [0]
 		Weather[0]=[0]
@@ -91,6 +91,12 @@ class WS28xxStation(object):
 				if abs(CWeatherTraits.PressureNP() - myCCommunicationService.DataStore.CurrentWeather._PressureRelative_hPa ) > 0.001:
 					e = generate_event('press')
 					e.value = myCCommunicationService.DataStore.CurrentWeather._PressureRelative_hPa
+					send_event(e)
+
+				if CWeatherTraits.RainNP() != myCCommunicationService.DataStore.CurrentWeather._RainTotal:
+					e = generate_event('rain')
+					e.rate = myCCommunicationService.DataStore.CurrentWeather._Rain1H
+					e.total = myCCommunicationService.DataStore.CurrentWeather._RainTotal
 					send_event(e)
 
 				if CWeatherTraits.WindNP() != myCCommunicationService.DataStore.CurrentWeather._WindSpeed:

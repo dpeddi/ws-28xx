@@ -717,7 +717,6 @@ class CCommunicationService(object):
 
 	def buildTimeFrame(self,Buffer,checkMinuteOverflow):
 		self.logger.debug("checkMinuteOverflow=%x" % checkMinuteOverflow)
-		print "buildTimeFrame"
 
 		DeviceCheckSum = CDataStore.GetDeviceConfigCS(self.DataStore)
 		now = time.time()
@@ -757,7 +756,6 @@ class CCommunicationService(object):
 			new_Buffer[0][11] = (tm[0] - 2000) // 10                          #year
 			self.Regenerate = 1
 			self.TimeSent = 1
-			print new_Buffer[0]
 			Buffer[0]=new_Buffer[0]
 			Length = 0x0c
 		return Length
@@ -1425,8 +1423,8 @@ class CCommunicationService(object):
 					#    00000000: dd 0a 01 fe 18 f6 aa 01 2a a2 4d 00 00 87 16 
 					TransceiverID = buffer[0][0] << 8;
 					TransceiverID += buffer[0][1];
-					print "GenerateResponse: TransceiverID", TransceiverID
-					print "GenerateResponse: Length[0]",Length[0]
+					#print "GenerateResponse: TransceiverID", TransceiverID
+					#print "GenerateResponse: Length[0]",Length[0]
 					#print "Buffer[0]", Buffer[0]
 					if (    Length[0]            !=    6
 					    or  Buffer[0][0]         != 0xf0

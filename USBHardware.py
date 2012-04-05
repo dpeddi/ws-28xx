@@ -18,19 +18,19 @@ class USBHardware(object):
 				or (buffer[0][start+1] & 0xF) == 15
 		return result
 
-	def IsOFL5(self, buffer, startOnLowNibble):
+	def IsOFL5(self, buffer, start, startOnLowNibble):
 		if ( startOnLowNibble ):
-			result =     (buffer[0][0] & 0xF) == 15 \
-				  or (buffer[0][0] >>  4) == 15 \
-				  or (buffer[0][1] & 0xF) == 15 \
-				  or (buffer[0][1] >>  4) == 15 \
-				  or (buffer[0][2] & 0xF) == 15
+			result =     (buffer[0][start+0] & 0xF) == 15 \
+				  or (buffer[0][start+0] >>  4) == 15 \
+				  or (buffer[0][start+1] & 0xF) == 15 \
+				  or (buffer[0][start+1] >>  4) == 15 \
+				  or (buffer[0][start+2] & 0xF) == 15
 		else:
-			result =     (buffer[0][0] >>  4) == 15 \
-				  or (buffer[0][1] & 0xF) == 15 \
-				  or (buffer[0][1] >>  4) == 15 \
-				  or (buffer[0][2] & 0xF) == 15 \
-				  or (buffer[0][2] >>  4) == 15
+			result =     (buffer[0][start+0] >>  4) == 15 \
+				  or (buffer[0][start+1] & 0xF) == 15 \
+				  or (buffer[0][start+1] >>  4) == 15 \
+				  or (buffer[0][start+2] & 0xF) == 15 \
+				  or (buffer[0][start+2] >>  4) == 15
 		return result
 
 	def IsErr2(self,buffer,start,startOnLowNibble):
@@ -43,29 +43,29 @@ class USBHardware(object):
 			result = (buffer[0][start+0] >> 4) >= 10 and buffer[0][start+0] >> 4 != 15 or (buffer[0][start+1] & 0xF) >= 10 and (buffer[0][start+1] & 0xF) != 15;
 		return result
 
-	def IsErr5(self,buffer,startOnLowNibble):
+	def IsErr5(self,buffer,start,startOnLowNibble):
 		if ( startOnLowNibble ):
-			result =     (buffer[0][0] & 0xF) >= 10 \
-				 and (buffer[0][0] & 0xF) != 15 \
-				  or (buffer[0][0] >>  4) >= 10 \
-				 and (buffer[0][0] >>  4) != 15 \
-				  or (buffer[0][1] & 0xF) >= 10 \
-				 and (buffer[0][1] & 0xF) != 15 \
-				  or (buffer[0][1] >>  4) >= 10 \
-				 and (buffer[0][1] >>  4) != 15 \
-				  or (buffer[0][2] & 0xF) >= 10 \
-				 and (buffer[0][2] & 0xF) != 15
+			result =     (buffer[0][start+0] & 0xF) >= 10 \
+				 and (buffer[0][start+0] & 0xF) != 15 \
+				  or (buffer[0][start+0] >>  4) >= 10 \
+				 and (buffer[0][start+0] >>  4) != 15 \
+				  or (buffer[0][start+1] & 0xF) >= 10 \
+				 and (buffer[0][start+1] & 0xF) != 15 \
+				  or (buffer[0][start+1] >>  4) >= 10 \
+				 and (buffer[0][start+1] >>  4) != 15 \
+				  or (buffer[0][start+2] & 0xF) >= 10 \
+				 and (buffer[0][start+2] & 0xF) != 15
 		else:
-			result =     (buffer[0][0] >>  4) >= 10 \
-				 and (buffer[0][0] >>  4) != 15 \
-				  or (buffer[0][1] & 0xF) >= 10 \
-				 and (buffer[0][1] & 0xF) != 15 \
-				  or (buffer[0][1] >>  4) >= 10 \
-				 and (buffer[0][1] >>  4) != 15 \
-				  or (buffer[0][2] & 0xF) >= 10 \
-				 and (buffer[0][2] & 0xF) != 15 \
-				  or (buffer[0][2] >>  4) >= 10 \
-				 and (buffer[0][2] >>  4) != 15
+			result =     (buffer[0][start+0] >>  4) >= 10 \
+				 and (buffer[0][start+0] >>  4) != 15 \
+				  or (buffer[0][start+1] & 0xF) >= 10 \
+				 and (buffer[0][start+1] & 0xF) != 15 \
+				  or (buffer[0][start+1] >>  4) >= 10 \
+				 and (buffer[0][start+1] >>  4) != 15 \
+				  or (buffer[0][start+2] & 0xF) >= 10 \
+				 and (buffer[0][start+2] & 0xF) != 15 \
+				  or (buffer[0][start+2] >>  4) >= 10 \
+				 and (buffer[0][start+2] >>  4) != 15
 		return result
 
 	def ToCurrentTempBytes(self,bufer,c, d):
@@ -89,10 +89,10 @@ class USBHardware(object):
 
 	def ToHumidity(self,buffer,start,startOnLowNibble):
 		self.logger.debug("")
-		if ( self.IsErr2(buffer, 0, startOnLowNibble) ):
+		if ( self.IsErr2(buffer, start+0, startOnLowNibble) ):
 			result = CWeatherTraits.HumidityNP();
 		else:
-			if ( self.IsOFL2(buffer, 0, startOnLowNibble) ):
+			if ( self.IsOFL2(buffer, start+0, startOnLowNibble) ):
 				result = CWeatherTraits.HumidityOFL()
 			else:
 				result = self.To2Pre(buffer, start, startOnLowNibble);
@@ -100,10 +100,10 @@ class USBHardware(object):
 
 	def ToTemperature(self,buffer, start, startOnLowNibble):
 		self.logger.debug("")
-		if ( self.IsErr5(buffer, startOnLowNibble) ):
+		if ( self.IsErr5(buffer, start+0, startOnLowNibble) ):
 			result = CWeatherTraits.TemperatureNP()
 		else:
-			if ( self.IsOFL5(buffer, startOnLowNibble) ):
+			if ( self.IsOFL5(buffer, start+0, startOnLowNibble) ):
 				result = CWeatherTraits.TemperatureOFL()
 			else:
 				if startOnLowNibble:
@@ -121,20 +121,37 @@ class USBHardware(object):
 				result = rawtemp - CWeatherTraits.TemperatureOffset()
 		return result;
 
-	def To4Pre2Post(self,buffer):
+	def To4Pre3Post(self,buffer,start):
 		self.logger.debug("")
-		if ( self.IsErr2(buffer,0,1) or self.IsErr2(buffer,1, 1) or self.IsErr2(buffer,2, 1) ):
-			result = CWeatherTraits.RainNP();
+		if ( self.IsErr5(buffer, start+0, 1) or self.IsErr2(buffer, start+2, 0) ):
+			result = CWeatherTraits.RainNP()
 		else:
-			if ( self.IsOFL2(buffer,0, 1) or self.IsOFL2(buffer, 1, 1) or self.IsOFL2(buffer, 2, 1) ):
+			if  ( self.IsOFL5(buffer, start+1, 1) or self.IsOFL2(buffer, start+2, 0) ):
 				result = CWeatherTraits.RainOFL()
 			else:
-				result  = (buffer[0][0] & 0xf)* 1     \
-					+ (buffer[0][0] >>  4)* 0.01  \
-					+ (buffer[0][1] & 0xf)* 0.1   \
-					+ (buffer[0][1] >>  4)*  1    \
-					+ (buffer[0][2] & 0xf)* 10    \
-					+ (buffer[0][2] >>  4)*100
+				result  = (buffer[0][start+0] & 0xf)*  0.001 \
+					+ (buffer[0][start+0] >>  4)*  0.01  \
+					+ (buffer[0][start+1] & 0xf)*  0.1   \
+					+ (buffer[0][start+1] >>  4)*   1    \
+					+ (buffer[0][start+2] & 0xf)*  10    \
+					+ (buffer[0][start+2] >>  4)* 100    \
+					+ (buffer[0][start+3] & 0xf)*1000
+		return result
+
+	def To4Pre2Post(self,buffer,start):
+		self.logger.debug("")
+		if ( self.IsErr2(buffer,start+0,1) or self.IsErr2(buffer,start+1, 1) or self.IsErr2(buffer, start+2, 1) ):
+			result = CWeatherTraits.RainNP();
+		else:
+			if ( self.IsOFL2(buffer,start+0, 1) or self.IsOFL2(buffer, start+1, 1) or self.IsOFL2(buffer, start+2, 1) ):
+				result = CWeatherTraits.RainOFL()
+			else:
+				result  = (buffer[0][start+0] & 0xf)*  0.01 \
+					+ (buffer[0][start+0] >>  4)*  0.1  \
+					+ (buffer[0][start+1] & 0xf)*   1   \
+					+ (buffer[0][start+1] >>  4)*  10   \
+					+ (buffer[0][start+2] & 0xf)* 100   \
+					+ (buffer[0][start+2] >>  4)*1000
 		return result
 
 	def ToWindspeed(self,buffer,start): #m/s
@@ -222,10 +239,10 @@ class USBHardware(object):
 		return ( self.ToPressure(buffer,start,1) , self.ToPressureInhg(buffer,start+2,0))
 
 	def ToPressure(self,buffer,start,startOnLowNibble):
-		if ( self.IsErr5(buffer, startOnLowNibble) ):
+		if ( self.IsErr5(buffer, start+0, startOnLowNibble) ):
 			result = CWeatherTraits.PressureNP();
 		else:
-			if ( self.IsOFL5(buffer, startOnLowNibble) ):
+			if ( self.IsOFL5(buffer, start+0, startOnLowNibble) ):
 				result = CWeatherTraits.PressureOFL();
 			else:
 				if ( startOnLowNibble ):
@@ -244,10 +261,10 @@ class USBHardware(object):
 		return result
 
 	def ToPressureInhg(self,buffer,start,startOnLowNibble):
-		if ( self.IsErr5(buffer, startOnLowNibble) ):
+		if ( self.IsErr5(buffer, start+0, startOnLowNibble) ):
 			rawresult = CWeatherTraits.PressureNP();
 		else:
-			if ( self.IsOFL5(buffer, startOnLowNibble) ):
+			if ( self.IsOFL5(buffer, start+0, startOnLowNibble) ):
 				rawresult = CWeatherTraits.PressureOFL()
 			else:
 				if ( startOnLowNibble ):
