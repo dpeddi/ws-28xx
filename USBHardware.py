@@ -81,9 +81,6 @@ class USBHardware(object):
 				+ (buffer[0][start+1] & 0xf)* 10
 		return rawpre
 
-	def ToPressureInhg(buffer, startOnLowNibble):
-		self.logger.debug("")
-
 	def ToRainAlarmBytes(buffer,alarm):
 		self.logger.debug("")
 
@@ -218,7 +215,7 @@ class USBHardware(object):
 
 	def ReadWindDirectionShared(self,buffer,start):
 		self.logger.debug("")
-		return (buffer[0][0+start] & 0xf, buffer[0][0+start] >> 4)
+		return (buffer[0][0+start] & 0xf, buffer[0][2+start] >> 4)
 
 	def ReadPressureShared(self,buffer,start):
 		self.logger.debug("")
