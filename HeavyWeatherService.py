@@ -717,6 +717,7 @@ class CCommunicationService(object):
 
 	def buildTimeFrame(self,Buffer,checkMinuteOverflow):
 		self.logger.debug("checkMinuteOverflow=%x" % checkMinuteOverflow)
+		print "buildTimeFrame"
 
 		DeviceCheckSum = CDataStore.GetDeviceConfigCS(self.DataStore)
 		now = time.time()
@@ -743,19 +744,20 @@ class CCommunicationService(object):
 			new_Buffer[0][2] = 0xc0
 			new_Buffer[0][3] = (DeviceCheckSum >>8)  & 0xFF #BYTE1(DeviceCheckSum);
 			new_Buffer[0][4] = (DeviceCheckSum >>0)  & 0xFF #DeviceCheckSum;
-			new_Buffer[0][5] = (tm[5] % 10) + (0x10 * tm[5] // 10); #sec
-			new_Buffer[0][6] = (tm[4] % 10) + (0x10 * tm[4] // 10); #min
-			new_Buffer[0][7] = (tm[3] % 10) + (0x10 * tm[3] // 10); #hour
-			#DayOfWeek = tm[7] - 1; #ole from 1 - 7 - 1=Sun... 0-6 0=Sun
-			DayOfWeek = tm[7];      #py  prom 0 - 6 - 0=Mon
+			new_Buffer[0][5] = (tm[5] % 10) + 0x10 * (tm[5] // 10); #sec
+			new_Buffer[0][6] = (tm[4] % 10) + 0x10 * (tm[4] // 10); #min
+			new_Buffer[0][7] = (tm[3] % 10) + 0x10 * (tm[3] // 10); #hour
+			#DayOfWeek = tm[6] - 1; #ole from 1 - 7 - 1=Sun... 0-6 0=Sun
+			DayOfWeek = tm[6];      #py  prom 0 - 6 - 0=Mon
 			#if ( DayOfWeek == 1 ): # this was for OLE::Time
 			#	DayOfWeek = 7;  # this was for OLE::Time
-			new_Buffer[0][8] = DayOfWeek % 10 + (0x10 *  tm[2] % 10)          #DoW + Day
-			new_Buffer[0][9] =  (tm[2] // 10) + (0x10 *  tm[1] % 10)          #day + month
-			new_Buffer[0][10] = (tm[1] // 10) + (0x10 * (tm[0] - 2000) % 10)  #month + year
+			new_Buffer[0][8] = DayOfWeek % 10 + 0x10 *  (tm[2] % 10)          #DoW + Day
+			new_Buffer[0][9] =  (tm[2] // 10) + 0x10 *  (tm[1] % 10)          #day + month
+			new_Buffer[0][10] = (tm[1] // 10) + 0x10 * ((tm[0] - 2000) % 10)  #month + year
 			new_Buffer[0][11] = (tm[0] - 2000) // 10                          #year
 			self.Regenerate = 1
 			self.TimeSent = 1
+			print new_Buffer[0]
 			Buffer[0]=new_Buffer[0]
 			Length = 0x0c
 		return Length
@@ -1222,7 +1224,6 @@ class CCommunicationService(object):
 		      newLength[0] = self.buildACKFrame(Buffer, 1, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
 		      CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
 		elif rt == 5 or rt == 6: #rtFirstConfig || #rtINVALID
-			print "5 - rtGetCurrent || 6 - rtINVALID"
 			newLength[0] = self.buildACKFrame(Buffer, 0, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
 
 		Length[0] = newLength[0]
