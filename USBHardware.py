@@ -215,11 +215,11 @@ class USBHardware(object):
 
 	def ReadWindDirectionShared(self,buffer,start):
 		self.logger.debug("")
-		return (buffer[0][0+start] & 0xf, buffer[0][2+start] >> 4)
+		return (buffer[0][0+start] & 0xf, buffer[0][start] >> 4)
 
 	def ReadPressureShared(self,buffer,start):
 		self.logger.debug("")
-		return ( self.ToPressure(buffer,start,1) , self.ToPressureInhg(buffer,start,0))
+		return ( self.ToPressure(buffer,start,1) , self.ToPressureInhg(buffer,start+2,0))
 
 	def ToPressure(self,buffer,start,startOnLowNibble):
 		if ( self.IsErr5(buffer, startOnLowNibble) ):
