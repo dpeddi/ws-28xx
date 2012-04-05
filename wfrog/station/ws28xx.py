@@ -76,12 +76,6 @@ class WS28xxStation(object):
 					e.value = myCCommunicationService.DataStore.CurrentWeather._IndoorHumidity
 					send_event(e)
 
-				#if abs(CWeatherTraits.HumidityNP() - myCCommunicationService.DataStore.CurrentWeather._IndoorHumidity ) > 0.001:
-				#	e = generate_event('press')
-				#	e.sensor = 0
-				#	e.value = myCCommunicationService.DataStore.CurrentWeather._IndoorHumidity
-				#	send_event(e)
-
 				if abs(CWeatherTraits.TemperatureNP() - myCCommunicationService.DataStore.CurrentWeather._OutdoorTemp ) > 0.001:
 					e = generate_event('temp')
 					e.sensor = 1
@@ -94,10 +88,9 @@ class WS28xxStation(object):
 					e.value = myCCommunicationService.DataStore.CurrentWeather._OutdoorHumidity
 					send_event(e)
 
-				if abs(CWeatherTraits.HumidityNP() - myCCommunicationService.DataStore.CurrentWeather._OutdoorHumidity ) > 0.001:
+				if abs(CWeatherTraits.PressureNP() - myCCommunicationService.DataStore.CurrentWeather._PressureRelative_hPa ) > 0.001:
 					e = generate_event('press')
-					e.sensor = 1
-					e.value = myCCommunicationService.DataStore.CurrentWeather._OutdoorHumidity
+					e.value = myCCommunicationService.DataStore.CurrentWeather._PressureRelative_hPa
 					send_event(e)
 
 				if CWeatherTraits.WindNP() != myCCommunicationService.DataStore.CurrentWeather._WindSpeed:

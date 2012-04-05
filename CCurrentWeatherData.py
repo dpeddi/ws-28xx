@@ -12,10 +12,6 @@ USBHardware = USBHardware.USBHardware()
 windDirMap = { 0:"N", 1:"NNE", 2:"NE", 3:"ENE", 4:"E", 5:"ESE", 6:"SE", 7:"SSE",
               8:"S", 9:"SSW", 10:"SW", 11:"WSW", 12:"W", 13:"WNW", 14:"NW", 15:"NWN", 16:"err", 17:"inv" }
 
-#I have my wind sensor not oriented to south so I need a correction map
-windDirMap_c = { 4:"N", 5:"NNE", 6:"NE", 7:"ENE", 8:"E", 9:"ESE", 10:"SE", 11:"SSE",
-              12:"S", 13:"SSW", 14:"SW", 15:"WSW",  0:"W",  1:"WNW",  2:"NW",  3:"NWN", 16:"err", 17:"inv" }
-
 class CCurrentWeatherData(object):
 
 	def __init__(self):
@@ -544,9 +540,9 @@ class CCurrentWeatherData(object):
 		#    &thisa->_GustDirection4,
 		#    &thisa->_GustDirection5);
 		USBHardware.ReverseByteOrder(newbuf, pos + 184, 0x19)
-		self._PressureRelative_hPa, self._PressureRelative_inHg = USBHardware.ReadPressureShared(newbuf, pos + 184)
-		(min_hPa,min_inHg) = USBHardware.ReadPressureShared(newbuf, pos + 189)
-		(max_hPa,max_inHg) = USBHardware.ReadPressureShared(newbuf, pos + 194)
+		(self._PressureRelative_hPa, self._PressureRelative_inHg) = USBHardware.ReadPressureShared(newbuf, pos + 184)
+		(self._PressureRelative_hPaMinMax._Min._Value,self._PressureRelative_inHgMinMax._Min._Value) = USBHardware.ReadPressureShared(newbuf, pos + 189)
+		(self._PressureRelative_hPaMinMax._Max._Value,self._PressureRelative_inHgMinMax._Max._Value) = USBHardware.ReadPressureShared(newbuf, pos + 194)
 		#  thisa->_PressureRelative_hPaMinMax._Min._Value = CWeatherTraits::PressureOFL();
 		#  thisa->_PressureRelative_hPaMinMax._Min._IsError = 1;
 		#  thisa->_PressureRelative_hPaMinMax._Min._IsOverflow = 1;
@@ -632,9 +628,7 @@ class CCurrentWeatherData(object):
 		print "_WindSpeed=%7.2f _Gust=%7.2f" % (self._WindSpeed * 3.6,self._Gust * 3.6)
 		print "w=%d , w1=%d, w2=%d, w3=%d, w4=%d, w5=%d" % (w, w1, w2, w3, w4, w5)
 		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (windDirMap[w], windDirMap[w1], windDirMap[w2], windDirMap[w3], windDirMap[w4], windDirMap[w5])
-#		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (windDirMap_c[w], windDirMap_c[w1], windDirMap_c[w2], windDirMap_c[w3], windDirMap_c[w4], windDirMap_c[w5])
 		print "g=%d , g1=%d, g2=%d, g3=%d, g4=%d, g5=%d" % (g, g1, g2, g3, g4, g5)
 		print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (windDirMap[g], windDirMap[g1], windDirMap[g2], windDirMap[g3], windDirMap[g4], windDirMap[g5])
-#		print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (windDirMap_c[g], windDirMap_c[g1], windDirMap_c[g2], windDirMap_c[g3], windDirMap_c[g4], windDirMap_c[g5])
 		print "self._PressureRelative_hPa", self._PressureRelative_hPa
 		print "self._PressureRelative_inHg", self._PressureRelative_inHg

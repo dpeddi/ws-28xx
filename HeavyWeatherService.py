@@ -824,7 +824,7 @@ class CCommunicationService(object):
 		return 9
 
 	def handleWsAck(self,Buffer,Length):
-		self.logger.error("")
+		self.logger.debug("")
 		#3 = ATL::COleDateTime::GetTickCount(&result);
 		CDataStore.setLastSeen(self.DataStore, time.time());
 		#std::bitset<4>::bitset<4>(&BatteryStat, (*Buffer)[2] & 0xF);
@@ -900,7 +900,7 @@ class CCommunicationService(object):
 		#Length = 0;
 
 	def handleConfig(self,Buffer,Length):
-		self.logger.error("")
+		self.logger.debug("")
 		newBuffer=[0]
 		newBuffer[0] = Buffer[0]
 		newLength = [0]
@@ -1091,7 +1091,7 @@ class CCommunicationService(object):
 		Length[0] = newLength[0]
 
 	def handleCurrentData(self,Buffer,Length):
-		self.logger.error("")
+		self.logger.debug("")
 
 		newBuffer = [0]
 		newBuffer[0] = Buffer[0]
@@ -1113,35 +1113,29 @@ class CCommunicationService(object):
 		HistoryIndex = CDataStore.getLastHistoryIndex(self.DataStore);
 
 		if   rt == 0: #rtGetCurrent
-			print "0 - rtGetCurrent"
 			CDataStore.setRequestState(self.DataStore, ERequestState.rsFinished); #2
 			CDataStore.RequestNotify(self.DataStore);
 			newLength[0] = self.buildACKFrame(newBuffer, 0, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 		elif rt == 2: #rtGetConfig
-			print "2 - rtGetConfig"
 			newLength[0] = self.buildACKFrame(newBuffer, 3, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 			CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning); #1
 		elif rt == 3: #rtSetConfig
-			print "3 - rtSetConfig"
 			newLength[0] = self.buildACKFrame(newBuffer, 2, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 			CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning); #1
 		elif rt == 1: #rtGetHistory
-			print "1 - rtGetHistory"
 			newLength[0] = self.buildACKFrame(newBuffer, 4, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 			CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning); #1
 		elif rt == 4: #rtSetTime
-			print "4 - rtSetTime"
 			newLength[0] = self.buildACKFrame(newBuffer, 1, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 			CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning); #1
 		elif rt == 5 or rt == 6: #rtFirstConfig || #rtINVALID
-			print "5 - rtGetCurrent || 6 - rtINVALID"
 			newLength[0] = self.buildACKFrame(newBuffer, 0, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 
 		Length[0] = newLength[0]
 		Buffer[0] = newBuffer[0]
 
 	def handleHistoryData(self,Buffer,Length):
-		self.logger.error("")
+		self.logger.debug("")
 		newBuffer = [0]
 		newBuffer[0] = Buffer[0]
 		newLength = [0]
@@ -1235,7 +1229,7 @@ class CCommunicationService(object):
 		Buffer[0] = newBuffer[0]
 
 	def handleNextAction(self,Buffer,Length):
-		self.logger.error("")
+		self.logger.debug("")
 		newBuffer = [0]
 		newBuffer[0] = Buffer[0]
 		newLength = [0]
@@ -1250,7 +1244,7 @@ class CCommunicationService(object):
 		Quality = Buffer[0][3] & 0x7F;
 		CDataStore.setLastLinkQuality(self.DataStore, Quality);
 		if (Buffer[0][2] & 0xF) == 2: #(CWeatherStationConfig *)
-			self.logger.error("handleNextAction Buffer[2] == 2")
+			self.logger.debug("handleNextAction Buffer[2] == 2")
 		#	v16 = CDataStore::getFrontEndConfig(self.DataStore, &result);
 		#	Data = v16;
 		#	[0]v24 = 0;
@@ -1259,10 +1253,10 @@ class CCommunicationService(object):
 		#	CWeatherStationConfig::_CWeatherStationConfig(&result);
 		else:
 			if (Buffer[0][2] & 0xF) == 3: #(CWeatherStationConfig *)
-				self.logger.error("handleNextAction Buffer[2] == 3")
+				self.logger.debug("handleNextAction Buffer[2] == 3")
 				newLength[0] = self.buildTimeFrame(newBuffer, 1);
 			else:
-				self.logger.error("handleNextAction Buffer[2] == %x" % (Buffer[0][2] & 0xF))
+				self.logger.debug("handleNextAction Buffer[2] == %x" % (Buffer[0][2] & 0xF))
 				if   rt == 0: #rtGetCurrent
 					newLength[0] = self.buildACKFrame(newBuffer, 5, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
@@ -1287,7 +1281,7 @@ class CCommunicationService(object):
 		Buffer[0] = newBuffer[0]
 
 	def CCommunicationService(self):
-		self.logger.error("")
+		self.logger.debug("")
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.IFMODE]     = 0x00;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.MODULATION] = 0x41;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.ENCODING]   = 0x07;
@@ -1345,7 +1339,7 @@ class CCommunicationService(object):
 		child.start()
 
 	def caluculateFrequency(self,Frequency):
-		self.logger.error("")
+		self.logger.debug("")
 		FreqVal =  long(Frequency / 16000000.0 * 16777216.0);
 		FreqCorrection = [None]
 		if sHID.ReadConfigFlash(0x1F5, 4, FreqCorrection):
@@ -1384,7 +1378,7 @@ class CCommunicationService(object):
 				self.logger.debug("ID:%x" % ID)
 
 				if ID == RegisterdID:
-					print ((Buffer[0][2] & 0xE0) - 0x20)
+					#print ((Buffer[0][2] & 0xE0) - 0x20)
 					responseType = (Buffer[0][2] & 0xE0) - 0x20
 					self.logger.debug("Length %x RegisteredID x%x responseType: x%x" % (Length[0], RegisterdID, responseType))
 					if responseType == 0x00:
