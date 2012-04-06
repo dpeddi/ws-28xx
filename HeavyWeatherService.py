@@ -11,6 +11,11 @@
 #self._WeatherState 1     self._WeatherTendency 2  ->
 #self._WeatherState 2     self._WeatherTendency 1  -> arrow up - sunny
 
+#forecastMap = { 0:"Partly Cloudy", 1:"Rainy", 2:"Cloudy", 3:"Sunny",  #copied from wmrs200.py
+#                4:"Clear Night", 5:"Snowy",                           #copied from wmrs200.py
+#                6:"Partly Cloudy Night", 7:"Unknown7" }               #copied from wmrs200.py
+#trends =      { 0:"Stable", 1:"Rising", 2:"Falling", 3:"Undefined" }  #copied from wmrs200.py
+
 import logging
 import traceback
 
@@ -213,7 +218,7 @@ class CDataStore(object):
 	class TLastStat(object):
 		# void __thiscall CDataStore::TLastStat::TLastStat(CDataStore::TLastStat *this);
 		def __init__(self):
-			self.LastBatteryStatus = None
+			self.LastBatteryStatus = [0]
 			self.LastHistoryIndex = 0
 			self.LastLinkQuality = 0
 			self.OutstandingHistorySets = 0
@@ -345,6 +350,11 @@ class CDataStore(object):
 	def getLastSeen(self):
 		self.logger.debug("LastSeen=%d",self.LastSeen)
 		return self.LastSeen
+
+	def setLastBatteryStatus(self, BatteryStat):
+		self.logger.debug("")
+		print "Battery 3=%d 0=%d 1=%d 2=%d" % (testBit(BatteryStat,3),testBit(BatteryStat,0),testBit(BatteryStat,1),testBit(BatteryStat,2))
+		self.LastStat.LastBatteryStatus = BatteryStat
 
 	def setCurrentWeather(self,Data):
 		self.logger.debug("")
@@ -499,14 +509,10 @@ class CDataStore(object):
 					ID[0] = self.getDeviceId();
 					self.Request.Type = ERequestType.rtINVALID #6;
 					self.Request.State = ERequestState.rsINVALID #8;
-			#		v23 = 0;
-			#		v30 = -1;
 					print "FirstTimeConfig found an ID"
 				else:
 					self.Request.Type = ERequestType.rtINVALID #6;
 					self.Request.State = ERequestState.rsINVALID #8;
-			#		v24 = 1;
-			#		v30 = -1;
 					print "FirstTimeConfig failed"
 			#else:
 			#	self.Request.Type = 6;
@@ -831,9 +837,8 @@ class CCommunicationService(object):
 		self.logger.debug("")
 		#3 = ATL::COleDateTime::GetTickCount(&result);
 		CDataStore.setLastSeen(self.DataStore, time.time());
-		#std::bitset<4>::bitset<4>(&BatteryStat, (*Buffer)[2] & 0xF);
-		#v5 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#CDataStore::setLastBatteryStatus(v5, &BatteryStat);
+		BatteryStat = (Buffer[0][2] & 0xF);
+		CDataStore.setLastBatteryStatus(self.DataStore, BatteryStat);
 		Quality = Buffer[0][3] & 0x7F;
 		CDataStore.setLastLinkQuality(self.DataStore, Quality);
 		ReceivedCS = (Buffer[0][4] << 8) + Buffer[0][5];
@@ -989,10 +994,8 @@ class CCommunicationService(object):
 			#v43 = (CDataStore::ERequestState)&now;
 			#v9 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 			#CDataStore::setLastSeen(self.DataStore, (ATL::COleDateTime *)v43);
-			#v43 = (*Buffer)[2] & 0xF;
-			#std::bitset<4>::bitset<4>(&BatteryStat, v43);
-			#v43 = (CDataStore::ERequestState)&BatteryStat;
-			#CDataStore::setLastBatteryStatus(self.DataStore, (std::bitset<4> *)v43);
+			BatteryStat = (newBuffer[0][2] & 0xF);
+			CDataStore.setLastBatteryStatus(self.DataStore, BatteryStat);
 			Quality = newBuffer[0][3] & 0x7F
 			CDataStore.setLastLinkQuality(self.DataStore, Quality)
 			#FrontCS = CDataStore::GetFrontEndConfigCS(self.DataStore);
@@ -1105,8 +1108,8 @@ class CCommunicationService(object):
 		#print "CurrentData", Buffer[0] #//fixme
 		CDataStore.setLastSeen(self.DataStore, time.time());
 		CDataStore.setLastCurrentWeatherTime(self.DataStore, time.time())
-		#std::bitset<4>::bitset<4>(&BatteryStat, (*Buffer)[2] & 0xF);
-		#CDataStore::setLastBatteryStatus(v5, &BatteryStat);
+		BatteryStat = (Buffer[0][2] & 0xF);
+		CDataStore.setLastBatteryStatus(self.DataStore, BatteryStat);
 		Quality = Buffer[0][3] & 0x7F;
 		CDataStore.setLastLinkQuality(self.DataStore, Quality);
 		CDataStore.setCurrentWeather(self.DataStore, Data);
@@ -1147,9 +1150,8 @@ class CCommunicationService(object):
 		#ATL::COleDateTime::GetTickCount(&now);
 		#v3 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 		CDataStore.setLastSeen(self.DataStore, time.time());
-		#std::bitset<4>::bitset<4>(&BatteryStat, (*Buffer)[2] & 0xF);
-		#v4 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#CDataStore::setLastBatteryStatus(v4, &BatteryStat);
+		BatteryStat = (Buffer[0][2] & 0xF);
+		CDataStore.setLastBatteryStatus(self.DataStore, BatteryStat);
 		Quality = Buffer[0][3] & 0x7F;
 		CDataStore.setLastLinkQuality(self.DataStore, Quality);
 		LatestHistoryAddres = ((((Buffer[0][6] & 0xF) << 8) | Buffer[0][7]) << 8) | Buffer[0][8];
