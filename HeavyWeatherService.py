@@ -1144,7 +1144,6 @@ class CCommunicationService(object):
 		newLength = [0]
 		#CHistoryDataSet::CHistoryDataSet(&Data, &(*Buffer)[12]);
 		#ATL::COleDateTime::GetTickCount(&now);
-		#v3 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 		CDataStore.setLastSeen(self.DataStore, time.time());
 		BatteryStat = (Buffer[0][2] & 0xF);
 		CDataStore.setLastBatteryStatus(self.DataStore, BatteryStat);
