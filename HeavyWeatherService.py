@@ -1,11 +1,15 @@
 #!/usr/bin/python
 
-#self._WeatherState 2     -> arrow up - sunny
-#self._WeatherTendency 1  ->
+## This driver is based is based on reverse engineering of HeavyWeather 2800 v 1.54
+## All copyright goes to La Crosse Technology (c) 2008
 
-#self._WeatherState 1     ->
-#self._WeatherTendency 2  ->
+## Python port by Eddi De Pieri <eddi@depieri.net>
+## Use this software as your own risk.
+## Me and La Crosse Technology is not responsable for any damage using this software
 
+#self._WeatherState 0     self._WeatherTendency 2  -> arrow down - cloudy with light rain
+#self._WeatherState 1     self._WeatherTendency 2  ->
+#self._WeatherState 2     self._WeatherTendency 1  -> arrow up - sunny
 
 import logging
 import traceback

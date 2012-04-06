@@ -1,3 +1,4 @@
+## Copyright 2012 Eddi De Pieri <eddi@depieri.net>
 ##
 ##  This file is part of wfrog
 ##
@@ -14,11 +15,24 @@
 ##  You should have received a copy of the GNU General Public License
 ##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+##  To use this module you need to install somewhere 
+##  the library available at https://github.com/dpeddi/ws-28xx.git
+##  Before you start wfrog you need to export path to ws-28xx module
+##  export PYTHONPATH=$PYTHONPATH:/path/to/ws-28xx-module
+##  then you can start wfrog.
+
+##  The ws-28xx at github and driver are still under heavy
+##  development. Feel free to contribute.
+
 import time
 import logging
 
 def detect():
-	station = WS28xxStation()
+	try:
+		station = WS28xxStation()
+	except:
+		print "ws28xx: failed loading modules"
+		station = None
 	return station
 
 class WS28xxStation(object):
@@ -29,20 +43,16 @@ class WS28xxStation(object):
 	
 	def run(self, generate_event, send_event, context={}):
 
-		from ws28xxgit import HeavyWeatherService
-		from ws28xxgit import CWeatherTraits
+		import HeavyWeatherService
+		import CWeatherTraits
 
-		#import HeavyWeatherService
-		#print(dir(HeavyWeatherService))
-		
 		CWeatherTraits = CWeatherTraits.CWeatherTraits()
 
 		myCCommunicationService = HeavyWeatherService.CCommunicationService()
-		HeavyWeatherService.CDataStore.setCommModeInterval(myCCommunicationService.DataStore,3) #move me to setfrontendalive
+		HeavyWeatherService.CDataStore.setCommModeInterval(myCCommunicationService.DataStore,3)
 		time.sleep(5)
 
 		TimeOut = HeavyWeatherService.CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + HeavyWeatherService.CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
-		print "FirstTimeConfig Timeout=%d" % TimeOut
 		ID=[0]
 		ID[0]=0
 		HeavyWeatherService.CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
@@ -104,7 +114,6 @@ class WS28xxStation(object):
 					e.create_child('mean')
 					e.mean.speed = myCCommunicationService.DataStore.CurrentWeather._WindSpeed
 					e.mean.dir = myCCommunicationService.DataStore.CurrentWeather._WindDirection * 360 / 16
-					#if CWeatherTraits.WindNP() == myCCommunicationService.DataStore.CurrentWeather._Gust:
 					e.create_child('gust')
 					e.gust.speed = myCCommunicationService.DataStore.CurrentWeather._Gust
 					e.gust.dir = myCCommunicationService.DataStore.CurrentWeather._GustDirection * 360 / 16
