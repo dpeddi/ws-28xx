@@ -16,9 +16,6 @@ import CMinMaxMeasurement
 CWeatherTraits = CWeatherTraits.CWeatherTraits()
 USBHardware = USBHardware.USBHardware()
 
-windDirMap = { 0:"N", 1:"NNE", 2:"NE", 3:"ENE", 4:"E", 5:"ESE", 6:"SE", 7:"SSE",
-              8:"S", 9:"SSW", 10:"SW", 11:"WSW", 12:"W", 13:"WNW", 14:"NW", 15:"NWN", 16:"err", 17:"inv" }
-
 class CCurrentWeatherData(object):
 
 	def __init__(self):
@@ -637,8 +634,8 @@ class CCurrentWeatherData(object):
 		print "_Rain1HMax._Value=%7.2f" % self._Rain1HMax._Value
 		print "_RainTotal=%7.2f" % self._RainTotal
 		print "w=%d , w1=%d, w2=%d, w3=%d, w4=%d, w5=%d" % (w, w1, w2, w3, w4, w5)
-		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (windDirMap[w], windDirMap[w1], windDirMap[w2], windDirMap[w3], windDirMap[w4], windDirMap[w5])
+		print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (CWeatherTraits.windDirMap[w], CWeatherTraits.windDirMap[w1], CWeatherTraits.windDirMap[w2], CWeatherTraits.windDirMap[w3], CWeatherTraits.windDirMap[w4], CWeatherTraits.windDirMap[w5])
 		print "g=%d , g1=%d, g2=%d, g3=%d, g4=%d, g5=%d" % (g, g1, g2, g3, g4, g5)
-		print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (windDirMap[g], windDirMap[g1], windDirMap[g2], windDirMap[g3], windDirMap[g4], windDirMap[g5])
+		print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (CWeatherTraits.windDirMap[g], CWeatherTraits.windDirMap[g1], CWeatherTraits.windDirMap[g2], CWeatherTraits.windDirMap[g3], CWeatherTraits.windDirMap[g4], CWeatherTraits.windDirMap[g5])
 		print "_PressureRelative_hPa= %7.2f" % self._PressureRelative_hPa
 		print "_PressureRelative_inHg=%7.2f" % self._PressureRelative_inHg
