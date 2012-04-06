@@ -9,6 +9,9 @@
 
 class CWeatherTraits(object):
 
+	forecastMap = { 0:"Rainy", 1:"Sunny", 2:"Cloudy", 3:"Undefined" }
+	trends =      { 0:"Stable", 1:"Rising", 2:"Falling", 3:"Undefined" }
+
 	def TemperatureNP(self):
 		return 81.099998
 

@@ -7,15 +7,6 @@
 ## Use this software as your own risk.
 ## Me and La Crosse Technology is not responsable for any damage using this software
 
-#self._WeatherState 0     self._WeatherTendency 2  -> arrow down - cloudy with light rain
-#self._WeatherState 1     self._WeatherTendency 2  ->
-#self._WeatherState 2     self._WeatherTendency 1  -> arrow up - sunny
-
-#forecastMap = { 0:"Partly Cloudy", 1:"Rainy", 2:"Cloudy", 3:"Sunny",  #copied from wmrs200.py
-#                4:"Clear Night", 5:"Snowy",                           #copied from wmrs200.py
-#                6:"Partly Cloudy Night", 7:"Unknown7" }               #copied from wmrs200.py
-#trends =      { 0:"Stable", 1:"Rising", 2:"Falling", 3:"Undefined" }  #copied from wmrs200.py
-
 import logging
 import traceback
 
@@ -221,7 +212,7 @@ class CDataStore(object):
 			self.LastBatteryStatus = [0]
 			self.LastHistoryIndex = 0
 			self.LastLinkQuality = 0
-			self.OutstandingHistorySets = 0
+			self.OutstandingHistorySets = -1
 			self.WeatherClubTransmissionErrors = 0
 			self.LastCurrentWeatherTime = None
 			self.LastHistoryDataTime = None
@@ -455,6 +446,11 @@ class CDataStore(object):
 				self.Settings.TransceiverID = tid
 		self.logger.debug("self.Settings.TransceiverID=%x" % self.Settings.TransceiverID)
 
+	def setOutsatndingHistorySets(self,val):
+		self.logger.debug("val=%d" % val)
+		self.LastStat.OutstandingHistorySets = val
+		pass
+
 	def setTransceiverSerNo(self,inp):
 		self.logger.debug("inp=%s" % inp)
 		self.TransceiverSerNo = inp
@@ -490,7 +486,7 @@ class CDataStore(object):
 			self.Settings.DeviceRegistered = False;
 			self.Settings.DeviceId = -1;
 			self.LastStat.LastHistoryIndex = 0xffff;
-			self.LastStat.OutstandingHistorySets = None;
+			self.LastStat.OutstandingHistorySets = -1;
 
 			self.Request.Type = ERequestType.rtFirstConfig;
 			self.Request.State = 0;
@@ -1182,7 +1178,7 @@ class CCommunicationService(object):
 		#          if ( ATL::COleDateTime::operator__(v15, &LastHistTs) )
 		#          {
 		#            CDataStore::setOutsatndingHistorySets(self.DataStore, 0xFFFFFFFFu);
-		#            CDataStore::setLastHistoryIndex(self.DataStore, 0xFFFFFFFFu);
+		#             CDataStore.setLastHistoryIndex(self.DataStore, 0xFFFFFFFF);
 		#            ThisHistoryIndex = -1;
 		#            ATL::COleDateTime::COleDateTime(&InvalidDateTime);
 		#            ATL::COleDateTime::SetStatus(&InvalidDateTime, partial);
@@ -1203,11 +1199,10 @@ class CCommunicationService(object):
 			#CDataStore::setLastHistTimeStamp(self.DataStore, v21);
 			#CDataStore::addHistoryData(self.DataStore, &Data);
 			CDataStore.setLastHistoryIndex(self.DataStore, ThisHistoryIndex);
-			#if ( LatestHistoryIndex >= ThisHistoryIndex ):
-			#	CDataStore.setOutsatndingHistorySets(self.DataStore, LatestHistoryIndex - ThisHistoryIndex)
-			#else:
-			#	CDataStore.setOutsatndingHistorySets(self.DataStore, LatestHistoryIndex + 18 - ThisHistoryIndex)
-			pass
+			if ( LatestHistoryIndex >= ThisHistoryIndex ): #unused
+				CDataStore.setOutsatndingHistorySets(self.DataStore, LatestHistoryIndex - ThisHistoryIndex) #unused
+			else:
+				CDataStore.setOutsatndingHistorySets(self.DataStore, LatestHistoryIndex + 18 - ThisHistoryIndex) #unused
 
 		rt = CDataStore.getRequestType(self.DataStore)
 		DeviceCS = CDataStore.GetDeviceConfigCS(self.DataStore)
