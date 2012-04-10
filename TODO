@@ -1,4 +1,3 @@
 - Original windows driver may support multiple ws while this one implementation not..
 - Missing some Current Weather value (rain)
-- Some Current Weather value are wrong (pressure)
 - Missing handling Historic Data

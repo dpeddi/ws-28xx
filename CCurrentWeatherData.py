@@ -121,24 +121,20 @@ class CCurrentWeatherData(object):
 		else:
 			self._IndoorTempMinMax._Max._IsOverflow = 0
 
+		if 1 == 0:
 		#if ( CMinMaxMeasurement::IsMinValueError(&thisa->_IndoorTempMinMax)
 		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_IndoorTempMinMax) ):
 		#    ATL::COleDateTime::SetStatus(&thisa->_IndoorTempMinMax._Min._Time, partial);
-		#else:
-		#    v5 = USBHardware::ToDateTime(&result, buf + 10, 0);
-		#    v6 = (char *)&thisa->_IndoorTempMinMax._Min._Time;
-		#    LODWORD(thisa->_IndoorTempMinMax._Min._Time.m_dt) = LODWORD(v5->m_dt);
-		#    *((_DWORD *)v6 + 1) = HIDWORD(v5->m_dt);
-		#    *((_DWORD *)v6 + 2) = v5->m_status;
+			pass
+		else:
+			self._IndoorTempMinMax._Min._Time = USBHardware.ToDateTime(newbuf, pos + 10, 0);
+		if 1 == 0:
 		#if ( CMinMaxMeasurement::IsMaxValueError(&thisa->_IndoorTempMinMax)
 		#    || CMinMaxMeasurement::IsMaxValueOverflow(&thisa->_IndoorTempMinMax) ):
 		#    ATL::COleDateTime::SetStatus(&thisa->_IndoorTempMinMax._Max._Time, partial);
-		#else:
-		#    v7 = USBHardware::ToDateTime((ATL::COleDateTime *)&v82, buf + 15, 0);
-		#    v8 = (char *)&thisa->_IndoorTempMinMax._Max._Time;
-		#    LODWORD(thisa->_IndoorTempMinMax._Max._Time.m_dt) = LODWORD(v7->m_dt);
-		#    *((_DWORD *)v8 + 1) = HIDWORD(v7->m_dt);
-		#    *((_DWORD *)v8 + 2) = v7->m_status;
+			pass
+		else:
+			self._IndoorTempMinMax._Max._Time = USBHardware.ToDateTime(newbuf, pos + 15, 0);
 
 		USBHardware.ReverseByteOrder(newbuf, pos + 21, 0x12);
 		self._OutdoorTemp = USBHardware.ToTemperature(newbuf, pos + 21, 1)
@@ -163,24 +159,21 @@ class CCurrentWeatherData(object):
 		else:
 			self._OutdoorTempMinMax._Max._IsOverflow = 0
 
+		if 1 == 0:
 		#  if ( CMinMaxMeasurement::IsMinValueError(&thisa->_OutdoorTempMinMax)
 		#    || CMinMaxMeasurement::IsMinValueOverflow(&thisa->_OutdoorTempMinMax) ):
 		#    ATL::COleDateTime::SetStatus(&thisa->_OutdoorTempMinMax._Min._Time, partial);
-		#  else:
-		#    v12 = USBHardware::ToDateTime((ATL::COleDateTime *)&v83, buf + 28, 0);
-		#    v13 = (char *)&thisa->_OutdoorTempMinMax._Min._Time;
-		#    LODWORD(thisa->_OutdoorTempMinMax._Min._Time.m_dt) = LODWORD(v12->m_dt);
-		#    *((_DWORD *)v13 + 1) = HIDWORD(v12->m_dt);
-		#    *((_DWORD *)v13 + 2) = v12->m_status;
+			pass
+		else:
+			self._OutdoorTempMinMax._Min._Time = USBHardware.ToDateTime(newbuf, pos + 28, 0)
+		if 1 == 0:
 		#  if ( CMinMaxMeasurement::IsMaxValueError(&thisa->_OutdoorTempMinMax)
 		#    || CMinMaxMeasurement::IsMaxValueOverflow(&thisa->_OutdoorTempMinMax) ):
 		#    ATL::COleDateTime::SetStatus(&thisa->_OutdoorTempMinMax._Max._Time, partial);
-		#  else:
-		#    v14 = USBHardware::ToDateTime((ATL::COleDateTime *)&v84, buf + 33, 0);
-		#    v15 = (char *)&thisa->_OutdoorTempMinMax._Max._Time;
-		#    LODWORD(thisa->_OutdoorTempMinMax._Max._Time.m_dt) = LODWORD(v14->m_dt);
-		#    *((_DWORD *)v15 + 1) = HIDWORD(v14->m_dt);
-		#    *((_DWORD *)v15 + 2) = v14->m_status;
+			pass
+		else:
+			self._OutdoorTempMinMax._Max._Time = USBHardware.ToDateTime(newbuf, pos + 33, 0)
+
 		USBHardware.ReverseByteOrder(newbuf, pos + 39, 0x12);
 		self._Windchill = USBHardware.ToTemperature(newbuf, pos + 39, 1);
 		self._WindchillMinMax._Min._Value = USBHardware.ToTemperature(newbuf, pos + 41, 0);
@@ -288,6 +281,7 @@ class CCurrentWeatherData(object):
 			self._IndoorHumidityMinMax._Min._IsOverflow = 1
 		else:
 			self._IndoorHumidityMinMax._Min._IsOverflow = 0
+
 		self._IndoorHumidityMinMax._Max._Value = USBHardware.ToHumidity(newbuf, pos + 77, 1)
 		if self._IndoorHumidityMinMax._Max._Value == CWeatherTraits.HumidityNP():
 			self._IndoorHumidityMinMax._Max._IsError = 1
@@ -623,9 +617,9 @@ class CCurrentWeatherData(object):
 		self.logger.debug("_Rain1H=%d" % self._Rain1H)
 		self.logger.debug("_Rain1HMax._Value=%d" % self._Rain1HMax._Value)
 		print "_WeatherState=%s _WeatherTendency=%s" % ( CWeatherTraits.forecastMap[self._WeatherState], CWeatherTraits.trends[self._WeatherTendency])
-		print "_IndoorTemp=     %7.2f _Min=%7.2f _Max=%7.2f" % (self._IndoorTemp, self._IndoorTempMinMax._Min._Value, self._IndoorTempMinMax._Max._Value)
+		print "_IndoorTemp=     %7.2f _Min=%7.2f(%s) _Max=%7.2f(%s)" % (self._IndoorTemp, self._IndoorTempMinMax._Min._Value, self._IndoorTempMinMax._Min._Time, self._IndoorTempMinMax._Max._Value, self._IndoorTempMinMax._Max._Time)
 		print "_IndoorHumidity= %7.2f _Min=%7.2f _Max=%7.2f" % (self._IndoorHumidity, self._IndoorHumidityMinMax._Min._Value,self._IndoorHumidityMinMax._Max._Value)
-		print "_OutdoorTemp=    %7.2f _Min=%7.2f _Max=%7.2f" % (self._OutdoorTemp, self._OutdoorTempMinMax._Min._Value, self._OutdoorTempMinMax._Max._Value)
+		print "_OutdoorTemp=    %7.2f _Min=%7.2f(%s) _Max=%7.2f(%s)" % (self._OutdoorTemp, self._OutdoorTempMinMax._Min._Value, self._OutdoorTempMinMax._Min._Time, self._OutdoorTempMinMax._Max._Value, self._OutdoorTempMinMax._Max._Time)
 		print "_OutdoorHumidity=%7.2f _Min=%7.2f _Max=%7.2f" % (self._OutdoorHumidity, self._OutdoorHumidityMinMax._Min._Value,self._OutdoorHumidityMinMax._Max._Value)
 		print "_Windchill=      %7.2f _Min=%7.2f _Max=%7.2f" % (self._Windchill, self._WindchillMinMax._Min._Value, self._WindchillMinMax._Max._Value)
 		print "_Dewpoint=       %7.2f _Min=%7.2f _Max=%7.2f" % (self._Dewpoint, self._DewpointMinMax._Min._Value, self._DewpointMinMax._Max._Value)

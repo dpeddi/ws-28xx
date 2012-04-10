@@ -7,20 +7,24 @@
 ## Use this software as your own risk.
 ## Me and La Crosse Technology is not responsable for any damage using this software
 
-import logging
-import traceback
-
-import time
-import threading
-#import shelve 
-#import mmap #http://docs.python.org/library/mmap.html
-import USBHardware
-import sHID
-import CCurrentWeatherData
-from CWeatherStationConfig import CWeatherStationConfig
-import CWeatherTraits
+from configobj import ConfigObj
 from datetime import datetime
 from datetime import timedelta
+
+import logging
+import time
+import threading
+import traceback
+
+#import shelve 
+#import mmap #http://docs.python.org/library/mmap.html
+
+import USBHardware
+import CWeatherTraits
+import CHistoryDataSet
+import CCurrentWeatherData
+import sHID
+from CWeatherStationConfig import CWeatherStationConfig
 
 def handleError(self, record):
 	traceback.print_stack()
@@ -135,9 +139,8 @@ class EWindDirection:
 	 wdERR            = 0x10
 	 wdInvalid        = 0x11
 
-windDirMap = { 0:"N", 1:"NNE", 2:"NE", 3:"ENE", 4:"E", 5:"ESE", 6:"SE", 7:"SSE",
-              8:"S", 9:"SSW", 10:"SW", 11:"WSW", 12:"W", 13:"WNW", 14:"NW", 15:"NWN", 16:"err", 17:"inv" }
-
+#windDirMap = { 0:"N", 1:"NNE", 2:"NE", 3:"ENE", 4:"E", 5:"ESE", 6:"SE", 7:"SSE",
+#              8:"S", 9:"SSW", 10:"SW", 11:"WSW", 12:"W", 13:"WNW", 14:"NW", 15:"NWN", 16:"err", 17:"inv" }
 
 class EResetMinMaxFlags:
 	 rmTempIndoorHi   = 0
@@ -279,12 +282,26 @@ class CDataStore(object):
 		self.logger.debug("")
 
 	def getDeviceId(self):
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		try:
+			self.Settings.DeviceId = int(config['ws28xx']['DeviceID'])
+		except:
+			pass
 		self.logger.debug("Settings.DeviceId=%x" % self.Settings.DeviceId)
+		print "Settings.DeviceId=%x" % self.Settings.DeviceId
 		return self.Settings.DeviceId
 
 	def setDeviceId(self,val):
 		self.logger.debug("val=%x" % val)
 		self.Settings.DeviceId = val
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		config['ws28xx'] = {}
+		config['ws28xx']['DeviceID'] = str(val)
+		config.write()
 
 	def getFlag_FLAG_TRANSCEIVER_SETTING_CHANGE(self):	# <4>
 		self.logger.debug("")
@@ -785,7 +802,7 @@ class CCommunicationService(object):
 #		if ( !Action && ComInt == 0xFFFFFFFF ):
 #			v28 = 0;
 #			if ( !Stat.LastCurrentWeatherTime.m_status ):
-#			ATL::COleDateTime::operator_(&now, &ts, &Stat.LastCurrentWeatherTime);
+#				ATL::COleDateTime::operator_(&now, &ts, &Stat.LastCurrentWeatherTime);
 #			if ( ATL::COleDateTimeSpan::GetTotalSeconds(&ts) >= 8.0 )
 #				Action = 5;
 #			v28 = -1;
@@ -1142,7 +1159,8 @@ class CCommunicationService(object):
 		newBuffer = [0]
 		newBuffer[0] = Buffer[0]
 		newLength = [0]
-		#CHistoryDataSet::CHistoryDataSet(&Data, &(*Buffer)[12]);
+		Data = CHistoryDataSet.CHistoryDataSet() #similar to currentwheather as it works ;-)
+		Data.CHistoryDataSet_buf(newBuffer, 12)
 		#ATL::COleDateTime::GetTickCount(&now);
 		CDataStore.setLastSeen(self.DataStore, time.time());
 		BatteryStat = (Buffer[0][2] & 0xF);
@@ -1689,7 +1707,7 @@ if __name__ == "__main__":
 	CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
 
 	CDataStore.setDeviceRegistered(myCCommunicationService.DataStore, True); #temp hack
-	CDataStore.setDeviceId(myCCommunicationService.DataStore, 0x32); #temp hack
+	#CDataStore.setDeviceId(myCCommunicationService.DataStore, 0x32); #temp hack
 
 	Weather = [0]
 	Weather[0]=[0]

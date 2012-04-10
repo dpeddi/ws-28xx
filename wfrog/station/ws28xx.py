@@ -55,10 +55,11 @@ class WS28xxStation(object):
 		TimeOut = HeavyWeatherService.CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + HeavyWeatherService.CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
 		ID=[0]
 		ID[0]=0
-		HeavyWeatherService.CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
+		#print "Press [v] key on Weather Station"
+		#HeavyWeatherService.CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
 
 		HeavyWeatherService.CDataStore.setDeviceRegistered(myCCommunicationService.DataStore, True);	#temp hack
-		HeavyWeatherService.CDataStore.setDeviceId(myCCommunicationService.DataStore, 0x32); 		#temp hack
+		#HeavyWeatherService.CDataStore.setDeviceId(myCCommunicationService.DataStore, 0x32); 		#temp hack
 
 		Weather = [0]
 		Weather[0]=[0]
@@ -117,7 +118,7 @@ class WS28xxStation(object):
 					e.create_child('gust')
 					e.gust.speed = myCCommunicationService.DataStore.CurrentWeather._Gust
 					e.gust.dir = myCCommunicationService.DataStore.CurrentWeather._GustDirection * 360 / 16
-				send_event(e)
+					send_event(e)
 
 			except Exception, e:
 				self.logger.error(e)

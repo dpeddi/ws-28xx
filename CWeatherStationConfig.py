@@ -7,6 +7,7 @@
 ## Use this software as your own risk.
 ## Me and La Crosse Technology is not responsable for any damage using this software
 
+from configobj import ConfigObj
 import logging
 import USBHardware
 
@@ -15,7 +16,15 @@ USBHardware = USBHardware.USBHardware()
 class CWeatherStationConfig(object):
 	def __init__(self):
 		self.logger = logging.getLogger('ws28xx.CWeatherStationConfig')
-		self._CheckSumm = 0
+
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		try:
+			self._CheckSumm = int(config['ws28xx']['CheckSumm'])
+		except:
+			self._CheckSumm = 0
+
 		self._ClockMode = 0
 		self._TemperatureFormat = 0
 		self._PressureFormat = 0
@@ -84,6 +93,24 @@ class CWeatherStationConfig(object):
 		self._StormThreshold = (nbuf[0][1+start] >> 4) & 0xF;
 		self._LCDContrast = nbuf[0][2+start] & 0xF;
 		self._LowBatFlags = (nbuf[0][2+start] >> 4) & 0xF;
+
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		config['ws28xx'] = {}
+		config['ws28xx']['CheckSumm'] = str(self._CheckSumm)
+		config['ws28xx']['ClockMode'] = str(self._ClockMode)
+
+		config['ws28xx']['TemperatureFormat'] = str(self._TemperatureFormat)
+		config['ws28xx']['PressureFormat'] = str(self._PressureFormat)
+		config['ws28xx']['RainFormat'] = str(self._RainFormat)
+		config['ws28xx']['WindspeedFormat'] = str(self._WindspeedFormat)
+		config['ws28xx']['WeatherThreshold'] = str(self._WeatherThreshold)
+		config['ws28xx']['StormThreshold'] = str(self._StormThreshold)
+		config['ws28xx']['LCDContrast'] = str(self._LCDContrast)
+		config['ws28xx']['LowBatFlags'] = str(self._LowBatFlags)
+		config.write()
+
 		USBHardware.ReverseByteOrder(nbuf,3+start, 4)
 		#buf=nbuf[0]
 		#CWeatherStationConfig::readAlertFlags(thisa, buf + 3+start);
@@ -197,7 +224,7 @@ class CWeatherStationConfig(object):
 		#((void (__thiscall *)(CWeatherStationHighAlarm *))thisa->_AlarmRain24H.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmRain24H);
 		#v21 = v11;
 		#USBHardware::ToRainAlarmBytes(buf + 21, v21);
-		#		buf[25] = thisa->_HistoryInterval & 0xF;
+		#buf[25] = thisa->_HistoryInterval & 0xF;
 		#v21 = CWeatherStationWindAlarm::GetHighAlarmRaw(&thisa->_AlarmGust);
 		#USBHardware::_ToWindspeedAlarmBytes(buf + 26, v21);
 		#v21 = CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure);

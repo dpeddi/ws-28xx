@@ -11,8 +11,9 @@ class CWeatherTraits(object):
 
 	windDirMap = { 0:"N", 1:"NNE", 2:"NE", 3:"ENE", 4:"E", 5:"ESE", 6:"SE", 7:"SSE",
                        8:"S", 9:"SSW", 10:"SW", 11:"WSW", 12:"W", 13:"WNW", 14:"NW", 15:"NWN", 16:"err", 17:"inv" }
-	forecastMap = { 0:"Rainy", 1:"Sunny", 2:"Cloudy", 3:"Undefined" }
-	trends =      { 0:"Stable", 1:"Rising", 2:"Falling", 3:"Undefined" }
+
+	forecastMap = { 0:"Rainy(Bad)", 1:"Cloudy(Neutral)", 2:"Sunny(Good)",  3:"Error" }
+	trends =      { 0:"Stable(Neutral)", 1:"Rising(Up)", 2:"Falling(Down)", 3:"Error" }
 
 	def TemperatureNP(self):
 		return 81.099998

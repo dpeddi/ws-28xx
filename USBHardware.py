@@ -8,6 +8,7 @@
 ## Me and La Crosse Technology is not responsable for any damage using this software
 
 import logging
+import datetime
 import CWeatherTraits
 
 CWeatherTraits = CWeatherTraits.CWeatherTraits()
@@ -91,8 +92,36 @@ class USBHardware(object):
 	def ToRainAlarmBytes(buffer,alarm):
 		self.logger.debug("")
 
-	def ToDateTime(result, buffer, startOnLowNibble):
+	def ToDateTime(self, buffer, start, startOnLowNibble):
 		self.logger.debug("")
+		#print "buffer[0]", buffer[0]
+		#ATL::COleDateTime::COleDateTime(&invalidDate);
+		#ATL::COleDateTime::SetStatus(&invalidDate, partial);
+		if ( self.IsErr2(buffer, start+0, startOnLowNibble)
+		   or self.IsErr2(buffer, start+1, startOnLowNibble)
+		   or self.IsErr2(buffer, start+2, startOnLowNibble)
+		   or self.IsErr2(buffer, start+3, startOnLowNibble)
+		   or self.IsErr2(buffer, start+4, startOnLowNibble) ):
+			pass
+			#*(_QWORD *)&result->m_dt = (_QWORD)invalidDate.m_dt;
+			#result->m_status = invalidDate.m_status;
+		else:
+			minutes = self.To2Pre(buffer, start+0, startOnLowNibble)
+			hours = self.To2Pre(buffer, start+1, startOnLowNibble)
+			days = self.To2Pre(buffer, start+2, startOnLowNibble)
+			month = self.To2Pre(buffer, start+3, startOnLowNibble)
+			year = self.To2Pre(buffer, start+4, startOnLowNibble) + 2000;
+		#	ATL::COleDateTime::COleDateTime(&dt, year, month, days, hours, minutes, 0);
+			#print "Minutes",minutes
+			#print "Hours",hours
+			#print "Days",days
+			#print "Month",month
+			#print "Year",year
+			result = datetime.datetime(year, month, days, hours, minutes)
+		#	*(_QWORD *)&result->m_dt = (_QWORD)dt.m_dt;
+		#	result->m_status = dt.m_status;
+		return result
+		#return datetime.datetime.now()
 
 	def ToHumidity(self,buffer,start,startOnLowNibble):
 		self.logger.debug("")
@@ -193,39 +222,6 @@ class USBHardware(object):
 				val += digit * power
 			i += 1
 		return val
-
-	def ToDateTime(self,buffer,startOnLowNibble):
-		pass
-#  ATL::COleDateTime::COleDateTime(&invalidDate);
-#  ATL::COleDateTime::SetStatus(&invalidDate, partial);
-#  if ( USBHardware::IsErr2(buffer, startOnLowNibble)
-#    || USBHardware::IsErr2(buffer + 1, startOnLowNibble)
-#    || USBHardware::IsErr2(buffer + 2, startOnLowNibble)
-#    || USBHardware::IsErr2(buffer + 3, startOnLowNibble)
-#    || USBHardware::IsErr2(buffer + 4, startOnLowNibble) )
-#  {
-#    *(_QWORD *)&result->m_dt = (_QWORD)invalidDate.m_dt;
-#    result->m_status = invalidDate.m_status;
-#  }
-#  else
-#  {
-#    v3 = USBHardware::To2Pre(buffer, startOnLowNibble);
-#    minutes = j___ftol2_sse(v3);
-#    v4 = USBHardware::To2Pre(buffer + 1, startOnLowNibble);
-#    hours = j___ftol2_sse(v4);
-#    v5 = USBHardware::To2Pre(buffer + 2, startOnLowNibble);
-#    days = j___ftol2_sse(v5);
-#    v6 = USBHardware::To2Pre(buffer + 3, startOnLowNibble);
-#    month = j___ftol2_sse(v6);
-#    v7 = USBHardware::To2Pre(buffer + 4, startOnLowNibble);
-#    year = j___ftol2_sse(v7) + 2000;
-#    ATL::COleDateTime::COleDateTime(&dt, year, month, days, hours, minutes, 0);
-#    *(_QWORD *)&result->m_dt = (_QWORD)dt.m_dt;
-#    result->m_status = dt.m_status;
-#  }
-#  _RTC_CheckStackVars(&v18, &stru_55ADA8);
-#  j___RTC_CheckEsp(v8);
-#  return v9;
 
 	def ReverseByteOrder(self,buf,start,Count):
 		self.logger.debug("")
