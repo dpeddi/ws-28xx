@@ -9,8 +9,10 @@
 
 import logging
 #from datetime import datetime
+import CWeatherTraits
 import USBHardware
 
+CWeatherTraits = CWeatherTraits.CWeatherTraits()
 USBHardware = USBHardware.USBHardware()
 
 class CHistoryDataSet(object):
@@ -41,30 +43,30 @@ class CHistoryDataSet(object):
 		self.m_IndoorHumidity = USBHardware.ToHumidity(buf, pos + 10, 0);
 		self.m_OutdoorHumidity = USBHardware.ToHumidity(buf, pos + 11, 0);
 		self.m_RainCounterRaw = USBHardware.ByteToFloat(buf, pos + 12, 0, 16, 3);
-		#j__memcpy(buffer2, pBuffer + 14, 2)
-		#self.m_WindSpeed = USBHardware.ToWindspeedRingBuffer(buf, pos + 14);
+		self.m_WindSpeed = USBHardware.ToWindspeedRingBuffer(buf, pos + 14);
 		self.m_WindDirection = (buf[0][pos + 15] >> 4) & 0xF;
-		#if ( self.m_WindSpeed == CWeatherTraits.WindNP() )
-		#		self.m_WindDirection = 16;
-		#if ( self.m_WindDirection < 0 && self.m_WindDirection > 16 )
-		#		self.m_WindDirection = 16;
-		#j__memcpy(buffer2, pBuffer + 16, 2)
-		#self.m_Gust = USBHardware.ToWindspeedRingBuffer(buffer2);
+		if ( self.m_WindSpeed == CWeatherTraits.WindNP() ):
+			self.m_WindDirection = 16
+		if ( self.m_WindDirection < 0 and self.m_WindDirection > 16 ):
+			self.m_WindDirection = 16
+		self.m_Gust = USBHardware.ToWindspeedRingBuffer(buf, pos + 16)
 		#if ( ATL::COleDateTime::GetYear(&self.m_Time) == 1999 )
-		#{
-		#		v12 = CTracer::Instance();
-		#		CTracer::WriteTrace(
-		#				v12,
-		#				30,
-		#				"Dataset has year 1999, will be removed as invalid, will not be included in rain calculation");
-		#		ATL::COleDateTime::SetStatus(&self.m_Time, partial);
-		#}
+		#	v12 = CTracer::Instance();
+		#	CTracer::WriteTrace(
+		#			v12,
+		#			30,
+		#			"Dataset has year 1999, will be removed as invalid, will not be included in rain calculation");
+		#	ATL::COleDateTime::SetStatus(&self.m_Time, partial);
 		#self._Dewpoint = CHistoryDataSet::CalculateDewpoint(thisa, self.m_OutdoorTemp, self.m_OutdoorHumidity);
 		#self._Windchill = CHistoryDataSet::CalculateWindchill(thisa, self.m_OutdoorTemp, self.m_WindSpeed);
 
-		self.logger.info("m_Time %s " % self.m_Time)
-		self.logger.info("m_IndoorTemp=%7.2f" % self.m_IndoorTemp)
-		self.logger.info("m_IndoorHumidity=%7.2f" % self.m_IndoorHumidity)
-		self.logger.info("m_OutdoorTemp=%7.2f" % self.m_OutdoorTemp)
-		self.logger.info("m_OutdoorHumidity=%7.2f" % self.m_OutdoorHumidity)
-		self.logger.info("m_PressureRelative=%7.2f" % self.m_PressureRelative)
+		self.logger.info("m_Time              %s"    % self.m_Time)
+		self.logger.info("m_IndoorTemp=       %7.2f" % self.m_IndoorTemp)
+		self.logger.info("m_IndoorHumidity=   %7.2f" % self.m_IndoorHumidity)
+		self.logger.info("m_OutdoorTemp=      %7.2f" % self.m_OutdoorTemp)
+		self.logger.info("m_OutdoorHumidity=  %7.2f" % self.m_OutdoorHumidity)
+		self.logger.info("m_PressureRelative= %7.2f" % self.m_PressureRelative)
+		self.logger.info("m_RainCounterRaw=   %7.2f" % self.m_RainCounterRaw)
+		self.logger.info("m_WindDirection=    %d"    % self.m_RainCounterRaw)
+		self.logger.info("m_WindSpeed=        %7.2f" % self.m_WindSpeed)
+		self.logger.info("m_Gust=             %7.2f" % self.m_Gust)

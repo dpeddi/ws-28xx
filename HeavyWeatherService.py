@@ -139,9 +139,6 @@ class EWindDirection:
 	 wdERR            = 0x10
 	 wdInvalid        = 0x11
 
-#windDirMap = { 0:"N", 1:"NNE", 2:"NE", 3:"ENE", 4:"E", 5:"ESE", 6:"SE", 7:"SSE",
-#              8:"S", 9:"SSW", 10:"SW", 11:"WSW", 12:"W", 13:"WNW", 14:"NW", 15:"NWN", 16:"err", 17:"inv" }
-
 class EResetMinMaxFlags:
 	 rmTempIndoorHi   = 0
 	 rmTempIndoorLo   = 1
@@ -217,9 +214,9 @@ class CDataStore(object):
 			self.LastLinkQuality = 0
 			self.OutstandingHistorySets = -1
 			self.WeatherClubTransmissionErrors = 0
-			self.LastCurrentWeatherTime = datetime.now()
-			self.LastHistoryDataTime = None
-			self.LastConfigTime = None
+			self.LastCurrentWeatherTime = datetime(1900, 01, 01, 00, 00)
+			self.LastHistoryDataTime = datetime(1900, 01, 01, 00, 00)
+			self.LastConfigTime = datetime(1900, 01, 01, 00, 00)
 			self.LastWeatherClubTransmission = None
 
 	class TSettings(object):
@@ -246,7 +243,6 @@ class CDataStore(object):
 		self.Settings = 0;
 		self.TransceiverSettings = 0;
 		self.WeatherClubSettings = 0;
-		self.LastSeen = 0;
 		self.CurrentWeather = CCurrentWeatherData.CCurrentWeatherData();
 		self.DeviceConfig = 0;
 		self.FrontEndConfig = 0;
@@ -278,6 +274,35 @@ class CDataStore(object):
 		if self.Request:
 		    self.logger.debug("ok")
 
+	def writeLastStat(self):
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		config['LastStat'] = {}
+		config['LastStat']['LastLinkQuality'] = str(self.LastStat.LastLinkQuality)
+		config['LastStat']['LastSeen'] = str(self.LastStat.LastSeen)
+		config['LastStat']['LastHistoryIndex'] = str(self.LastStat.LastHistoryIndex)
+		config['LastStat']['LastCurrentWeatherTime'] = str(self.LastStat.LastCurrentWeatherTime)
+		config['LastStat']['LastHistoryDataTime'] = str(self.LastStat.LastHistoryDataTime)
+		config['LastStat']['LastConfigTime'] = str(self.LastStat.LastConfigTime)
+		config.write()
+
+	def writeSettings(self):
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		config['Settings'] = {}
+		config['Settings']['DeviceID'] = str(self.Settings.DeviceId)
+		config.write()
+
+	def writeDataStore(self):
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		config['DataStore'] = {}
+		config['DataStore']['TransceiverSerNo'] = self.TransceiverSerNo
+		config.write()
+
 	def getDeviceConfig(self,result):
 		self.logger.debug("")
 
@@ -296,12 +321,7 @@ class CDataStore(object):
 	def setDeviceId(self,val):
 		self.logger.debug("val=%x" % val)
 		self.Settings.DeviceId = val
-		filename= "/etc/WV5Datastore.cfg"
-		config = ConfigObj(filename)
-		config.filename = filename
-		config['Settings'] = {}
-		config['Settings']['DeviceID'] = str(val)
-		config.write()
+		self.writeSettings()
 
 	def getFlag_FLAG_TRANSCEIVER_SETTING_CHANGE(self):	# <4>
 		self.logger.debug("")
@@ -350,14 +370,16 @@ class CDataStore(object):
 	def setLastLinkQuality(self,Quality):
 		self.logger.debug("Quality=%d",Quality)
 		self.LastStat.LastLinkQuality = Quality
+		self.writeLastStat()
 
 	def setLastSeen(self,time):
-		self.logger.debug("time=%d",time)
-		self.LastSeen = time
+		self.logger.debug("time=%s",time)
+		self.LastStat.LastSeen = time
+		self.writeLastStat()
 
 	def getLastSeen(self):
-		self.logger.debug("LastSeen=%d",self.LastSeen)
-		return self.LastSeen
+		self.logger.debug("LastSeen=%d",self.LastStat.LastSeen)
+		return self.LastStat.LastSeen
 
 	def setLastBatteryStatus(self, BatteryStat):
 		self.logger.debug("")
@@ -391,6 +413,12 @@ class CDataStore(object):
 	def setLastCurrentWeatherTime(self,time):
 		self.logger.debug("time=%s" % time)
 		self.LastStat.LastCurrentWeatherTime = time
+		self.writeLastStat()
+
+	def setLastHistoryDataTime(self,time):
+		self.logger.debug("time=%s" % time)
+		self.LastStat.LastHistoryDataTime = time
+		self.writeLastStat()
 
 	def getBufferCheck(self):
 		self.logger.debug("self.BufferCheck=%x" % self.BufferCheck)
@@ -471,10 +499,12 @@ class CDataStore(object):
 	def setTransceiverSerNo(self,inp):
 		self.logger.debug("inp=%s" % inp)
 		self.TransceiverSerNo = inp
+		self.writeDataStore()
 
 	def setLastHistoryIndex(self,val):
 		self.LastStat.LastHistoryIndex = val
 		self.logger.debug("self.LastStat.LastHistoryIndex=%x" % self.LastStat.LastHistoryIndex)
+		self.writeLastStat()
 
 	def getLastHistoryIndex(self):
 		self.logger.debug("LastHistoryIndex=%x" % self.LastStat.LastHistoryIndex)
@@ -850,7 +880,7 @@ class CCommunicationService(object):
 	def handleWsAck(self,Buffer,Length):
 		self.logger.debug("")
 		#3 = ATL::COleDateTime::GetTickCount(&result);
-		CDataStore.setLastSeen(self.DataStore, time.time());
+		CDataStore.setLastSeen(self.DataStore, datetime.now());
 		BatteryStat = (Buffer[0][2] & 0xF);
 		CDataStore.setLastBatteryStatus(self.DataStore, BatteryStat);
 		Quality = Buffer[0][3] & 0x7F;
@@ -920,7 +950,9 @@ class CCommunicationService(object):
 		#			}
 		#		}
 		#	}
-		#Length = 0;
+		#v73 = -1;
+		#CWeatherStationConfig::_CWeatherStationConfig(&RecConfig);
+		Length[0] = 0
 
 	def handleConfig(self,Buffer,Length):
 		self.logger.debug("")
@@ -1019,18 +1051,14 @@ class CCommunicationService(object):
 				if   rt == 3:
 					print "handleConfig rt==3 rtSetConfig"
 					#v43 = (CDataStore::ERequestState)&result;
-					#v14 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-					#v46 = CDataStore::getFrontEndConfig(v14, (CWeatherStationConfig *)v43);
 					#rhs = v46;
 					#LOBYTE(v73) = 4;
-					#v51 = CWeatherStationConfig::operator__(&RecConfig, v46);
+					#v51 = CWeatherStationConfig::operator__(&RecConfig, CDataStore::getFrontEndConfig(self.DataStore, (CWeatherStationConfig *)v43))
 					#LOBYTE(v73) = 3;
 					#CWeatherStationConfig::_CWeatherStationConfig(&result);
 					#if ( v51 ):
 						#*Length = CCommunicationService::buildACKFrame(thisa, Buffer, 0, &FrontCS, &HistoryIndex, 0xFFFFFFFFu);
-						#v43 = (CDataStore::ERequestState)&now;
-						#v15 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-						#CDataStore::setLastConfigTime(v15, (ATL::COleDateTime *)v43);
+						#CDataStore.setLastConfigTime(self.DataStore, datetime.now())
 						#v43 = (CDataStore::ERequestState)&RecConfig;
 						#v16 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 						#CDataStore::setDeviceConfig(v16, (CWeatherStationConfig *)v43);
@@ -1043,9 +1071,7 @@ class CCommunicationService(object):
 					#	CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning); #1
 				elif rt == 2:
 					print "handleConfig rt==2 rtGetConfig"
-					#v43 = (CDataStore::ERequestState)&now;
-					#v20 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-					#CDataStore::setLastConfigTime(v20, (ATL::COleDateTime *)v43);
+					CDataStore.setLastConfigTime(self.DataStore, datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
 					#v21 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 					#CDataStore::setDeviceConfig(v21, (CWeatherStationConfig *)v43);
@@ -1055,9 +1081,7 @@ class CCommunicationService(object):
 					CDataStore.RequestNotify(self.DataStore);
 				elif rt == 0:
 					print "handleConfig rt==0 rtGetCurrent"
-					#v43 = (CDataStore::ERequestState)&now;
-					#v24 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-					#CDataStore::setLastConfigTime(v24, (ATL::COleDateTime *)v43);
+					CDataStore.setLastConfigTime(self.DataStore, datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
 					#v25 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 					#CDataStore::setDeviceConfig(v25, (CWeatherStationConfig *)v43);
@@ -1066,9 +1090,7 @@ class CCommunicationService(object):
 					CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning); #1
 				elif rt == 1:
 					print "handleConfig rt==1 rtGetHistory"
-					#v43 = (CDataStore::ERequestState)&now;
-					#v27 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-					#CDataStore::setLastConfigTime(v27, (ATL::COleDateTime *)v43);
+					CDataStore.setLastConfigTime(self.DataStore, datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
 					#v28 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 					#CDataStore::setDeviceConfig(v28, (CWeatherStationConfig *)v43);
@@ -1077,9 +1099,7 @@ class CCommunicationService(object):
 					CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning); #1
 				elif rt == 4:
 					print "handleConfig rt==4 rtSetTime"
-					#v43 = (CDataStore::ERequestState)&now;
-					#v30 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-					#CDataStore::setLastConfigTime(v30, (ATL::COleDateTime *)v43);
+					CDataStore.setLastConfigTime(self.DataStore, datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
 					#v31 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 					#CDataStore::setDeviceConfig(v31, (CWeatherStationConfig *)v43);
@@ -1088,8 +1108,7 @@ class CCommunicationService(object):
 					CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning); #1
 				elif rt == 5:
 					print "handleConfig rt==5 rtFirstConfig"
-					#v43 = (CDataStore::ERequestState)&now;
-					#CDataStore.setLastConfigTime(self.DataStore, (ATL::COleDateTime *)v43);
+					CDataStore.setLastConfigTime(self.DataStore, datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
 					#CDataStore.setDeviceConfig(self.DataStore, (CWeatherStationConfig *)v43);
 					v58 = CWeatherStationConfig.GetCheckSum(RecConfig);
@@ -1098,8 +1117,7 @@ class CCommunicationService(object):
 					CDataStore.RequestNotify(self.DataStore);
 				elif rt == 6:
 					print "handleConfig rt==6 rtINVALID"
-					#v43 = (CDataStore::ERequestState)&now;
-					#CDataStore::setLastConfigTime(self.DataStore, (ATL::COleDateTime *)v43);
+					CDataStore.setLastConfigTime(self.DataStore, datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
 					#CDataStore.setDeviceConfig(self.DataStore, (CWeatherStationConfig *)v43);
 					v59 = CWeatherStationConfig.GetCheckSum(RecConfig);
@@ -1120,7 +1138,7 @@ class CCommunicationService(object):
 		Data = CCurrentWeatherData.CCurrentWeatherData()
 		Data.CCurrentWeatherData_buf(newBuffer, 6);
 		#print "CurrentData", Buffer[0] #//fixme
-		CDataStore.setLastSeen(self.DataStore, time.time());
+		CDataStore.setLastSeen(self.DataStore, datetime.now());
 		CDataStore.setLastCurrentWeatherTime(self.DataStore, datetime.now())
 		BatteryStat = (Buffer[0][2] & 0xF);
 		CDataStore.setLastBatteryStatus(self.DataStore, BatteryStat);
@@ -1163,7 +1181,7 @@ class CCommunicationService(object):
 		Data = CHistoryDataSet.CHistoryDataSet() #similar to currentwheather as it works ;-)
 		Data.CHistoryDataSet_buf(newBuffer, 12)
 		#ATL::COleDateTime::GetTickCount(&now);
-		CDataStore.setLastSeen(self.DataStore, time.time());
+		CDataStore.setLastSeen(self.DataStore, datetime.now());
 		BatteryStat = (Buffer[0][2] & 0xF);
 		CDataStore.setLastBatteryStatus(self.DataStore, BatteryStat);
 		Quality = Buffer[0][3] & 0x7F;
@@ -1184,37 +1202,23 @@ class CCommunicationService(object):
 		#        __LINE__Var + 85);
 		#    v9 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 		#v10 = CTracer::Instance();
-		#CTracer::WriteTrace(v10, 40, "getLastHistoryIndex(): %X",CDataStore::getLastHistoryIndex(v9));
+		#CTracer::WriteTrace(v10, 40, "getLastHistoryIndex(): %X",CDataStore.getLastHistoryIndex(self.DataStore));
 		if ( ThisHistoryIndex == CDataStore.getLastHistoryIndex(self.DataStore)):
-		#      CDataStore::getLastHistTimeStamp(self.DataStore, &LastHistTs);
-		#      if ( !ATL::COleDateTime::GetStatus(&LastHistTs) )
-		#      {
-		#        v14 = CHistoryDataSet::GetTime(&Data);
-		#        if ( !ATL::COleDateTime::GetStatus(v14) )
-		#        {
-		#          v15 = CHistoryDataSet::GetTime(&Data);
-		#          if ( ATL::COleDateTime::operator__(v15, &LastHistTs) )
-		#          {
-		#            CDataStore::setOutsatndingHistorySets(self.DataStore, 0xFFFFFFFFu);
-		#             CDataStore.setLastHistoryIndex(self.DataStore, 0xFFFFFFFF);
-		#            ThisHistoryIndex = -1;
-		#            ATL::COleDateTime::COleDateTime(&InvalidDateTime);
-		#            ATL::COleDateTime::SetStatus(&InvalidDateTime, partial);
-		#            v18 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#            CDataStore::setLastHistTimeStamp(v18, &InvalidDateTime);
-		#          }
-		#          else
-		#          {
-		#            v19 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
-		#            CDataStore::setLastHistoryDataTime(v19, &now);
-		#          }
-		#        }
-		#      }
-		#    }
+		#	CDataStore::getLastHistTimeStamp(self.DataStore, &LastHistTs);
+		#	if ( !ATL::COleDateTime::GetStatus(&LastHistTs) )
+		#		if ( !ATL::COleDateTime::GetStatus(CHistoryDataSet::GetTime(&Data)) ):
+		#			if ( ATL::COleDateTime::operator__(CHistoryDataSet::GetTime(&Data), &LastHistTs) ):
+		#				CDataStore::setOutsatndingHistorySets(self.DataStore, 0xFFFFFFFFu);
+		#				CDataStore.setLastHistoryIndex(self.DataStore, 0xFFFFFFFF);
+		#				ThisHistoryIndex = -1;
+		#				ATL::COleDateTime::COleDateTime(&InvalidDateTime);
+		#				ATL::COleDateTime::SetStatus(&InvalidDateTime, partial);
+		#				CDataStore::setLastHistTimeStamp(self.DataStore, &InvalidDateTime);
+		#			else:
+		#				CDataStore::setLastHistoryDataTime(self.DataStore, &now);
 			CDataStore.setBufferCheck(self.DataStore, 0)
 		else:
-			#v21 = CHistoryDataSet::GetTime(&Data);
-			#CDataStore::setLastHistTimeStamp(self.DataStore, v21);
+			#CDataStore::setLastHistTimeStamp(self.DataStore, CHistoryDataSet::GetTime(&Data));
 			#CDataStore::addHistoryData(self.DataStore, &Data);
 			CDataStore.setLastHistoryIndex(self.DataStore, ThisHistoryIndex);
 			if ( LatestHistoryIndex >= ThisHistoryIndex ): #unused
@@ -1225,21 +1229,21 @@ class CCommunicationService(object):
 		rt = CDataStore.getRequestType(self.DataStore)
 		DeviceCS = CDataStore.GetDeviceConfigCS(self.DataStore)
 		if   rt == 0: #rtGetCurrent
-		      newLength[0] = self.buildACKFrame(Buffer, 5, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
-		      CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
+			newLength[0] = self.buildACKFrame(Buffer, 5, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
+			CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
 		elif rt == 2: #rtGetConfig
-		      newLength[0] = self.buildACKFrame(Buffer, 3, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
-		      CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
+			newLength[0] = self.buildACKFrame(Buffer, 3, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
+			CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
 		elif rt == 3: #rtSetConfig
-		      newLength[0] = self.buildACKFrame(Buffer, 2, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
-		      CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
+			newLength[0] = self.buildACKFrame(Buffer, 2, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
+			CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
 		elif rt == 1: #rtGetHistory
 			CDataStore.setRequestState(self.DataStore, ERequestState.rsFinished);
 			CDataStore.RequestNotify(self.DataStore)
 			newLength[0] = self.buildACKFrame(Buffer, 0, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
 		elif rt == 4: #rtSetTime
-		      newLength[0] = self.buildACKFrame(Buffer, 1, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
-		      CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
+			newLength[0] = self.buildACKFrame(Buffer, 1, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
+			CDataStore.setRequestState(self.DataStore, ERequestState.rsRunning);
 		elif rt == 5 or rt == 6: #rtFirstConfig || #rtINVALID
 			newLength[0] = self.buildACKFrame(Buffer, 0, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
 
@@ -1258,16 +1262,14 @@ class CCommunicationService(object):
 		rt = CDataStore.getRequestType(self.DataStore)
 		HistoryIndex = CDataStore.getLastHistoryIndex(self.DataStore);
 		DeviceCS = CDataStore.GetDeviceConfigCS(self.DataStore);
-		CDataStore.setLastSeen(self.DataStore, time.time());
+		CDataStore.setLastSeen(self.DataStore, datetime.now());
 		Quality = Buffer[0][3] & 0x7F;
 		CDataStore.setLastLinkQuality(self.DataStore, Quality);
 		if (Buffer[0][2] & 0xF) == 2: #(CWeatherStationConfig *)
 			self.logger.debug("handleNextAction Buffer[2] == 2")
 		#	v16 = CDataStore::getFrontEndConfig(self.DataStore, &result);
 		#	Data = v16;
-		#	[0]v24 = 0;
 			newLength[0] = self.buildConfigFrame(newBuffer, v16);
-		#	v24 = -1;
 		#	CWeatherStationConfig::_CWeatherStationConfig(&result);
 		else:
 			if (Buffer[0][2] & 0xF) == 3: #(CWeatherStationConfig *)
