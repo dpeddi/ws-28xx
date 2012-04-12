@@ -320,14 +320,20 @@ class USBHardware(object):
 				result = CWeatherTraits.TemperatureOFL()
 			else:
 				if ( startOnLowNibble ):
-					result    =  (buffer[0][start+0] & 0xF)* 10   \
+					#rawtemp   =  (buffer[0][start+0] & 0xF)* 10   \
+					#	  +  (buffer[0][start+0] >>  4)*  1   \
+					#	  +  (buffer[0][start+1] & 0xF)*  0.1
+					rawtemp   =  (buffer[0][start+0] & 0xF)*  0.1 \
 						  +  (buffer[0][start+0] >>  4)*  1   \
-						  +  (buffer[0][start+1] & 0xF)*  0.1
+						  +  (buffer[0][start+1] & 0xF)* 10
 				else:
-					result    =  (buffer[0][start+0] >>  4)* 10   \
+					#rawtemp   =  (buffer[0][start+0] >>  4)* 10   \
+					#	  +  (buffer[0][start+1] & 0xF)*  1   \
+					#	  +  (buffer[0][start+1] >>  4)*  0.1
+					rawtemp   =  (buffer[0][start+0] >>  4)*  0.1 \
 						  +  (buffer[0][start+1] & 0xF)*  1   \
-						  +  (buffer[0][start+1] >>  4)*  0.1
-				result -= CWeatherTraits.TemperatureOffset()
+						  +  (buffer[0][start+1] >>  4)* 10  
+				result = rawtemp - CWeatherTraits.TemperatureOffset()
 		return result
 
 	def ToWindspeedRingBuffer(self,buffer,start):
