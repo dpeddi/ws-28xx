@@ -26,6 +26,17 @@ class USBHardware(object):
 				or (buffer[0][start+1] & 0xF) == 15
 		return result
 
+	def IsOFL3(self, buffer, start, startOnLowNibble):
+		if ( startOnLowNibble ):
+			result =   (buffer[0][start+0] & 0xF) == 15 \
+				or (buffer[0][start+0] >>  4) == 15 \
+				or (buffer[0][start+1] & 0xF) == 15
+		else:
+			result =   (buffer[0][start+0] >>  4) == 15 \
+				or (buffer[0][start+1] & 0xF) == 15 \
+				or (buffer[0][start+1] >>  4) == 15
+		return result;
+
 	def IsOFL5(self, buffer, start, startOnLowNibble):
 		if ( startOnLowNibble ):
 			result =     (buffer[0][start+0] & 0xF) == 15 \
@@ -52,6 +63,23 @@ class USBHardware(object):
 				and (buffer[0][start+0] >>  4) != 15 \
 				 or (buffer[0][start+1] & 0xF) >= 10 \
 				and (buffer[0][start+1] & 0xF) != 15
+		return result
+
+	def IsErr3(self,buffer,start,startOnLowNibble):
+		if ( startOnLowNibble ):
+			result =     (buffer[0][start+0] & 0xF) >= 10 \
+				 and (buffer[0][start+0] & 0xF) != 15 \
+				 or  (buffer[0][start+0] >>  4) >= 10 \
+				 and (buffer[0][start+0] >>  4) != 15 \
+				 or  (buffer[0][start+1] & 0xF) >= 10 \
+				 and (buffer[0][start+1] & 0xF) != 15
+		else:
+			result =     (buffer[0][start+0] >>  4) >= 10 \
+				 and (buffer[0][start+0] >>  4) != 15 \
+				 or  (buffer[0][start+1] & 0xF) >= 10 \
+				 and (buffer[0][start+1] & 0xF) != 15 \
+				 or  (buffer[0][start+1] >>  4) >= 10 \
+				 and (buffer[0][start+1] >>  4) != 10
 		return result
 
 	def IsErr5(self,buffer,start,startOnLowNibble):
@@ -282,4 +310,22 @@ class USBHardware(object):
 						  + (buffer[0][start+0] & 0xF)*   0.1  \
 						  + (buffer[0][start+0] >>  4)*   0.01
 				result = rawresult
+		return result
+
+	def ToTemperatureRingBuffer(self,buffer,start,startOnLowNibble):
+		if ( self.IsErr3(buffer, start+0, startOnLowNibble) ):
+			result = CWeatherTraits.TemperatureNP()
+		else:
+			if ( self.IsOFL3(buffer, start+0, startOnLowNibble) ):
+				result = CWeatherTraits.TemperatureOFL()
+			else:
+				if ( startOnLowNibble ):
+					result    =  (buffer[0][start+0] & 0xF)* 10  \
+						  +  (buffer[0][start+0] >>  4)* 1   \
+						  +  (buffer[0][start+1] & 0xF)* 0.1 
+				else:
+					result    =  (buffer[0][start+0] >>  4)* 10  \
+						  +  (buffer[0][start+1] & 0xF)*  1  \
+						  +  (buffer[0][start+1] >>  4)* 0.1
+				result -= CWeatherTraits.TemperatureOffset()
 		return result

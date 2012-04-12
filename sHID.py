@@ -85,13 +85,13 @@ class sHID(object):
 								
 					self.devh.getDescriptor(0x22, 0, 0x2a9)
 					
-					while True:
-						try:
-							ret = self.devh.interruptRead(usb.ENDPOINT_IN + 1, 0xf, int(15 * 1000))
-							#print ret
-						except:
-							break
-						break
+					#while True:
+					#	try:
+					#		ret = self.devh.interruptRead(usb.ENDPOINT_IN + 1, 0xf, int(15 * 1000))
+					#		#print ret
+					#	except:
+					#		break
+					#	break
 
 					time.sleep(usbWait)
 
