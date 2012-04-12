@@ -44,7 +44,7 @@ class CHistoryDataSet(object):
 		self.m_OutdoorHumidity = USBHardware.ToHumidity(buf, pos + 11, 0);
 		self.m_RainCounterRaw = USBHardware.ByteToFloat(buf, pos + 12, 0, 16, 3);
 		#j__memcpy(buffer2, pBuffer + 14, 2)
-		#self.m_WindSpeed = USBHardware.ToWindspeedRingBuffer(buffer2);
+		#self.m_WindSpeed = USBHardware.ToWindspeedRingBuffer(buf, pos + 14);
 		#j__memcpy((char *)&buffer1, pBuffer + 15, 1)
 		#self.m_WindDirection = (buffer1 >> 4) & 0xF;
 		#if ( self.m_WindSpeed == CWeatherTraits.WindNP() )
@@ -65,6 +65,7 @@ class CHistoryDataSet(object):
 		#self._Dewpoint = CHistoryDataSet::CalculateDewpoint(thisa, self.m_OutdoorTemp, self.m_OutdoorHumidity);
 		#self._Windchill = CHistoryDataSet::CalculateWindchill(thisa, self.m_OutdoorTemp, self.m_WindSpeed);
 
+		self.logger.info("m_Time %s " % self.m_Time)
 		print "m_Time %s " % self.m_Time
 		print "m_PressureRelative", self.m_PressureRelative
 		print "m_IndoorHumidity", self.m_IndoorHumidity

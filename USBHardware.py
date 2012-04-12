@@ -48,7 +48,10 @@ class USBHardware(object):
 				 or (buffer[0][start+0] >>  4) >= 10 \
 				and (buffer[0][start+0] >>  4) != 15
 		else:
-			result = (buffer[0][start+0] >> 4) >= 10 and buffer[0][start+0] >> 4 != 15 or (buffer[0][start+1] & 0xF) >= 10 and (buffer[0][start+1] & 0xF) != 15;
+			result =    (buffer[0][start+0] >>  4) >= 10 \
+				and (buffer[0][start+0] >>  4) != 15 \
+				 or (buffer[0][start+1] & 0xF) >= 10 \
+				and (buffer[0][start+1] & 0xF) != 15
 		return result
 
 	def IsErr5(self,buffer,start,startOnLowNibble):
@@ -101,22 +104,18 @@ class USBHardware(object):
 		   or self.IsErr2(buffer, start+1, startOnLowNibble)
 		   or self.IsErr2(buffer, start+2, startOnLowNibble)
 		   or self.IsErr2(buffer, start+3, startOnLowNibble)
-		   or self.IsErr2(buffer, start+4, startOnLowNibble) ):
-			pass
+		   or self.IsErr2(buffer, start+4, startOnLowNibble)
+		   or self.To2Pre(buffer, start+3, startOnLowNibble) > 12): #fix since I bugget my ws with corrupted date..
 			#*(_QWORD *)&result->m_dt = (_QWORD)invalidDate.m_dt;
 			#result->m_status = invalidDate.m_status;
+			#return datetime.datetime.now()
+			return datetime.datetime(1900, 01, 01, 00, 00) #fake too old date means invalid date
 		else:
 			minutes = self.To2Pre(buffer, start+0, startOnLowNibble)
 			hours = self.To2Pre(buffer, start+1, startOnLowNibble)
 			days = self.To2Pre(buffer, start+2, startOnLowNibble)
 			month = self.To2Pre(buffer, start+3, startOnLowNibble)
 			year = self.To2Pre(buffer, start+4, startOnLowNibble) + 2000;
-		#	ATL::COleDateTime::COleDateTime(&dt, year, month, days, hours, minutes, 0);
-			#print "Minutes",minutes
-			#print "Hours",hours
-			#print "Days",days
-			#print "Month",month
-			#print "Year",year
 			result = datetime.datetime(year, month, days, hours, minutes)
 		#	*(_QWORD *)&result->m_dt = (_QWORD)dt.m_dt;
 		#	result->m_status = dt.m_status;

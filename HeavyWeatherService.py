@@ -213,11 +213,11 @@ class CDataStore(object):
 		# void __thiscall CDataStore::TLastStat::TLastStat(CDataStore::TLastStat *this);
 		def __init__(self):
 			self.LastBatteryStatus = [0]
-			self.LastHistoryIndex = 0
+			self.LastHistoryIndex = 0xffff
 			self.LastLinkQuality = 0
 			self.OutstandingHistorySets = -1
 			self.WeatherClubTransmissionErrors = 0
-			self.LastCurrentWeatherTime = None
+			self.LastCurrentWeatherTime = datetime.now()
 			self.LastHistoryDataTime = None
 			self.LastConfigTime = None
 			self.LastWeatherClubTransmission = None
@@ -286,11 +286,11 @@ class CDataStore(object):
 		config = ConfigObj(filename)
 		config.filename = filename
 		try:
-			self.Settings.DeviceId = int(config['ws28xx']['DeviceID'])
+			self.Settings.DeviceId = int(config['Settings']['DeviceID'])
 		except:
 			pass
 		self.logger.debug("Settings.DeviceId=%x" % self.Settings.DeviceId)
-		print "Settings.DeviceId=%x" % self.Settings.DeviceId
+		#print "Settings.DeviceId=%x" % self.Settings.DeviceId
 		return self.Settings.DeviceId
 
 	def setDeviceId(self,val):
@@ -299,8 +299,8 @@ class CDataStore(object):
 		filename= "/etc/WV5Datastore.cfg"
 		config = ConfigObj(filename)
 		config.filename = filename
-		config['ws28xx'] = {}
-		config['ws28xx']['DeviceID'] = str(val)
+		config['Settings'] = {}
+		config['Settings']['DeviceID'] = str(val)
 		config.write()
 
 	def getFlag_FLAG_TRANSCEIVER_SETTING_CHANGE(self):	# <4>
@@ -361,7 +361,7 @@ class CDataStore(object):
 
 	def setLastBatteryStatus(self, BatteryStat):
 		self.logger.debug("")
-		print "Battery 3=%d 0=%d 1=%d 2=%d" % (testBit(BatteryStat,3),testBit(BatteryStat,0),testBit(BatteryStat,1),testBit(BatteryStat,2))
+		self.logger.info("Battery 3=%d 0=%d 1=%d 2=%d" % (testBit(BatteryStat,3),testBit(BatteryStat,0),testBit(BatteryStat,1),testBit(BatteryStat,2)))
 		self.LastStat.LastBatteryStatus = BatteryStat
 
 	def setCurrentWeather(self,Data):
@@ -389,7 +389,7 @@ class CDataStore(object):
 		#CScopedLock::_CScopedLock(&lock);
 
 	def setLastCurrentWeatherTime(self,time):
-		self.logger.debug("time=%d" % time)
+		self.logger.debug("time=%s" % time)
 		self.LastStat.LastCurrentWeatherTime = time
 
 	def getBufferCheck(self):
@@ -477,7 +477,7 @@ class CDataStore(object):
 		self.logger.debug("self.LastStat.LastHistoryIndex=%x" % self.LastStat.LastHistoryIndex)
 
 	def getLastHistoryIndex(self):
-		self.logger.debug("")
+		self.logger.debug("LastHistoryIndex=%x" % self.LastStat.LastHistoryIndex)
 		print "CDataStore::getLastHistoryIndex %x" % self.LastStat.LastHistoryIndex
 		#ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(
 		#    &FuncName,
@@ -617,7 +617,6 @@ class CDataStore(object):
 
 	def GetDeviceConfigCS(self):
 		self.logger.debug("")
-		print "CDataStore::GetDeviceConfigCS"
 		#CWeatherStationConfig::CWeatherStationConfig((CWeatherStationConfig *)&v8, &result);
 		#v4 = v1;
 		#v3 = v1;
@@ -805,6 +804,8 @@ class CCommunicationService(object):
 #				ATL::COleDateTime::operator_(&now, &ts, &Stat.LastCurrentWeatherTime);
 #			if ( ATL::COleDateTimeSpan::GetTotalSeconds(&ts) >= 8.0 )
 #				Action = 5;
+			if datetime.now() - self.DataStore.LastStat.LastCurrentWeatherTime >= timedelta(seconds=8):
+				Action = 5
 #			v28 = -1;
 		newBuffer[0][2] = Action & 0xF;
 #		v21 = CDataStore::GetDeviceConfigCS(self.DataStore);
@@ -826,7 +827,7 @@ class CCommunicationService(object):
 			  and CDataStore.getBufferCheck(self.DataStore) != 2 ):
 				HistoryAddress = 18 * HistoryIndex + 0x1a0;
 			else:
-				if ( HistoryIndex ):
+				if ( HistoryIndex != 0xffff ):
 					HistoryAddress = 18 * (HistoryIndex - 1) + 0x1a0;
 				else:
 					HistoryAddress = 0x7fe8;
@@ -1120,7 +1121,7 @@ class CCommunicationService(object):
 		Data.CCurrentWeatherData_buf(newBuffer, 6);
 		#print "CurrentData", Buffer[0] #//fixme
 		CDataStore.setLastSeen(self.DataStore, time.time());
-		CDataStore.setLastCurrentWeatherTime(self.DataStore, time.time())
+		CDataStore.setLastCurrentWeatherTime(self.DataStore, datetime.now())
 		BatteryStat = (Buffer[0][2] & 0xF);
 		CDataStore.setLastBatteryStatus(self.DataStore, BatteryStat);
 		Quality = Buffer[0][3] & 0x7F;
@@ -1251,9 +1252,9 @@ class CCommunicationService(object):
 		newBuffer[0] = Buffer[0]
 		newLength = [0]
 		newLength[0] = Length[0]
-		print "handleNextAction:: Buffer[0] %x" % Buffer[0][0]
-		print "handleNextAction:: Buffer[1] %x" % Buffer[0][1]
-		print "handleNextAction:: Buffer[2] %x (CWeatherStationConfig *)" % (Buffer[0][2] & 0xF)
+		#print "handleNextAction:: Buffer[0] %x" % Buffer[0][0]
+		#print "handleNextAction:: Buffer[1] %x" % Buffer[0][1]
+		#print "handleNextAction:: Buffer[2] %x (CWeatherStationConfig *)" % (Buffer[0][2] & 0xF)
 		rt = CDataStore.getRequestType(self.DataStore)
 		HistoryIndex = CDataStore.getLastHistoryIndex(self.DataStore);
 		DeviceCS = CDataStore.GetDeviceConfigCS(self.DataStore);
@@ -1461,8 +1462,8 @@ class CCommunicationService(object):
 								#print "#2"
 							else:
 								#print "#3"
-								self.handleConfig(newBuffer, newLength); #temporary commented out
-								if Length[0] == 9:
+								self.handleConfig(newBuffer, newLength);
+								if newLength[0] == 9:
 									#print "#4"
 									CDataStore.setDeviceId(self.DataStore,TransceiverID);
 									CDataStore.setDeviceRegistered(self.DataStore, True);
@@ -1473,7 +1474,7 @@ class CCommunicationService(object):
 					else:
 						if RequestType == 5:
 							#print "#6"
-							HistoryIndex = 0xfffff
+							HistoryIndex = 0xffff
 							newLength[0] = self.buildACKFrame(newBuffer,3,TransceiverID,HistoryIndex,0xFFFFFFFF)
 							self.RepeatCount = 0
 							CDataStore.setRequestState(self.DataStore,ERequestState.rsWaitConfig)
@@ -1695,19 +1696,19 @@ if __name__ == "__main__":
 #	logging.basicConfig(format='%(asctime)s %(name)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
 	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
 
-	print "Press [v] key on Weather Station"
 	myCCommunicationService = CCommunicationService()
 	CDataStore.setCommModeInterval(myCCommunicationService.DataStore,3) #move me to setfrontendalive
 	time.sleep(5)
 
-	TimeOut = CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
-	print "FirstTimeConfig Timeout=%d" % TimeOut
-	ID=[0]
-	ID[0]=0
-	CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
+	if CDataStore.getDeviceId(myCCommunicationService.DataStore) == -1:
+		print "Press [v] key on Weather Station"
+		TimeOut = CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
+		print "FirstTimeConfig Timeout=%d" % TimeOut
+		ID=[0]
+		ID[0]=0
+		CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
 
 	CDataStore.setDeviceRegistered(myCCommunicationService.DataStore, True); #temp hack
-	#CDataStore.setDeviceId(myCCommunicationService.DataStore, 0x32); #temp hack
 
 	Weather = [0]
 	Weather[0]=[0]

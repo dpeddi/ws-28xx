@@ -52,14 +52,14 @@ class WS28xxStation(object):
 		HeavyWeatherService.CDataStore.setCommModeInterval(myCCommunicationService.DataStore,3)
 		time.sleep(5)
 
-		TimeOut = HeavyWeatherService.CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + HeavyWeatherService.CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
-		ID=[0]
-		ID[0]=0
-		#print "Press [v] key on Weather Station"
-		#HeavyWeatherService.CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
+		if HeavyWeatherService.CDataStore.getDeviceId(myCCommunicationService.DataStore) == -1:
+			TimeOut = HeavyWeatherService.CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + HeavyWeatherService.CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
+			ID=[0]
+			ID[0]=0
+			print "Press [v] key on Weather Station"
+			HeavyWeatherService.CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
 
 		HeavyWeatherService.CDataStore.setDeviceRegistered(myCCommunicationService.DataStore, True);	#temp hack
-		#HeavyWeatherService.CDataStore.setDeviceId(myCCommunicationService.DataStore, 0x32); 		#temp hack
 
 		Weather = [0]
 		Weather[0]=[0]
