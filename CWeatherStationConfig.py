@@ -109,49 +109,50 @@ class CWeatherStationConfig(object):
 		config['ws28xx']['StormThreshold'] = str(self._StormThreshold)
 		config['ws28xx']['LCDContrast'] = str(self._LCDContrast)
 		config['ws28xx']['LowBatFlags'] = str(self._LowBatFlags)
+		config['ws28xx']['HistoryInterval'] = str(self._HistoryInterval)
 		config.write()
 
 		USBHardware.ReverseByteOrder(nbuf,3+start, 4)
 		#buf=nbuf[0]
 		#CWeatherStationConfig::readAlertFlags(thisa, buf + 3+start);
 		USBHardware.ReverseByteOrder(nbuf, 7+start, 5);
-		#v2 = USBHardware.ToTemperature(buf + 7+start, 1);
+		#v2 = USBHardware.ToTemperature(nbuf, 7+start, 1);
 		#CWeatherStationHighLowAlarm::SetLowAlarm(&self._AlarmTempIndoor, v2);
-		#v3 = USBHardware.ToTemperature(buf + 9+start, 0);
+		#v3 = USBHardware.ToTemperature(nbuf + 9+start, 0);
 		#self._AlarmTempIndoor.baseclass_0.baseclass_0.vfptr[2].__vecDelDtor(
 		#  (CWeatherStationAlarm *)&self._AlarmTempIndoor,
 		#  LODWORD(v3));
 		#j___RTC_CheckEsp(v4);
 		USBHardware.ReverseByteOrder(nbuf, 12+start, 5);
-		#v5 = USBHardware.ToTemperature(buf + 12+start, 1);
+		#v5 = USBHardware.ToTemperature(nbuf, 12+start, 1);
 		#CWeatherStationHighLowAlarm::SetLowAlarm(&self._AlarmTempOutdoor, v5);
-		#v6 = USBHardware.ToTemperature(buf + 14+start, 0);
+		#v6 = USBHardware.ToTemperature(nbuf, 14+start, 0);
 		#self._AlarmTempOutdoor.baseclass_0.baseclass_0.vfptr[2].__vecDelDtor(
 		#  (CWeatherStationAlarm *)&self._AlarmTempOutdoor,
 		#  LODWORD(v6));
 		USBHardware.ReverseByteOrder(nbuf, 17+start, 2);
-		#v8 = USBHardware.ToHumidity(buf + 17+start, 1);
+		#v8 = USBHardware.ToHumidity(nbuf, 17+start, 1);
 		#CWeatherStationHighLowAlarm::SetLowAlarm(&self._AlarmHumidityIndoor, v8);
-		#v9 = USBHardware.ToHumidity(buf + 18+start, 1);
+		#v9 = USBHardware.ToHumidity(nbuf, 18+start, 1);
 		#self._AlarmHumidityIndoor.baseclass_0.baseclass_0.vfptr[2].__vecDelDtor(
 		#  (CWeatherStationAlarm *)&self._AlarmHumidityIndoor,
 		#  LODWORD(v9));
 		USBHardware.ReverseByteOrder(nbuf, 19+start, 2);
-		#v11 = USBHardware.ToHumidity(buf + 19+start, 1);
+		#v11 = USBHardware.ToHumidity(nbuf, 19+start, 1);
 		#CWeatherStationHighLowAlarm::SetLowAlarm(&self._AlarmHumidityOutdoor, v11);
-		#v12 = USBHardware.ToHumidity(buf + 20+start, 1);
+		#v12 = USBHardware.ToHumidity(nbuf, 20+start, 1);
 		#self._AlarmHumidityOutdoor.baseclass_0.baseclass_0.vfptr[2].__vecDelDtor(
 		#  (CWeatherStationAlarm *)&self._AlarmHumidityOutdoor,
 		#  LODWORD(v12));
-		#USBHardware.ReverseByteOrder(buf + 21+start, 4u);
-		#v14 = USBHardware.To4Pre3Post(buf + 21+start);
+		USBHardware.ReverseByteOrder(nbuf, 21+start, 4);
+		#v14 = USBHardware.To4Pre3Post(nbuf, 21+start);
 		#self._AlarmRain24H.baseclass_0.vfptr[2].__vecDelDtor((CWeatherStationAlarm *)&self._AlarmRain24H, LODWORD(v14));
-		#self._HistoryInterval = buf[25+start] & 0xF;
-		#USBHardware.ReverseByteOrder(buf + 26+start, 3u);
-		##v16 = USBHardware._ToWindspeed(buf + 26+start);
+		self._HistoryInterval = nbuf[25+start] & 0xF;
+		#USBHardware.ReverseByteOrder(nbuf, 26+start, 3u);
+		##v16 = USBHardware._ToWindspeed(nbuf, 26+start);
 		#CWeatherStationWindAlarm::SetHighAlarmRaw(&self._AlarmGust, v16);
-		#USBHardware.ReverseByteOrder(buf + 29+start, 5u);
-		#USBHardware.ReadPressureShared(buf + 29+start, &a, &b);
+		#USBHardware.ReverseByteOrder(nbuf, 29+start, 5u);
+		#USBHardware.ReadPressureShared(nbuf, 29+start, &a, &b);
 		#v17 = Conversions::ToInhg(a);
 		#v25 = b - v17;
 		#if ( fabs(v25) > 1.0 )
@@ -162,7 +163,7 @@ class CWeatherStationConfig(object):
 		#}
 		#CWeatherStationHighLowAlarm::SetLowAlarm(&self._AlarmPressure, a);
 		USBHardware.ReverseByteOrder(nbuf, 34+start, 5);
-		#USBHardware.ReadPressureShared(buf + 34+start, &a, &b);
+		#USBHardware.ReadPressureShared(nbuf, 34+start, &a, &b);
 		#v19 = Conversions::ToInhg(a);
 		#v25 = b - v19;
 		#if ( fabs(v25) > 1.0 )
@@ -196,45 +197,45 @@ class CWeatherStationConfig(object):
 		new_buf[0][0] = 16 * (self._WindspeedFormat & 0xF) + 8 * (self._RainFormat & 1) + 4 * (self._PressureFormat & 1) + 2 * (self._TemperatureFormat & 1) + self._ClockMode & 1;
 		new_buf[0][1] = self._WeatherThreshold & 0xF | 16 * self._StormThreshold & 0xF0;
 		new_buf[0][2] = self._LCDContrast & 0xF | 16 * self._LowBatFlags & 0xF0;
-		#CWeatherStationConfig::writeAlertFlags(buf + 3);
+		#CWeatherStationConfig::writeAlertFlags(nbuf, 3);
 		#((void (__thiscall *)(CWeatherStationHighLowAlarm *))thisa->_AlarmTempIndoor.baseclass_0.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmTempIndoor);
 		#v25 = v2;
 		#v24 = CWeatherTraits.TemperatureOffset() + v2;
 		#v21 = v24;
 		#v22 = CWeatherTraits.TemperatureOffset() + CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmTempIndoor);
 		#v4 = v22;
-		#USBHardware::ToTempAlarmBytes(buf + 7, v22, v21);
+		#USBHardware::ToTempAlarmBytes(nbuf, 7, v22, v21);
 		#((void (__thiscall *)(CWeatherStationHighLowAlarm *))thisa->_AlarmTempOutdoor.baseclass_0.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmTempOutdoor);
 		#v25 = v4;
 		#v24 = CWeatherTraits.TemperatureOffset() + v4;
 		#v21 = v24;
 		#v22 = CWeatherTraits.TemperatureOffset() + CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmTempOutdoor);
 		#v6 = v22;
-		#USBHardware::ToTempAlarmBytes(buf + 12, v22, v21);
+		#USBHardware::ToTempAlarmBytes(nbuf, 12, v22, v21);
 		#((void (__thiscall *)(CWeatherStationHighLowAlarm *))thisa->_AlarmHumidityIndoor.baseclass_0.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmHumidityIndoor);
 		#v21 = v6;
 		#v8 = CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmHumidityIndoor);
 		#v9 = v8;
-		#USBHardware::ToHumidityAlarmBytes(buf + 17, v9, v21);
+		#USBHardware::ToHumidityAlarmBytes(nbuf, 17, v9, v21);
 		#((void (__thiscall *)(CWeatherStationHighLowAlarm *))thisa->_AlarmHumidityOutdoor.baseclass_0.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmHumidityOutdoor);
 		#v21 = v8;
 		#v11 = CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmHumidityOutdoor);
 		#v12 = v11;
-		#USBHardware::ToHumidityAlarmBytes(buf + 19, v12, v21);
+		#USBHardware::ToHumidityAlarmBytes(nbuf, 19, v12, v21);
 		#((void (__thiscall *)(CWeatherStationHighAlarm *))thisa->_AlarmRain24H.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmRain24H);
 		#v21 = v11;
-		#USBHardware::ToRainAlarmBytes(buf + 21, v21);
+		#USBHardware::ToRainAlarmBytes(nbuf, 21, v21);
 		#buf[25] = thisa->_HistoryInterval & 0xF;
 		#v21 = CWeatherStationWindAlarm::GetHighAlarmRaw(&thisa->_AlarmGust);
-		#USBHardware::_ToWindspeedAlarmBytes(buf + 26, v21);
+		#USBHardware::_ToWindspeedAlarmBytes(nbuf, 26, v21);
 		#v21 = CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure);
 		#v21 = Conversions::ToInhg(v21);
 		#v14 = CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure);
 		#v15 = CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure);
-		#USBHardware::ToPressureBytesShared(buf + 29, v15, v21);
+		#USBHardware::ToPressureBytesShared(nbuf, 29, v15, v21);
 		#((void (__thiscall *)(CWeatherStationHighLowAlarm *))thisa->_AlarmPressure.baseclass_0.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmPressure);
 		#((void (__thiscall *)(CWeatherStationHighLowAlarm *))thisa->_AlarmPressure.baseclass_0.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmPressure);
-		#USBHardware::ToPressureBytesShared(buf + 34, Conversions::ToInhg(CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure)), Conversions::ToInhg(CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure)))
+		#USBHardware::ToPressureBytesShared(nbuf, 34, Conversions::ToInhg(CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure)), Conversions::ToInhg(CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure)))
 
 		#print "debugxxx ", type(self._ResetMinMaxFlags)
 		new_buf[0][39] = (self._ResetMinMaxFlags >>  0) & 0xFF;

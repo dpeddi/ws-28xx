@@ -275,7 +275,7 @@ class CDataStore(object):
 		    self.logger.debug("ok")
 
 	def writeLastStat(self):
-		filename= "/etc/WV5Datastore.cfg"
+		filename= "/tmp/WV5Datastore.cfg"
 		config = ConfigObj(filename)
 		config.filename = filename
 		config['LastStat'] = {}
@@ -418,6 +418,11 @@ class CDataStore(object):
 	def setLastHistoryDataTime(self,time):
 		self.logger.debug("time=%s" % time)
 		self.LastStat.LastHistoryDataTime = time
+		self.writeLastStat()
+
+	def setLastConfigTime(self,time):
+		self.logger.debug("time=%s" % time)
+		self.LastStat.LastConfigTime = time
 		self.writeLastStat()
 
 	def getBufferCheck(self):
@@ -1205,8 +1210,11 @@ class CCommunicationService(object):
 		#CTracer::WriteTrace(v10, 40, "getLastHistoryIndex(): %X",CDataStore.getLastHistoryIndex(self.DataStore));
 		if ( ThisHistoryIndex == CDataStore.getLastHistoryIndex(self.DataStore)):
 		#	CDataStore::getLastHistTimeStamp(self.DataStore, &LastHistTs);
+			if 1 == 1:
 		#	if ( !ATL::COleDateTime::GetStatus(&LastHistTs) )
+				if 1 == 1:
 		#		if ( !ATL::COleDateTime::GetStatus(CHistoryDataSet::GetTime(&Data)) ):
+					if 1 == 1:
 		#			if ( ATL::COleDateTime::operator__(CHistoryDataSet::GetTime(&Data), &LastHistTs) ):
 		#				CDataStore::setOutsatndingHistorySets(self.DataStore, 0xFFFFFFFFu);
 		#				CDataStore.setLastHistoryIndex(self.DataStore, 0xFFFFFFFF);
@@ -1215,7 +1223,7 @@ class CCommunicationService(object):
 		#				ATL::COleDateTime::SetStatus(&InvalidDateTime, partial);
 		#				CDataStore::setLastHistTimeStamp(self.DataStore, &InvalidDateTime);
 		#			else:
-		#				CDataStore::setLastHistoryDataTime(self.DataStore, &now);
+						CDataStore.setLastHistoryDataTime(self.DataStore, datetime.now())
 			CDataStore.setBufferCheck(self.DataStore, 0)
 		else:
 			#CDataStore::setLastHistTimeStamp(self.DataStore, CHistoryDataSet::GetTime(&Data));

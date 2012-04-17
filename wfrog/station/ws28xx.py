@@ -110,8 +110,8 @@ class WS28xxStation(object):
 					e.total = myCCommunicationService.DataStore.CurrentWeather._RainTotal
 					send_event(e)
 
-				if CWeatherTraits.WindNP() != myCCommunicationService.DataStore.CurrentWeather._WindSpeed:
-					e = generate_event('wind')
+				if abs(CWeatherTraits.WindNP() - myCCommunicationService.DataStore.CurrentWeather._WindSpeed) > 0.001:
+	    				e = generate_event('wind')
 					e.create_child('mean')
 					e.mean.speed = myCCommunicationService.DataStore.CurrentWeather._WindSpeed
 					e.mean.dir = myCCommunicationService.DataStore.CurrentWeather._WindDirection * 360 / 16
