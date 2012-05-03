@@ -24,6 +24,14 @@
 ##  The ws-28xx at github and driver are still under heavy
 ##  development. Feel free to contribute.
 
+##  2012-04-27: my station stopped working. I've imported a US unit
+##              while I live in EU. I've asked support for my unit
+##              both to lacrossetechnology.com and lacrossetecnhology.fr
+##
+##              Now I'm in the situation that both give email support
+##              but I can't get my station back to repair.
+
+
 import time
 import logging
 

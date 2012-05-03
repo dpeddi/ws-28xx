@@ -35,6 +35,7 @@ class CWeatherStationConfig(object):
 		self._LCDContrast = 0
 		self._LowBatFlags = 0
 		self._ResetMinMaxFlags = 0
+		self._HistoryInterval = 0
 
 	def readAlertFlags(self,buf):
 		print "CWeatherStationConfig::readAlertFlags"
@@ -147,7 +148,7 @@ class CWeatherStationConfig(object):
 		USBHardware.ReverseByteOrder(nbuf, 21+start, 4);
 		#v14 = USBHardware.To4Pre3Post(nbuf, 21+start);
 		#self._AlarmRain24H.baseclass_0.vfptr[2].__vecDelDtor((CWeatherStationAlarm *)&self._AlarmRain24H, LODWORD(v14));
-		self._HistoryInterval = nbuf[25+start] & 0xF;
+		self._HistoryInterval = nbuf[0][25+start] & 0xF;
 		#USBHardware.ReverseByteOrder(nbuf, 26+start, 3u);
 		##v16 = USBHardware._ToWindspeed(nbuf, 26+start);
 		#CWeatherStationWindAlarm::SetHighAlarmRaw(&self._AlarmGust, v16);

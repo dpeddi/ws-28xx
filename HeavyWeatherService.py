@@ -1311,9 +1311,9 @@ class CCommunicationService(object):
 	def CCommunicationService(self):
 		self.logger.debug("")
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.IFMODE]     = 0x00;
-		self.AX5051RegisterNames_map[self.AX5051RegisterNames.MODULATION] = 0x41;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.MODULATION] = 0x41; #fsk
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.ENCODING]   = 0x07;
-		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FRAMING]    = 0x84;
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FRAMING]    = 0x84; #1000:0100 ##?hdlc? |1000 010 0
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.CRCINIT3]   = 0xff;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.CRCINIT2]   = 0xff;
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.CRCINIT1]   = 0xff;
@@ -1377,17 +1377,28 @@ class CCommunicationService(object):
 			CorVal |= FreqCorrection[0][2];
 			CorVal <<= 8;
 			CorVal |= FreqCorrection[0][3];
+			print "CorVal: %x" % CorVal #0x184e8
 			FreqVal += CorVal;
+
+		#print "try to tune sensors"
+		#Frequency = 915450000
+		#FreqVal =  long(Frequency / 16000000.0 * 16777216.0);
+
 		if ( not (FreqVal % 2) ):
 			FreqVal+=1;
-			self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ3] = (FreqVal >>24) & 0xFF;
-			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ3])
-			self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ2] = (FreqVal >>16) & 0xFF;
-			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ2])
-			self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ1] = (FreqVal >>8)  & 0xFF;
-			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ1])
-			self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0] = (FreqVal >>0)  & 0xFF;
-			#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0])
+			#FreqVal = 949060841 0x389184e9
+			#print "Freq:",CorVal,(CorVal / 16777216 * 16000000 + 1)
+			#FreqVal= 915450000 / 16000000 * 16777216 + 1
+			#print "experiment:",FreqVal,CorVal
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ3] = (FreqVal >>24) & 0xFF;
+		#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ3])
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ2] = (FreqVal >>16) & 0xFF;
+		#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ2])
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ1] = (FreqVal >>8)  & 0xFF;
+		#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ1])
+		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0] = (FreqVal >>0)  & 0xFF;
+		#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0])
+		print "FreqVal: %x" % FreqVal
 
 	def GenerateResponse(self,Buffer,Length):
 		self.logger.debug("Length=%x" % Length[0])
@@ -1444,6 +1455,8 @@ class CCommunicationService(object):
 					else:
 						newLength[0] = 0
 				else:
+					print "Unrecognized TransceiverID=%x" % ID
+					self.logger.debug("Unrecognized ID=%x" % ID)
 					newLength[0] = 0
 			else:
 				if RequestType == 5:
@@ -1609,6 +1622,7 @@ class CCommunicationService(object):
 				ReceiverState = StateBuffer[0][0];
 				if ReceiverState == 0x16:
 					ret = sHID.GetFrame(FrameBuffer, DataLength);
+					print FrameBuffer
 					if ret == None:
 						raise ws28xxError("USBDevice->GetFrame returned false")
 					if DataLength[0]:
