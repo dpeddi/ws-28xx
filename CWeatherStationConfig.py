@@ -95,23 +95,6 @@ class CWeatherStationConfig(object):
 		self._LCDContrast = nbuf[0][2+start] & 0xF;
 		self._LowBatFlags = (nbuf[0][2+start] >> 4) & 0xF;
 
-		filename= "/etc/WV5Datastore.cfg"
-		config = ConfigObj(filename)
-		config.filename = filename
-		config['ws28xx'] = {}
-		config['ws28xx']['CheckSumm'] = str(self._CheckSumm)
-		config['ws28xx']['ClockMode'] = str(self._ClockMode)
-
-		config['ws28xx']['TemperatureFormat'] = str(self._TemperatureFormat)
-		config['ws28xx']['PressureFormat'] = str(self._PressureFormat)
-		config['ws28xx']['RainFormat'] = str(self._RainFormat)
-		config['ws28xx']['WindspeedFormat'] = str(self._WindspeedFormat)
-		config['ws28xx']['WeatherThreshold'] = str(self._WeatherThreshold)
-		config['ws28xx']['StormThreshold'] = str(self._StormThreshold)
-		config['ws28xx']['LCDContrast'] = str(self._LCDContrast)
-		config['ws28xx']['LowBatFlags'] = str(self._LowBatFlags)
-		config['ws28xx']['HistoryInterval'] = str(self._HistoryInterval)
-		config.write()
 
 		USBHardware.ReverseByteOrder(nbuf,3+start, 4)
 		#buf=nbuf[0]
@@ -188,6 +171,25 @@ class CWeatherStationConfig(object):
 			CheckSumm -= nbuf[0][i+start];
 		#if ( CheckSumm ): for now is better to comment it
 			#self._CheckSumm = -1;
+
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		config['ws28xx'] = {}
+		config['ws28xx']['CheckSumm'] = str(self._CheckSumm)
+		config['ws28xx']['ClockMode'] = str(self._ClockMode)
+
+		config['ws28xx']['TemperatureFormat'] = str(self._TemperatureFormat)
+		config['ws28xx']['PressureFormat'] = str(self._PressureFormat)
+		config['ws28xx']['RainFormat'] = str(self._RainFormat)
+		config['ws28xx']['WindspeedFormat'] = str(self._WindspeedFormat)
+		config['ws28xx']['WeatherThreshold'] = str(self._WeatherThreshold)
+		config['ws28xx']['StormThreshold'] = str(self._StormThreshold)
+		config['ws28xx']['LCDContrast'] = str(self._LCDContrast)
+		config['ws28xx']['LowBatFlags'] = str(self._LowBatFlags)
+		config['ws28xx']['HistoryInterval'] = str(self._HistoryInterval)
+		config.write()
+
 		return 1;
 
 	def write(self,buf):
@@ -226,7 +228,7 @@ class CWeatherStationConfig(object):
 		#((void (__thiscall *)(CWeatherStationHighAlarm *))thisa->_AlarmRain24H.baseclass_0.vfptr[1].__vecDelDtor)(&thisa->_AlarmRain24H);
 		#v21 = v11;
 		#USBHardware::ToRainAlarmBytes(nbuf, 21, v21);
-		#buf[25] = thisa->_HistoryInterval & 0xF;
+		new_buf[0][25] = self._HistoryInterval & 0xF;
 		#v21 = CWeatherStationWindAlarm::GetHighAlarmRaw(&thisa->_AlarmGust);
 		#USBHardware::_ToWindspeedAlarmBytes(nbuf, 26, v21);
 		#v21 = CWeatherStationHighLowAlarm::GetLowAlarm(&thisa->_AlarmPressure);
