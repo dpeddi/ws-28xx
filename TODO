@@ -1,3 +1,5 @@
 - Original windows driver may support multiple ws while this one implementation not..
+- Missing support for device pre 2010
+- Missing First Syncronization between Usb key and display - First sync on linux is still software only and don't cople the device
 - Missing some Current Weather value (rain)
 - Missing handling Historic Data

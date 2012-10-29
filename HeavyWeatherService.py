@@ -7,6 +7,8 @@
 ## Use this software as your own risk.
 ## Me and La Crosse Technology is not responsable for any damage using this software
 
+## Really thanks tfa-dostmann.de to allow me to go forward with development
+
 from configobj import ConfigObj
 from datetime import datetime
 from datetime import timedelta
