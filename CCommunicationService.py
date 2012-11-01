@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+#define BYTE3(v) ((u8)((u32)(v) >> 24))
+
 from datetime import datetime
 from datetime import timedelta
 import logging
@@ -1030,7 +1032,7 @@ class CCommunicationService(object):
 						#		timeout -= 1;
 						#if timeout == 0:
 							self.RepeatTime = datetime.now()
-							time.sleep(0.2)
+							#time.sleep(0.2)
 						#break;
 						timeout -= 1
 						if ( not timeout ):
@@ -1049,7 +1051,7 @@ class CCommunicationService(object):
 			if not ret:
 				self.DataStore.setFlag_FLAG_TRANSCEIVER_PRESENT( 0)
 				pass
-			time.sleep(0.0005)
+			#time.sleep(0.0005)
 
 
 #filehandler = open("WV5DataStore", 'w')

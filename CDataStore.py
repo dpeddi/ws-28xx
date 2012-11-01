@@ -365,6 +365,7 @@ class CDataStore(object):
 
 	def FirstTimeConfig(self,ID,TimeOut):
 		print "CDataStore::FirstTimeConfig"
+		self.logger.debug("FirstTimeConfig")
 		#if ( CSingleInstance::IsRunning(this) && CDataStore::getFlag<0>(thisa))
 		if self.getFlag_FLAG_TRANSCEIVER_PRESENT():
 			self.Settings.DeviceRegistered = False;
@@ -400,6 +401,8 @@ class CDataStore(object):
 			#	v25 = 1;
 			#	v30 = -1;
 			self.Request.CondFinish.release()
+		else:
+			self.logger.debug("FirstTimeConfig: self.getFlag_FLAG_TRANSCEIVER_PRESENT ko")
 
 
 	def GetCurrentWeather(self,Weather,TimeOut):

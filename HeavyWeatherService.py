@@ -75,8 +75,12 @@ if __name__ == "__main__":
 	myCCommunicationService = CCommunicationService.CCommunicationService()
 	myCCommunicationService.DataStore.setCommModeInterval(3) #move me to setfrontendalive
 
-	print "zzzzz"
-	time.sleep(10)
+
+#wait until transceiver initialized...
+	while True:
+		if myCCommunicationService.DataStore.getFlag_FLAG_TRANSCEIVER_PRESENT():
+			time.sleep(0.001)
+			break
 
 	if myCCommunicationService.DataStore.getDeviceId() == -1:
 		print "Press [v] key on Weather Station"
@@ -86,8 +90,8 @@ if __name__ == "__main__":
 		ID[0]=0
 		myCCommunicationService.DataStore.FirstTimeConfig(ID,TimeOut)
 
-	#time.sleep(60+60+30)
-	#os._exit(12)
+	time.sleep(60+60+30)
+	os._exit(12)
 	
 	myCCommunicationService.DataStore.setDeviceRegistered( True); #temp hack
 
