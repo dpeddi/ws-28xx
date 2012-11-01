@@ -365,7 +365,7 @@ class CDataStore(object):
 
 	def FirstTimeConfig(self,ID,TimeOut):
 		print "CDataStore::FirstTimeConfig"
-		self.logger.debug("FirstTimeConfig")
+		self.logger.critical("FirstTimeConfig")
 		#if ( CSingleInstance::IsRunning(this) && CDataStore::getFlag<0>(thisa))
 		if self.getFlag_FLAG_TRANSCEIVER_PRESENT():
 			self.Settings.DeviceRegistered = False;

@@ -86,6 +86,8 @@ if __name__ == "__main__":
 		print "Press [v] key on Weather Station"
 		TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
 		print "FirstTimeConfig Timeout=%d" % TimeOut
+		
+		time.sleep(5)
 		ID=[0]
 		ID[0]=0
 		myCCommunicationService.DataStore.FirstTimeConfig(ID,TimeOut)
