@@ -130,6 +130,7 @@ class sHID(object):
 		                                0x00003d1,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
+			time.sleep(0.004)
 			result = 1
 		except:
 			result = 0
@@ -139,7 +140,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.critical(">%s" % strbuf)
 		return result
 
 	def SetRX(self):
@@ -153,6 +154,7 @@ class sHID(object):
 		                                0x00003d0,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
+			time.sleep(0.004)
 			result = 1
 		except:
 			result = 0
@@ -162,7 +164,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.critical(">%s" % strbuf)
 		return result
 
 	def GetState(self,StateBuffer):
@@ -174,6 +176,7 @@ class sHID(object):
 										  index=0x0000000,
 										  buffer=0x0a,
 										  timeout=1000)
+			time.sleep(0.004)
 			StateBuffer[0]=[0]*0x2
 			StateBuffer[0][0]=buffer[1]
 			StateBuffer[0][1]=buffer[2]
@@ -193,7 +196,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.critical("<%s" % strbuf)
 
 		return result
 
@@ -215,6 +218,7 @@ class sHID(object):
 					                                0x00003dd,                                  # value
 					                                0x0000000,                                  # index
 					                                1000)                                       # timeout
+					time.sleep(0.004)
 					result = 1
 				except:
 					result = 0
@@ -224,9 +228,8 @@ class sHID(object):
 				for entry in buffer:
 					strbuf += str("%.2x" % (buffer[i]))
 					i+=1
-				self.logger.debug("%s" % strbuf)
+				self.logger.critical(">%s" % strbuf)
 
-				#time.sleep(0.5)
 
 				try:
 					buffer = self.devh.controlMsg(requestType=usb.TYPE_CLASS | usb.RECIP_INTERFACE | usb.ENDPOINT_IN,
@@ -235,7 +238,7 @@ class sHID(object):
 											   index=0x0000000,
 											   buffer=0x15,
 											   timeout=1000)
-
+					time.sleep(0.004)
 					result = 1
 				except:
 					result = 0
@@ -265,7 +268,7 @@ class sHID(object):
 				for entry in buffer:
 					strbuf += str("%.2x" % (buffer[i]))
 					i+=1
-				self.logger.debug("%s" % strbuf)
+				self.logger.critical("<%s" % strbuf)
 
 			result = 1;
 		else:
@@ -286,6 +289,7 @@ class sHID(object):
 		                                0x00003d7,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
+			time.sleep(0.004)
 			result = 1
 		except:
 			result = 0
@@ -295,7 +299,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.critical(">%s" % strbuf)
 		return result
 
 
@@ -329,6 +333,7 @@ class sHID(object):
 		                                0x00003d5,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
+			time.sleep(0.004)
 			result = 1
 		except:
 			result = 0
@@ -338,7 +343,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.critical(">%s" % strbuf)
 		return result
 
 	def GetFrame(self,data,numBytes):
@@ -350,7 +355,7 @@ class sHID(object):
 										  index=0x0000000,
 										  buffer=0x111,
 										  timeout=1000)
-
+			time.sleep(0.004)
 			result = 1
 		except:
 			result = 0
@@ -365,7 +370,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.critical("<%s" % strbuf)
 
 		data[0] = new_data
 		numBytes[0] = new_numBytes
@@ -387,6 +392,7 @@ class sHID(object):
 		                                0x00003f0,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
+			time.sleep(0.004)
 			result = 1
 		except:
 			result = 0
@@ -396,7 +402,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.critical(">%s" % strbuf)
 		return result
 
 	def Execute(self,command):
@@ -412,6 +418,7 @@ class sHID(object):
 		                                0x00003d9,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
+			time.sleep(0.004)
 			result = 1
 		except:
 			result = 0
@@ -421,7 +428,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.critical(">%s" % strbuf)
 		return result
 
 	def SetPreamblePattern(self,pattern):
@@ -436,6 +443,7 @@ class sHID(object):
 		                                0x00003d8,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
+			time.sleep(0.004)
 			result = 1
 
 		except:
@@ -446,5 +454,5 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.critical(">%s" % strbuf)
 		return result

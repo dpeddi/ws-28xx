@@ -75,7 +75,7 @@ class CWeatherStationConfig(object):
 		t = [0]
 		t[0] = [0]*1024
 		#self._ = self.write(t);
-		print "CWeatherStationConfig._CheckSumm (should be retrieved) --> 0x%x" % self._CheckSumm
+		#print "CWeatherStationConfig._CheckSumm (should be retrieved) --> 0x%x" % self._CheckSumm
 
 	def read(self,buf,start):
 		self.logger.debug("wsconfig")
