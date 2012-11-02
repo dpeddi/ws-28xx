@@ -866,8 +866,8 @@ class CCommunicationService(object):
 		Buffer[0] = newBuffer[0]
 		Length[0] = newLength[0]
 		#if newLength[0] == 0:
-		return 0
-		#return 1
+		#return 0
+		return 1
 
 	def TransceiverInit(self):
 		self.logger.debug("")
@@ -930,12 +930,12 @@ class CCommunicationService(object):
 					#RequestState<>ERequestState.rsQueued
 					if RequestState == ERequestState.rsWaitDevice: # == 4
 						self.logger.debug("self.getRequestState == 4 (rsWaitDevice)")
-						#if datetime.now() >= DeviceWaitEndTime :
-						#	print "now=",datetime.now()
-						#	print "DeviceWaitEndTime=",DeviceWaitEndTime
-						#	print "now => DeviceWaitEndTime"
-						#	self.DataStore.setRequestState(ERequestState.rsError);
-						#	self.DataStore.RequestNotify();
+						if datetime.now() >= DeviceWaitEndTime :
+							print "now=",datetime.now()
+							print "DeviceWaitEndTime=",DeviceWaitEndTime
+							print "now => DeviceWaitEndTime"
+							self.DataStore.setRequestState(ERequestState.rsError);
+							self.DataStore.RequestNotify();
 				else:
 					#RequestState=ERequestState.rsQueued
 					sHID.SetPreamblePattern(0xaa)
@@ -946,17 +946,17 @@ class CCommunicationService(object):
 					print "PreambleDuration", PreambleDuration
 					PreambleEndTime = datetime.now() + timedelta(milliseconds=PreambleDuration)
 					print "PreambleEndTime", PreambleEndTime
-					#while True:
-					#	if not ( PreambleEndTime >= datetime.now() ):
-					#		print "!PreambleEndTime >= datetime.now()"
-					#		break
-					#	if RequestType != self.DataStore.getRequestType():
-					#		print "RequestType != self.DataStore.getRequestType()"
-					#		break
-					#	self.DataStore.RequestTick();
-					#	time.sleep(0.5)
-					#	self.DataStore.setFlag_FLAG_SERVICE_RUNNING(True);
-					time.sleep(6)
+					while True:
+						if not ( PreambleEndTime >= datetime.now() ):
+							print "!PreambleEndTime >= datetime.now()"
+							break
+						if RequestType != self.DataStore.getRequestType():
+							print "RequestType != self.DataStore.getRequestType()"
+							break
+						self.DataStore.RequestTick();
+						time.sleep(0.5)
+						self.DataStore.setFlag_FLAG_SERVICE_RUNNING(True);
+					#time.sleep(6)
 
 					if RequestType == self.DataStore.getRequestType():
 						self.DataStore.setRequestState(ERequestState.rsWaitDevice)

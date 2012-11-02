@@ -1,0 +1,36 @@
+Source: http://www.makestuff.eu/wordpress/category/software/
+
+Enabling Linux USB Debugging
+============================
+
+I always forget how to turn on USB debugging on Linux, so I'm going to write it down here:
+
+First mount debugfs and load the usbmon module:
+
+$ sudo mount -t debugfs none_debugs /sys/kernel/debug
+$ sudo modprobe usbmon
+
+Now identify the bus to which your misbehaving device is attached:
+
+$ lsusb | grep Atmel
+Bus 002 Device 005: ID 03eb:2042 Atmel Corp. LUFA Keyboard Demo ApplicationNow get the list of device nodes present for that bus (002):
+
+$ sudo ls /sys/kernel/debug/usb/usbmon | grep -E ^2
+2s
+2t
+2u
+
+Just try sudo cat on each one in turn until you get lucky:
+
+$ sudo cat /sys/kernel/debug/usb/usbmon/2s
+nreaders 0 events 0 text_lost 0
+$ sudo cat /sys/kernel/debug/usb/usbmon/2t
+ffff880381558f00 4274942466 C Ii:005:01 0 8 = 00000000 00000000
+ffff880381558f00 4274942512 S Ii:005:01 -115 8 <
+ffff880381558f00 4276274470 C Ii:005:01 0 8 = 00002800 00000000
+ffff880381558f00 4276274512 S Ii:005:01 -115 8 <
+
+Remember to remove usbmon from the kernel and unmount debugfs when you're done:
+
+$ sudo rmmod usbmon
+$ sudo umount /sys/kernel/debug

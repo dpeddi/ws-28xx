@@ -126,7 +126,6 @@ class CDataStore(object):
 		config.filename = filename
 		config['Settings'] = {}
 		config['Settings']['DeviceID'] = str(self.Settings.DeviceId)
-		config['Settings']['TransmissionFrequency'] = str(self.Settings.TransmissionFrequency)
 		
 		config.write()
 
@@ -141,6 +140,18 @@ class CDataStore(object):
 	def getDeviceConfig(self,result):
 		self.logger.debug("")
 
+	def getTransmissionFrequency(self):
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		try:
+			self.TransceiverSettings.TransmissionFrequency = int(config['TransceiverSettings']['TransmissionFrequency'])
+		except:
+			pass
+		self.logger.debug("TransceiverSettings.TransmissionFrequency=%x" % self.TransceiverSettings.TransmissionFrequency)
+		#print "TransceiverSettings.TransmissionFrequency=%x" % self.TransceiverSettings.TransmissionFrequency
+		return self.TransceiverSettings.TransmissionFrequency
+
 	def getDeviceId(self):
 		filename= "/etc/WV5Datastore.cfg"
 		config = ConfigObj(filename)
@@ -152,18 +163,6 @@ class CDataStore(object):
 		self.logger.debug("Settings.DeviceId=%x" % self.Settings.DeviceId)
 		#print "Settings.DeviceId=%x" % self.Settings.DeviceId
 		return self.Settings.DeviceId
-
-	def getTransmissionFrequency(self):
-		filename= "/etc/WV5Datastore.cfg"
-		config = ConfigObj(filename)
-		config.filename = filename
-		try:
-			self.Settings.TransmissionFrequency = int(config['Settings']['TransmissionFrequency'])
-		except:
-			pass
-		self.logger.debug("Settings.TransmissionFrequency=%x" % self.Settings.TransmissionFrequency)
-		#print "Settings.TransmissionFrequency=%x" % self.Settings.TransmissionFrequency
-		return self.Settings.TransmissionFrequency
 
 	def setDeviceId(self,val):
 		self.logger.debug("val=%x" % val)

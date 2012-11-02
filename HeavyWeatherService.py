@@ -68,36 +68,20 @@ class ws28xxError(IOError):
 if __name__ == "__main__":
 	import logging
 
-
-	import os
-	import sys    
+	import sys
+	import random
 	import termios
-	import fcntl
-	
-	def getch():
-	  fd = sys.stdin.fileno()
-	
-	  oldterm = termios.tcgetattr(fd)
-	  newattr = termios.tcgetattr(fd)
-	  newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
-	  termios.tcsetattr(fd, termios.TCSANOW, newattr)
-	
-	  oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
-	  fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
-	
-	  try:
-	    while 1:
-	      try:
-	        c = sys.stdin.read(1)
-		break
-	      except IOError: pass
-	  finally:
-	    termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
-	    fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
-	  return c
+	import tty
+	inkey_buffer=0
+	def inkey():
+		fd=sys.stdin.fileno()
+		remember_attributes=termios.tcgetattr(fd)
+		tty.setraw(sys.stdin.fileno())
+		character=sys.stdin.read(inkey_buffer)
+		termios.tcsetattr(fd, termios.TCSADRAIN, remember_attributes)
+		return character
 
 
-	
 #CRITICAL 50 
 #ERROR 40 
 #WARNING 30 
@@ -105,8 +89,8 @@ if __name__ == "__main__":
 #DEBUG 10 
 #NOTSET 0 
 #	logging.basicConfig(format='%(asctime)s %(name)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
-#	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
-	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.CRITICAL)
+	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
+#	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.INFO)
 
 	os.system( [ 'clear', 'cls' ][ os.name == 'nt' ] )
 
@@ -126,6 +110,7 @@ if __name__ == "__main__":
 			print "."
 			break
 
+	print "esc: exit"
 	print "0: Current"
 	print "1:"
 	print "2:"
@@ -133,8 +118,9 @@ if __name__ == "__main__":
 	print "4:"
 	print "5: Syncronize - press [v] key on Display then choose this option"
 	while True:
+		inkey_buffer=int(random.random()*2)
 		print myCCommunicationService.DataStore.getRequestState()
-		keypress = getch()
+		keypress = inkey()
 		if   keypress == "0":
 			print "Choosen 0"
 			Weather = [0]
@@ -143,8 +129,6 @@ if __name__ == "__main__":
 			#or myCCommunicationService.DataStore.getRequestState() == ERequestState.rsINVALID:
 			TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
 			myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
-			print "done"
-			time.sleep(10)
 		elif keypress == "1":
 			print "Choosen 1"
 		elif keypress == "2":
@@ -164,7 +148,10 @@ if __name__ == "__main__":
 				ID=[0]
 				ID[0]=0
 				myCCommunicationService.DataStore.FirstTimeConfig(ID,TimeOut)
-				print ID
+				print ID[0]
+		elif keypress==chr(27) or keypress == "x":
+			os._exit(12)
+			break
 
 
 
