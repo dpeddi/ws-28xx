@@ -195,6 +195,7 @@ class CDataStore(object):
 			self.VendorId	= 0x6666
 			self.ProductId	= 0x5555
 			self.VersionNo	= 1
+			self.TransmissionFrequency = 0
 			self.Frequency	= 905000000
 			self.manufacturer	= "LA CROSSE TECHNOLOGY"
 			self.product		= "Weather Direct Light Wireless Device"
@@ -307,6 +308,18 @@ class CDataStore(object):
 
 	def getDeviceConfig(self,result):
 		self.logger.debug("")
+
+	def getTransmissionFrequency(self):
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		try:
+			self.TransceiverSettings.TransmissionFrequency = int(config['TransceiverSettings']['TransmissionFrequency'])
+		except:
+			pass
+		self.logger.debug("TransceiverSettings.TransmissionFrequency=%x" % self.TransceiverSettings.TransmissionFrequency)
+		#print "TransceiverSettings.TransmissionFrequency=%x" % self.TransceiverSettings.TransmissionFrequency
+		return self.TransceiverSettings.TransmissionFrequency
 
 	def getDeviceId(self):
 		filename= "/etc/WV5Datastore.cfg"
@@ -1725,6 +1738,10 @@ if __name__ == "__main__":
 	myCCommunicationService = CCommunicationService()
 	CDataStore.setCommModeInterval(myCCommunicationService.DataStore,3) #move me to setfrontendalive
 	time.sleep(5)
+
+	if myCCommunicationService.DataStore.getTransmissionFrequency() == 1:
+		myCCommunicationService.DataStore.TransceiverSettings.Frequency = 868300000
+
 
 	if CDataStore.getDeviceId(myCCommunicationService.DataStore) == -1:
 		print "Press [v] key on Weather Station"

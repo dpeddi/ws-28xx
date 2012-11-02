@@ -1,0 +1,10 @@
+Configuration:
+==============
+
+ws28xx store its data to /etc/WV5Datastore.cfg.
+
+IT+868 Unit:
+============
+If you have an IT+868 unit you need to edit configuration file by adding
+[TransceiverSettings]
+TransmissionFrequency = 1
