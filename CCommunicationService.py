@@ -8,12 +8,19 @@ import logging
 import time
 import threading
 import CDataStore
+import CHistoryDataSet
 import sHID
 
 import EConstants
 
+from CWeatherStationConfig import CWeatherStationConfig
+import CCurrentWeatherData
+import USBHardware
+
 ERequestType=EConstants.ERequestType()
 ERequestState=EConstants.ERequestState()
+
+USBHardware=USBHardware.USBHardware()
 
 sHID = sHID.sHID()
 
@@ -865,8 +872,8 @@ class CCommunicationService(object):
 
 		Buffer[0] = newBuffer[0]
 		Length[0] = newLength[0]
-		#if newLength[0] == 0:
-		#return 0
+		if newLength[0] == 0:
+			return 0
 		return 1
 
 	def TransceiverInit(self):
@@ -954,7 +961,7 @@ class CCommunicationService(object):
 							print "RequestType != self.DataStore.getRequestType()"
 							break
 						self.DataStore.RequestTick();
-						time.sleep(0.5)
+						time.sleep(0.001) #(thread
 						self.DataStore.setFlag_FLAG_SERVICE_RUNNING(True);
 					#time.sleep(6)
 
@@ -1016,7 +1023,7 @@ class CCommunicationService(object):
 					ReceiverState = 0xc8;
 					timeout = 1000;
 					self.logger.debug("entro nell'while stronzo")
-					print "entro nell'while stronzo"
+					#print "entro nell'while stronzo"
 					while True:
 						ret = sHID.GetState(StateBuffer);
 						self.DataStore.RequestTick();
@@ -1034,11 +1041,11 @@ class CCommunicationService(object):
 						#		timeout -= 1;
 						#if timeout == 0:
 							self.RepeatTime = datetime.now()
-							#time.sleep(0.2)
-						#break;
+							time.sleep(0.2)
+						break;
 						timeout -= 1
-						if ( not timeout ):
-							break
+						#if ( not timeout ):
+						#	break
 #LABEL_49
 					#print "sono fuori dall'while stronzo"
 				if ReceiverState != 0x15:
@@ -1052,6 +1059,7 @@ class CCommunicationService(object):
 			if not ret:
 				self.DataStore.setFlag_FLAG_TRANSCEIVER_PRESENT( 0)
 				pass
+			time.sleep(0.001)
 
 
 #filehandler = open("WV5DataStore", 'w')

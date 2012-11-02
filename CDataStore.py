@@ -49,6 +49,7 @@ class CDataStore(object):
 			self.LastHistoryDataTime = datetime(1900, 01, 01, 00, 00)
 			self.LastConfigTime = datetime(1900, 01, 01, 00, 00)
 			self.LastWeatherClubTransmission = None
+			self.LastSeen = None
 
 	class TSettings(object):
 		#void __thiscall CDataStore::TSettings::TSettings(CDataStore::TSettings *this);
