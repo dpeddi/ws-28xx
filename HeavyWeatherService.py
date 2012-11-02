@@ -28,8 +28,10 @@ import CHistoryDataSet
 import CDataStore
 import CCommunicationService
 import CCurrentWeatherData
+import EConstants
 import sHID
 from CWeatherStationConfig import CWeatherStationConfig
+
 
 def handleError(self, record):
 	traceback.print_stack()
@@ -42,6 +44,8 @@ USBHardware = USBHardware.USBHardware()
 
 #CCommunicationService = CCommunicationService.CCommunicationService()
 CWeatherTraits = CWeatherTraits.CWeatherTraits()
+ERequestState=EConstants.ERequestState()
+
 
 #def equal(a, b):
     #return abs(a - b) < 1e-6
@@ -60,8 +64,40 @@ class ws28xxError(IOError):
 #t = ThreadClass()
 #t.start()
 
+
 if __name__ == "__main__":
 	import logging
+
+
+	import os
+	import sys    
+	import termios
+	import fcntl
+	
+	def getch():
+	  fd = sys.stdin.fileno()
+	
+	  oldterm = termios.tcgetattr(fd)
+	  newattr = termios.tcgetattr(fd)
+	  newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
+	  termios.tcsetattr(fd, termios.TCSANOW, newattr)
+	
+	  oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
+	  fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
+	
+	  try:
+	    while 1:
+	      try:
+	        c = sys.stdin.read(1)
+		break
+	      except IOError: pass
+	  finally:
+	    termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
+	    fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
+	  return c
+
+
+	
 #CRITICAL 50 
 #ERROR 40 
 #WARNING 30 
@@ -72,28 +108,68 @@ if __name__ == "__main__":
 #	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
 	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.CRITICAL)
 
+	os.system( [ 'clear', 'cls' ][ os.name == 'nt' ] )
+
+	print "initializing ws28xx..."
 	myCCommunicationService = CCommunicationService.CCommunicationService()
 	myCCommunicationService.DataStore.setCommModeInterval(3) #move me to setfrontendalive
 
+	if myCCommunicationService.DataStore.getTransmissionFrequency() == 1:
+		myCCommunicationService.DataStore.TransceiverSettings.Frequency = 868300000
+	
+	sys.stdout.write("waiting until transceiver initialized")
 
-#wait until transceiver initialized...
 	while True:
+		sys.stdout.write(".")
+		time.sleep(0.5)
 		if myCCommunicationService.DataStore.getFlag_FLAG_TRANSCEIVER_PRESENT():
-			time.sleep(0.001)
+			print "."
 			break
 
-	if myCCommunicationService.DataStore.getDeviceId() == -1:
-		print "Press [v] key on Weather Station"
-		TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
-		print "FirstTimeConfig Timeout=%d" % TimeOut
-		
-		time.sleep(5)
-		ID=[0]
-		ID[0]=0
-		myCCommunicationService.DataStore.FirstTimeConfig(ID,TimeOut)
+	print "0: Current"
+	print "1:"
+	print "2:"
+	print "3:"
+	print "4:"
+	print "5: Syncronize - press [v] key on Display then choose this option"
+	while True:
+		print myCCommunicationService.DataStore.getRequestState()
+		keypress = getch()
+		if   keypress == "0":
+			print "Choosen 0"
+			Weather = [0]
+			Weather[0]=[0]
+			#if myCCommunicationService.DataStore.getRequestState() == ERequestState.rsFinished \
+			#or myCCommunicationService.DataStore.getRequestState() == ERequestState.rsINVALID:
+			TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
+			myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
+			print "done"
+			time.sleep(10)
+		elif keypress == "1":
+			print "Choosen 1"
+		elif keypress == "2":
+			print "Choosen 2"
+		elif keypress == "3":
+			print "Choosen 3"
+		elif keypress == "4":
+			print "Choosen 4"
+		elif keypress == "5":
+			print "Choosen 5"
+			#if myCCommunicationService.DataStore.getDeviceId() == -1:
+			if True: #hack ident
+				print "TransceiverSerNo will be overwritten", myCCommunicationService.DataStore.getTransceiverSerNo()
+				print "DeviceID will be overwritten", myCCommunicationService.DataStore.getDeviceId()
+				TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
+				print "FirstTimeConfig Timeout=%d" % TimeOut
+				ID=[0]
+				ID[0]=0
+				myCCommunicationService.DataStore.FirstTimeConfig(ID,TimeOut)
+				print ID
 
-	time.sleep(60+60+30)
-	os._exit(12)
+
+
+	#time.sleep(60+60+30)
+	#os._exit(12)
 	
 	myCCommunicationService.DataStore.setDeviceRegistered( True); #temp hack
 

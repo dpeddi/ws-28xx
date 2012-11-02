@@ -60,14 +60,13 @@ class sHID(object):
 					except usb.USBError, e:
 					    pass
 
-					#self.devh.setAltInterface(0)
-					
 					self.devh.getDescriptor(0x1, 0, 0x12)
 					time.sleep(usbWait)
 					self.devh.getDescriptor(0x2, 0, 0x9)
 					time.sleep(usbWait)
 					self.devh.getDescriptor(0x2, 0, 0x22)
 					time.sleep(usbWait)
+
 					if platform.system() is 'Windows':
 						#self.devh.setConfiguration(self.usbConfiguration)
 						self.devh.setConfiguration(1)
@@ -93,27 +92,6 @@ class sHID(object):
 					#		break
 					#	break
 
-					time.sleep(usbWait)
-
-					#try:
-					#	self.devh.claimInterface(0)
-					#	print "claimed"
-					#except:
-					#	if not hasattr(self.devh, 'detachKernelDriver'):
-					#		raise RuntimeError(
-					#			"Please upgrade pyusb (or python-usb) to 0.4 or higher")
-					#try:
-					#<-----					self.devh.setAltInterface(0)
-					#except usb.USBError:
-					#<-----					raise "failed setAlt"
-					#try:
-					#	self.devh.detachKernelDriver(self.usbInterface.interfaceNumber)
-					#<-----					self.logger.info("Unloaded other driver from interface %d" %
-					#<-----										self.usbInterface.interfaceNumber)
-					#	print "unloaded"
-					#except usb.USBError, e:
-					#					raise "Failed to detach KernelDriver"
-					#					pass
 					time.sleep(usbWait)
 
 					return device
@@ -154,7 +132,7 @@ class sHID(object):
 		                                0x00003d0,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
-			time.sleep(0.004)
+			time.sleep(0.003)
 			result = 1
 		except:
 			result = 0
@@ -176,7 +154,6 @@ class sHID(object):
 										  index=0x0000000,
 										  buffer=0x0a,
 										  timeout=1000)
-			time.sleep(0.004)
 			StateBuffer[0]=[0]*0x2
 			StateBuffer[0][0]=buffer[1]
 			StateBuffer[0][1]=buffer[2]
@@ -289,7 +266,7 @@ class sHID(object):
 		                                0x00003d7,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
-			time.sleep(0.004)
+			time.sleep(0.001)
 			result = 1
 		except:
 			result = 0
@@ -392,7 +369,7 @@ class sHID(object):
 		                                0x00003f0,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
-			time.sleep(0.004)
+			time.sleep(0.002)
 			result = 1
 		except:
 			result = 0
@@ -443,7 +420,7 @@ class sHID(object):
 		                                0x00003d8,                                  # value
 		                                0x0000000,                                  # index
 		                                1000)                                       # timeout
-			time.sleep(0.004)
+			time.sleep(0.001)
 			result = 1
 
 		except:

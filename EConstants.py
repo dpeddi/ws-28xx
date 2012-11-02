@@ -113,3 +113,7 @@ class ERequestState:
 	rsError          = 6
 	rsChanged        = 7
 	rsINVALID        = 8
+
+class ETransmissionFrequency:
+	tfUS             = 0
+	tfEuropean       = 1

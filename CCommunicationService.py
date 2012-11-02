@@ -109,9 +109,6 @@ class CCommunicationService(object):
 		self.DataStore = CDataStore.CDataStore(1)
 		self.Instance = self.CCommunicationService()
 
-	def operator(self):
-		self.logger.debug("")
-
 	def getInstance(self):
 		self.logger.debug("partially implemented")
 		self.CCommunicationService();
@@ -237,7 +234,7 @@ class CCommunicationService(object):
 		self.DataStore.setLastLinkQuality( Quality);
 		ReceivedCS = (Buffer[0][4] << 8) + Buffer[0][5];
 		rt = self.DataStore.getRequestType()
-		#if ( rt == 3 ) #rtSetConfig
+		#if ( rt == ERequestType.rtSetConfig ) #rtSetConfig
 		#{
 		#	v11 = boost::shared_ptr<CDataStore>::operator_>(&thisa->DataStore);
 		#	v12 = CDataStore::GetFrontEndConfigCS(v11);
@@ -265,7 +262,7 @@ class CCommunicationService(object):
 		#}
 		#else
 		#{
-		#	if ( rt == 4 ) #rtSetTime (unused)
+		#	if ( rt == ERequestType.rtSetTime ) #rtSetTime (unused)
 		#	{
 		#		if ( thisa->TimeSent )
 		#		{
@@ -398,7 +395,7 @@ class CCommunicationService(object):
 			HistoryIndex = self.DataStore.getLastHistoryIndex();
 			#v46 = (CWeatherStationConfig *)rt;
 			if 1==1: #hack ident
-				if   rt == 3:
+				if   rt == ERequestType.rtSetConfig:
 					print "handleConfig rt==3 rtSetConfig"
 					#v43 = (CDataStore::ERequestState)&result;
 					#rhs = v46;
@@ -419,7 +416,7 @@ class CCommunicationService(object):
 					#	CheckSum = CWeatherStationConfig::GetCheckSum(&RecConfig);
 					#	*Length = CCommunicationService::buildACKFrame(thisa, Buffer, 2, &CheckSum, &HistoryIndex, 0xFFFFFFFFu);
 					#	self.DataStore.setRequestState( ERequestState.rsRunning); #1
-				elif rt == 2:
+				elif rt == ERequestType.rtGetConfig:
 					print "handleConfig rt==2 rtGetConfig"
 					self.DataStore.setLastConfigTime( datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
@@ -429,7 +426,7 @@ class CCommunicationService(object):
 					#*Length = CCommunicationService::buildACKFrame(thisa, Buffer, 0, &v54, &HistoryIndex, 0xFFFFFFFF);
 					self.DataStore.setRequestState( ERequestState.rsFinished); #2
 					self.DataStore.RequestNotify();
-				elif rt == 0:
+				elif rt == ERequestType.rtGetCurrent:
 					print "handleConfig rt==0 rtGetCurrent"
 					self.DataStore.setLastConfigTime( datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
@@ -438,7 +435,7 @@ class CCommunicationService(object):
 					v55 = CWeatherStationConfig.GetCheckSum(RecConfig);
 					newLength[0] = self.buildACKFrame(newBuffer, 5, v55, HistoryIndex, 0xFFFFFFFF);
 					self.DataStore.setRequestState( ERequestState.rsRunning); #1
-				elif rt == 1:
+				elif rt == ERequestType.rtGetHistory:
 					print "handleConfig rt==1 rtGetHistory"
 					self.DataStore.setLastConfigTime( datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
@@ -447,7 +444,7 @@ class CCommunicationService(object):
 					#v56 = CWeatherStationConfig::GetCheckSum(&RecConfig);
 					#*Length = CCommunicationService::buildACKFrame(thisa, Buffer, 4, &v56, &HistoryIndex, 0xFFFFFFFFu);
 					self.DataStore.setRequestState( ERequestState.rsRunning); #1
-				elif rt == 4:
+				elif rt == ERequestType.rtSetTime:
 					print "handleConfig rt==4 rtSetTime"
 					self.DataStore.setLastConfigTime( datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
@@ -456,7 +453,7 @@ class CCommunicationService(object):
 					#v57 = CWeatherStationConfig::GetCheckSum(&RecConfig);
 					#*Length = CCommunicationService::buildACKFrame(thisa, Buffer, 1, &v57, &HistoryIndex, 0xFFFFFFFFu);
 					self.DataStore.setRequestState( ERequestState.rsRunning); #1
-				elif rt == 5:
+				elif rt == ERequestType.rtFirstConfig:
 					print "handleConfig rt==5 rtFirstConfig"
 					self.DataStore.setLastConfigTime( datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
@@ -465,7 +462,7 @@ class CCommunicationService(object):
 					newLength[0] = self.buildACKFrame(newBuffer, 0, v58, HistoryIndex, 0xFFFFFFFF);
 					self.DataStore.setRequestState( ERequestState.rsFinished); #2
 					self.DataStore.RequestNotify();
-				elif rt == 6:
+				elif rt == ERequestType.rtINVALID:
 					print "handleConfig rt==6 rtINVALID"
 					self.DataStore.setLastConfigTime( datetime.now())
 					#v43 = (CDataStore::ERequestState)&RecConfig;
@@ -501,23 +498,23 @@ class CCommunicationService(object):
 		DeviceCS = self.DataStore.GetDeviceConfigCS()
 		HistoryIndex = self.DataStore.getLastHistoryIndex();
 
-		if   rt == 0: #rtGetCurrent
+		if   rt == ERequestType.rtGetCurrent: #rtGetCurrent
 			self.DataStore.setRequestState( ERequestState.rsFinished); #2
 			self.DataStore.RequestNotify();
 			newLength[0] = self.buildACKFrame(newBuffer, 0, DeviceCS, HistoryIndex, 0xFFFFFFFF);
-		elif rt == 2: #rtGetConfig
+		elif rt == ERequestType.rtGetConfig: #rtGetConfig
 			newLength[0] = self.buildACKFrame(newBuffer, 3, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 			self.DataStore.setRequestState( ERequestState.rsRunning); #1
-		elif rt == 3: #rtSetConfig
+		elif rt == ERequestType.rtSetConfig: #rtSetConfig
 			newLength[0] = self.buildACKFrame(newBuffer, 2, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 			self.DataStore.setRequestState( ERequestState.rsRunning); #1
-		elif rt == 1: #rtGetHistory
+		elif rt == ERequestType.rtGetHistory: #rtGetHistory
 			newLength[0] = self.buildACKFrame(newBuffer, 4, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 			self.DataStore.setRequestState( ERequestState.rsRunning); #1
-		elif rt == 4: #rtSetTime
+		elif rt == ERequestType.rtSetTime: #rtSetTime
 			newLength[0] = self.buildACKFrame(newBuffer, 1, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 			self.DataStore.setRequestState( ERequestState.rsRunning); #1
-		elif rt == 5 or rt == 6: #rtFirstConfig || #rtINVALID
+		elif rt == ERequestType.rtFirstConfig or rt == ERequestType.rtINVALID: #rtFirstConfig || #rtINVALID
 			newLength[0] = self.buildACKFrame(newBuffer, 0, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 
 		Length[0] = newLength[0]
@@ -581,23 +578,23 @@ class CCommunicationService(object):
 
 		rt = self.DataStore.getRequestType()
 		DeviceCS = self.DataStore.GetDeviceConfigCS()
-		if   rt == 0: #rtGetCurrent
+		if   rt == ERequestType.rtGetCurrent: #rtGetCurrent
 			newLength[0] = self.buildACKFrame(Buffer, 5, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
 			self.DataStore.setRequestState( ERequestState.rsRunning);
-		elif rt == 2: #rtGetConfig
+		elif rt == ERequestType.rtGetConfig: #rtGetConfig
 			newLength[0] = self.buildACKFrame(Buffer, 3, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
 			self.DataStore.setRequestState( ERequestState.rsRunning);
-		elif rt == 3: #rtSetConfig
+		elif rt == ERequestType.rtSetConfig: #rtSetConfig
 			newLength[0] = self.buildACKFrame(Buffer, 2, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
 			self.DataStore.setRequestState( ERequestState.rsRunning);
-		elif rt == 1: #rtGetHistory
+		elif rt == ERequestType.rtGetHistory: #rtGetHistory
 			self.DataStore.setRequestState( ERequestState.rsFinished);
 			self.DataStore.RequestNotify()
 			newLength[0] = self.buildACKFrame(Buffer, 0, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
-		elif rt == 4: #rtSetTime
+		elif rt == ERequestType.rtSetTime: #rtSetTime
 			newLength[0] = self.buildACKFrame(Buffer, 1, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
 			self.DataStore.setRequestState( ERequestState.rsRunning);
-		elif rt == 5 or rt == 6: #rtFirstConfig || #rtINVALID
+		elif rt == ERequestType.rtFirstConfig or rt == ERequestType.rtINVALID: #rtFirstConfig || #rtINVALID
 			newLength[0] = self.buildACKFrame(Buffer, 0, DeviceCS, ThisHistoryIndex, 0xFFFFFFFF);
 
 		Length[0] = newLength[0]
@@ -630,19 +627,19 @@ class CCommunicationService(object):
 				newLength[0] = self.buildTimeFrame(newBuffer, 1);
 			else:
 				self.logger.debug("handleNextAction Buffer[2] == %x" % (Buffer[0][2] & 0xF))
-				if   rt == 0: #rtGetCurrent
+				if   rt == ERequestType.rtGetCurrent: #rtGetCurrent
 					newLength[0] = self.buildACKFrame(newBuffer, 5, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					self.DataStore.setRequestState( ERequestState.rsRunning);
-				elif rt == 1: #rtGetHistory
+				elif rt == ERequestType.rtGetHistory: #rtGetHistory
 					newLength[0] = self.buildACKFrame(newBuffer, 4, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					self.DataStore.setRequestState( ERequestState.rsRunning);
-				elif rt == 2: #rtGetConfig
+				elif rt == ERequestType.rtGetConfig: #rtGetConfig
 					newLength[0] = self.buildACKFrame(newBuffer, 3, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					self.DataStore.setRequestState( ERequestState.rsRunning);
-				elif rt == 3: #rtSetConfig
+				elif rt == ERequestType.rtSetConfig: #rtSetConfig
 					newLength[0] = self.buildACKFrame(newBuffer, 2, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					self.DataStore.setRequestState( ERequestState.rsRunning);
-				elif rt == 4: #rtSetTime
+				elif rt == ERequestType.rtSetTime: #rtSetTime
 					newLength[0] = self.buildACKFrame(newBuffer, 1, DeviceCS, HistoryIndex, 0xFFFFFFFF);
 					self.DataStore.setRequestState( ERequestState.rsRunning);
 				else:
@@ -722,7 +719,7 @@ class CCommunicationService(object):
 			CorVal |= FreqCorrection[0][2];
 			CorVal <<= 8;
 			CorVal |= FreqCorrection[0][3];
-			print "CorVal: %x" % CorVal #0x184e8
+			self.logger.debug("CorVal: %x" % CorVal) #0x184e8
 			FreqVal += CorVal;
 
 		#print "try to tune sensors"
@@ -743,7 +740,9 @@ class CCommunicationService(object):
 		#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ1])
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0] = (FreqVal >>0)  & 0xFF;
 		#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0])
+		self.logger.debug("FreqVal: %x" % FreqVal)
 		print "FreqVal: %x" % FreqVal
+		print "should be 36 46 51 b5"
 
 	def GenerateResponse(self,Buffer,Length):
 		self.logger.debug("Length=%x" % Length[0])
@@ -931,12 +930,12 @@ class CCommunicationService(object):
 					#RequestState<>ERequestState.rsQueued
 					if RequestState == ERequestState.rsWaitDevice: # == 4
 						self.logger.debug("self.getRequestState == 4 (rsWaitDevice)")
-						if datetime.now() >= DeviceWaitEndTime :
-							print "now=",datetime.now()
-							print "DeviceWaitEndTime=",DeviceWaitEndTime
-							print "now => DeviceWaitEndTime"
-							self.DataStore.setRequestState(ERequestState.rsError);
-							self.DataStore.RequestNotify();
+						#if datetime.now() >= DeviceWaitEndTime :
+						#	print "now=",datetime.now()
+						#	print "DeviceWaitEndTime=",DeviceWaitEndTime
+						#	print "now => DeviceWaitEndTime"
+						#	self.DataStore.setRequestState(ERequestState.rsError);
+						#	self.DataStore.RequestNotify();
 				else:
 					#RequestState=ERequestState.rsQueued
 					sHID.SetPreamblePattern(0xaa)
@@ -947,15 +946,17 @@ class CCommunicationService(object):
 					print "PreambleDuration", PreambleDuration
 					PreambleEndTime = datetime.now() + timedelta(milliseconds=PreambleDuration)
 					print "PreambleEndTime", PreambleEndTime
-					while True:
-						if not ( PreambleEndTime > datetime.now() ):
-							print "!PreambleEndTime > datetime.now()"
-							break
-						if RequestType != self.DataStore.getRequestType():
-							break
-						self.DataStore.RequestTick();
-						time.sleep(1)
-						self.DataStore.setFlag_FLAG_SERVICE_RUNNING( True);
+					#while True:
+					#	if not ( PreambleEndTime >= datetime.now() ):
+					#		print "!PreambleEndTime >= datetime.now()"
+					#		break
+					#	if RequestType != self.DataStore.getRequestType():
+					#		print "RequestType != self.DataStore.getRequestType()"
+					#		break
+					#	self.DataStore.RequestTick();
+					#	time.sleep(0.5)
+					#	self.DataStore.setFlag_FLAG_SERVICE_RUNNING(True);
+					time.sleep(6)
 
 					if RequestType == self.DataStore.getRequestType():
 						self.DataStore.setRequestState(ERequestState.rsWaitDevice)
@@ -1015,6 +1016,7 @@ class CCommunicationService(object):
 					ReceiverState = 0xc8;
 					timeout = 1000;
 					self.logger.debug("entro nell'while stronzo")
+					print "entro nell'while stronzo"
 					while True:
 						ret = sHID.GetState(StateBuffer);
 						self.DataStore.RequestTick();
@@ -1041,7 +1043,6 @@ class CCommunicationService(object):
 					#print "sono fuori dall'while stronzo"
 				if ReceiverState != 0x15:
 					ret = sHID.SetRX(); #make state from 14 to 15
-					#time.sleep(0.5)
 				
 				#if ReceiverState == 0x15:
 				#	if self.DataStore.getRequestType() == 6:
@@ -1051,7 +1052,6 @@ class CCommunicationService(object):
 			if not ret:
 				self.DataStore.setFlag_FLAG_TRANSCEIVER_PRESENT( 0)
 				pass
-			#time.sleep(0.0005)
 
 
 #filehandler = open("WV5DataStore", 'w')

@@ -3,3 +3,22 @@
 - Missing First Syncronization between Usb key and display - First sync on linux is still software only and don't cople the device
 - Missing some Current Weather value (rain)
 - Missing handling Historic Data
+
+su win:
+19972 d8aa 
+19974 d71e Delta    2ms
+24981 d000 Delta 5007ms
+25030 de16 Delta   49ms
+
+
+2012-11-01 23:50:05,215 ws28xx.sHID.SetPreamblePattern >d8aa00000000000000000000000000000000000000
+2012-11-01 23:50:05,218 ws28xx.sHID.SetState >d71e00000000000000000000000000000000000000
+2012-11-01 23:50:09,227 ws28xx.sHID.SetRX >d00000000000000000000000000000000000000000
+
+
+Fix bug in 800mhz freq calculation. 915 is ok
+
+
+Itneresting Reg Settings: 
+OldRainSensor
+TransmissionFrequency

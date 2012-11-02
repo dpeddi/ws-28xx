@@ -24,6 +24,7 @@ class CDataStore(object):
 			self.ProductId	= 0x5555
 			self.VersionNo	= 1
 			self.Frequency	= 905000000
+			self.TransmissionFrequency = 0
 			self.manufacturer	= "LA CROSSE TECHNOLOGY"
 			self.product		= "Weather Direct Light Wireless Device"
 
@@ -125,6 +126,8 @@ class CDataStore(object):
 		config.filename = filename
 		config['Settings'] = {}
 		config['Settings']['DeviceID'] = str(self.Settings.DeviceId)
+		config['Settings']['TransmissionFrequency'] = str(self.Settings.TransmissionFrequency)
+		
 		config.write()
 
 	def writeDataStore(self):
@@ -149,6 +152,18 @@ class CDataStore(object):
 		self.logger.debug("Settings.DeviceId=%x" % self.Settings.DeviceId)
 		#print "Settings.DeviceId=%x" % self.Settings.DeviceId
 		return self.Settings.DeviceId
+
+	def getTransmissionFrequency(self):
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		try:
+			self.Settings.TransmissionFrequency = int(config['Settings']['TransmissionFrequency'])
+		except:
+			pass
+		self.logger.debug("Settings.TransmissionFrequency=%x" % self.Settings.TransmissionFrequency)
+		#print "Settings.TransmissionFrequency=%x" % self.Settings.TransmissionFrequency
+		return self.Settings.TransmissionFrequency
 
 	def setDeviceId(self,val):
 		self.logger.debug("val=%x" % val)
@@ -338,6 +353,10 @@ class CDataStore(object):
 		self.TransceiverSerNo = inp
 		self.writeDataStore()
 
+	def getTransceiverSerNo(self):
+		self.logger.debug("getTransceiverSerNo=%s" % self.TransceiverSerNo)
+		return self.TransceiverSerNo
+
 	def setLastHistoryIndex(self,val):
 		self.LastStat.LastHistoryIndex = val
 		self.logger.debug("self.LastStat.LastHistoryIndex=%x" % self.LastStat.LastHistoryIndex)
@@ -403,6 +422,7 @@ class CDataStore(object):
 			self.Request.CondFinish.release()
 		else:
 			self.logger.debug("FirstTimeConfig: self.getFlag_FLAG_TRANSCEIVER_PRESENT ko")
+			print "FirstTimeConfig: self.getFlag_FLAG_TRANSCEIVER_PRESENT ko"
 
 
 	def GetCurrentWeather(self,Weather,TimeOut):
