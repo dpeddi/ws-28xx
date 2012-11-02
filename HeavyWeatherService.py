@@ -221,6 +221,7 @@ class CDataStore(object):
 			self.LastHistoryDataTime = datetime(1900, 01, 01, 00, 00)
 			self.LastConfigTime = datetime(1900, 01, 01, 00, 00)
 			self.LastWeatherClubTransmission = None
+			self.LastSeen = None
 
 	class TSettings(object):
 		#void __thiscall CDataStore::TSettings::TSettings(CDataStore::TSettings *this);
@@ -1737,11 +1738,12 @@ if __name__ == "__main__":
 
 	myCCommunicationService = CCommunicationService()
 	CDataStore.setCommModeInterval(myCCommunicationService.DataStore,3) #move me to setfrontendalive
-	time.sleep(5)
 
 	if myCCommunicationService.DataStore.getTransmissionFrequency() == 1:
+		print "Set Frequency to EU"
 		myCCommunicationService.DataStore.TransceiverSettings.Frequency = 868300000
 
+	time.sleep(5)
 
 	if CDataStore.getDeviceId(myCCommunicationService.DataStore) == -1:
 		print "Press [v] key on Weather Station"
