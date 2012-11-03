@@ -58,6 +58,11 @@ class WS28xxStation(object):
 
 		myCCommunicationService = HeavyWeatherService.CCommunicationService()
 		HeavyWeatherService.CDataStore.setCommModeInterval(myCCommunicationService.DataStore,3)
+
+		if myCCommunicationService.DataStore.getTransmissionFrequency() == 1:
+			print "Set Frequency to EU"
+			myCCommunicationService.DataStore.TransceiverSettings.Frequency = 868300000
+
 		time.sleep(5)
 
 		if HeavyWeatherService.CDataStore.getDeviceId(myCCommunicationService.DataStore) == -1:
