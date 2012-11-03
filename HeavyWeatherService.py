@@ -58,28 +58,36 @@ class ws28xxError(IOError):
 #filehandler = open("WV5DataStore", 'w')
 #pickle.dump(CDataStore.TransceiverSettings, filehandler)
 
-#myCCommunicationService.getInstance()
-#myCCommunicationService.doRFCommunication()
-
-#t = ThreadClass()
-#t.start()
-
-
 if __name__ == "__main__":
 	import logging
-
 	import sys
-	import random
-	import termios
-	import tty
-	inkey_buffer=0
-	def inkey():
-		fd=sys.stdin.fileno()
-		remember_attributes=termios.tcgetattr(fd)
-		tty.setraw(sys.stdin.fileno())
-		character=sys.stdin.read(inkey_buffer)
-		termios.tcsetattr(fd, termios.TCSADRAIN, remember_attributes)
-		return character
+	
+	#http://rosettacode.org/wiki/Keyboard_input/Keypress_check
+	import thread
+	import time
+
+	try:
+	    from msvcrt import getch
+	except ImportError:
+	    def getch():
+	        import sys, tty, termios
+	        fd = sys.stdin.fileno()
+	        old_settings = termios.tcgetattr(fd)
+	        try:
+	            tty.setraw(sys.stdin.fileno())
+	            ch = sys.stdin.read(1)
+	        finally:
+	            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+	        return ch
+
+	char = None
+
+
+	def keypress():
+	    global char
+	    char = getch()
+
+	thread.start_new_thread(keypress, ())
 
 
 #CRITICAL 50 
@@ -89,56 +97,82 @@ if __name__ == "__main__":
 #DEBUG 10 
 #NOTSET 0 
 #	logging.basicConfig(format='%(asctime)s %(name)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
-#	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
-	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.INFO)
+	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
+#	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.INFO)
 
 	os.system( [ 'clear', 'cls' ][ os.name == 'nt' ] )
 
-	print "initializing ws28xx..."
+	print "initializing ws28xx...\r"
 	myCCommunicationService = CCommunicationService.CCommunicationService()
 	myCCommunicationService.DataStore.setCommModeInterval(3) #move me to setfrontendalive
 
+	Freq = 915
 	if myCCommunicationService.DataStore.getTransmissionFrequency() == 1:
 		myCCommunicationService.DataStore.TransceiverSettings.Frequency = 868300000
-	
+		Freq = 868
+
+	def infoscreen():
+		print "ws28xx python driver\r"
+		print "====================\r"
+		
+		print "Transceiver With SerNo %s at %d Mhz\r" % (myCCommunicationService.DataStore.getTransceiverSerNo(),Freq)
+		print "\r"
+		print "0: Current\r"
+		print "1:\r"
+		print "2:\r"
+		print "3:\r"
+		print "4:\r"
+		print "5: Syncronize - press [v] key on Display then choose this option\r"
+		print "F: switch frequency (active at next restart)\r"
+		print "\r"
+		print "x: exit\r"
+		print "\r"
+
 	sys.stdout.write("waiting until transceiver initialized")
 
 	while True:
 		sys.stdout.write(".")
 		time.sleep(0.5)
 		if myCCommunicationService.DataStore.getFlag_FLAG_TRANSCEIVER_PRESENT():
-			print "."
+			print "\r"
 			break
 
-	print "esc: exit"
-	print "0: Current"
-	print "1:"
-	print "2:"
-	print "3:"
-	print "4:"
-	print "5: Syncronize - press [v] key on Display then choose this option"
-	while True:
-		inkey_buffer=int(random.random()*2)
-		print myCCommunicationService.DataStore.getRequestState()
-		keypress = inkey()
-		if   keypress == "0":
-			print "Choosen 0"
+
+	myCCommunicationService.DataStore.setDeviceRegistered(True); #temp hack
+
+	infoscreen()
+
+	try:
+	    while True:
+		if char is not None:
+			print "Key pressed is %s\r" % char
+		print "GetRequestType %d\r" % myCCommunicationService.DataStore.getRequestType()
+		print "GetRequestState %d\r" % myCCommunicationService.DataStore.getRequestState()
+		if   char == "0":
+			char = None
+			print "Choosen 0\r"
 			Weather = [0]
 			Weather[0]=[0]
-			#if myCCommunicationService.DataStore.getRequestState() == ERequestState.rsFinished \
-			#or myCCommunicationService.DataStore.getRequestState() == ERequestState.rsINVALID:
-			TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
-			myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
-		elif keypress == "1":
-			print "Choosen 1"
-		elif keypress == "2":
-			print "Choosen 2"
-		elif keypress == "3":
-			print "Choosen 3"
-		elif keypress == "4":
-			print "Choosen 4"
-		elif keypress == "5":
-			print "Choosen 5"
+			if myCCommunicationService.DataStore.getRequestState() == ERequestState.rsFinished \
+			    or myCCommunicationService.DataStore.getRequestState() == ERequestState.rsINVALID:
+				print "getRequestState == rsFinished or rsInvalid... ask for current weather again :-)\r"
+				TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
+				myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
+		elif char == "1":
+			char = None
+			print "Choosen 1\r"
+		elif char == "2":
+			char = None
+			print "Choosen 2\r"
+		elif char == "3":
+			char = None
+			print "Choosen 3\r"
+		elif char == "4":
+			char = None
+			print "Choosen 4\r"
+		elif char == "5":
+			char = None
+			print "Choosen 5\r"
 			#if myCCommunicationService.DataStore.getDeviceId() == -1:
 			if True: #hack ident
 				print "TransceiverSerNo will be overwritten", myCCommunicationService.DataStore.getTransceiverSerNo()
@@ -149,31 +183,24 @@ if __name__ == "__main__":
 				ID[0]=0
 				myCCommunicationService.DataStore.FirstTimeConfig(ID,TimeOut)
 				print ID[0]
-		elif keypress==chr(27) or keypress == "x":
-			os._exit(12)
+		elif char==chr(27) or char == "x":
+			char = None
+			myCCommunicationService.kill_received = True
+			#os._exit(12)
 			break
-		time.sleep(0.5)
-		
+		else:
+			char = None
+			Weather = [0]
+			Weather[0]=[0]
+			if myCCommunicationService.DataStore.getRequestState() == ERequestState.rsFinished \
+			   or myCCommunicationService.DataStore.getRequestState() == ERequestState.rsINVALID:
+				print "getRequestState == rsFinished or rsInvalid... ask for current weather again :-)\r"
+				TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
+				myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
+		time.sleep(1)
 
-
-
-	#time.sleep(60+60+30)
-	#os._exit(12)
-	
-	myCCommunicationService.DataStore.setDeviceRegistered( True); #temp hack
-
-	Weather = [0]
-	Weather[0]=[0]
-
-	TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
-	myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
-	time.sleep(1)
-
-	while True:
-		if myCCommunicationService.DataStore.getRequestState() == ERequestState.rsFinished \
-		   or myCCommunicationService.DataStore.getRequestState() == ERequestState.rsINVALID:
-			TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
-			myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
-			#print "done"
-		time.sleep(10)
+	except KeyboardInterrupt:
+		print "Ctrl-c received! Sending kill to threads..."
+		myCCommunicationService.kill_received = True
+		raise
 

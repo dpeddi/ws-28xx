@@ -12,8 +12,8 @@ import logging
 import CCurrentWeatherData
 
 BitHandling = BitHandling.BitHandling()
-
 ERequestType = EConstants.ERequestType()
+ERequestState=EConstants.ERequestState()
 
 class CDataStore(object):
 
@@ -32,7 +32,7 @@ class CDataStore(object):
 		# void __thiscall CDataStore::TRequest::TRequest(CDataStore::TRequest *this);
 		def __init__(self):
 			self.Type = 6
-			self.State = 6
+			self.State = ERequestState.rsError
 			self.TTL = 90000
 			self.Lock = 0
 			self.CondFinish = threading.Condition()
@@ -183,9 +183,10 @@ class CDataStore(object):
 		return BitHandling.testBit(self.Flags, 2)
 
 	def getFlag_FLAG_TRANSCEIVER_PRESENT(self):		# <0>
-		self.logger.debug("")
+		Flag = BitHandling.testBit(self.Flags, 0)
+		self.logger.debug("getFlag_FLAG_TRANSCEIVER_PRESENT=%d" % Flag)
 		#return self.Flags_FLAG_TRANSCEIVER_PRESENT
-		return BitHandling.testBit(self.Flags, 0)
+		return Flag
 
 	def getFlag_FLAG_SERVICE_RUNNING(self):			# <3>
 		self.logger.debug("")
@@ -426,7 +427,7 @@ class CDataStore(object):
 
 
 	def GetCurrentWeather(self,Weather,TimeOut):
-		self.logger.debug("timeout=%d" % TimeOut)
+		self.logger.debug("timeout=%d DeviceRegistered=%d" % (TimeOut, self.getDeviceRegistered() ) )
 		#if ( CSingleInstance::IsRunning(this) && CDataStore::getFlag<0>(thisa) && CDataStore::getDeviceRegistered(thisa) )
 		if self.getFlag_FLAG_TRANSCEIVER_PRESENT() and self.getDeviceRegistered():
 			self.Request.Type = ERequestType.rtGetCurrent;
@@ -449,6 +450,8 @@ class CDataStore(object):
 		#		v24 = 1;
 		#		v30 = -1;
 			self.Request.CondFinish.release()
+		else:
+			print "GetCurrentWeather - warning: flag False or getDeviceRegistered false"
 
 	def GetHistory(self,TimeOut):
 		print "CDataStore::GetHistory"
@@ -527,14 +530,4 @@ class CDataStore(object):
 				self.Request.Type = 6
 				self.Request.State = 8
 				print "internal timeout, request aborted"
-
-
-#filehandler = open("WV5DataStore", 'w')
-#pickle.dump(CDataStore.TransceiverSettings, filehandler)
-
-#myCCommunicationService.getInstance()
-#myCCommunicationService.doRFCommunication()
-
-#t = ThreadClass()
-#t.start()
 

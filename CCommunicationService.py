@@ -115,6 +115,8 @@ class CCommunicationService(object):
 
 		self.DataStore = CDataStore.CDataStore(1)
 		self.Instance = self.CCommunicationService()
+		
+		self.kill_received = False
 
 	def getInstance(self):
 		self.logger.debug("partially implemented")
@@ -903,6 +905,7 @@ class CCommunicationService(object):
 			if sHID.Execute(5):
 				sHID.SetPreamblePattern(0xaa)
 				if sHID.SetState(0):
+					time.sleep(0.005) #//fixme
 					#print "fixme: subsecond duration" //fixme
 					if sHID.SetRX():
 						v67 = 1  #//fixme:and so?
@@ -928,9 +931,10 @@ class CCommunicationService(object):
 		else:
 			raise "ws-28xx not present"
 
-		while True:
+		#while True:
+		while not self.kill_received:
 			RequestType = self.DataStore.getRequestType()
-			if RequestType == ERequestType.rtFirstConfig: # ==5
+			if RequestType == ERequestType.rtFirstConfig:
 				RequestState = self.DataStore.getRequestState()
 				self.logger.critical("RequestState #1 = %d" % RequestState)
 				if RequestState:
@@ -961,7 +965,7 @@ class CCommunicationService(object):
 							print "RequestType != self.DataStore.getRequestType()"
 							break
 						self.DataStore.RequestTick();
-						time.sleep(0.001) #(thread
+						time.sleep(0.001)
 						self.DataStore.setFlag_FLAG_SERVICE_RUNNING(True);
 					#time.sleep(6)
 
@@ -971,6 +975,7 @@ class CCommunicationService(object):
 						DeviceWaitEndTime = datetime.now() + timedelta(milliseconds=RegisterWaitTime)
 						print "DeviceWaitEndTime=",DeviceWaitEndTime
 					ret = sHID.SetRX(); #make state from 14 to 15
+			#endif RequestType == ERequestType.rtFirstConfig:
 
 			DataLength = [0]
 			DataLength[0] = 0
@@ -1060,14 +1065,3 @@ class CCommunicationService(object):
 				self.DataStore.setFlag_FLAG_TRANSCEIVER_PRESENT( 0)
 				pass
 			time.sleep(0.001)
-
-
-#filehandler = open("WV5DataStore", 'w')
-#pickle.dump(self.DataStore.TransceiverSettings, filehandler)
-
-#myCCommunicationService.getInstance()
-#myCCommunicationService.doRFCommunication()
-
-#t = ThreadClass()
-#t.start()
-
