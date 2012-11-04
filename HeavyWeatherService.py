@@ -9,27 +9,27 @@
 
 ## Really thanks tfa-dostmann.de to allow me to go forward with development
 
-from datetime import datetime
-from datetime import timedelta
+#from datetime import datetime
+#from datetime import timedelta
 
 import os
 
 import logging
-import time
+#import time
 import threading
 import traceback
 
 #import shelve 
 #import mmap #http://docs.python.org/library/mmap.html
 
-import USBHardware
-import CWeatherTraits
-import CHistoryDataSet
-import CDataStore
+#import USBHardware
+#import CWeatherTraits
+#import CHistoryDataSet
+#import CDataStore
 import CCommunicationService
-import CCurrentWeatherData
+#import CCurrentWeatherData
 import EConstants
-import sHID
+#import sHID
 from CWeatherStationConfig import CWeatherStationConfig
 
 
@@ -37,13 +37,13 @@ def handleError(self, record):
 	traceback.print_stack()
 logging.Handler.handleError = handleError
 
-sHID = sHID.sHID()
-USBHardware = USBHardware.USBHardware()
+#sHID = sHID.sHID()
+#USBHardware = USBHardware.USBHardware()
 #CCurrentWeatherData = CCurrentWeatherData.CCurrentWeatherData()
 #CWeatherStationConfig = CWeatherStationConfig.CWeatherStationConfig()
 
 #CCommunicationService = CCommunicationService.CCommunicationService()
-CWeatherTraits = CWeatherTraits.CWeatherTraits()
+#CWeatherTraits = CWeatherTraits.CWeatherTraits()
 ERequestState=EConstants.ERequestState()
 
 
