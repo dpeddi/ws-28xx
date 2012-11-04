@@ -97,12 +97,12 @@ if __name__ == "__main__":
 #DEBUG 10 
 #NOTSET 0 
 #	logging.basicConfig(format='%(asctime)s %(name)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
-	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
-#	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.INFO)
+#	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.DEBUG)
+	logging.basicConfig(format='%(asctime)s %(name)s.%(funcName)s %(message)s',filename="HeavyWeatherService.log",level=logging.INFO)
 
 	os.system( [ 'clear', 'cls' ][ os.name == 'nt' ] )
 
-	print "initializing ws28xx...\r"
+	print "Initializing ws28xx...\r"
 	myCCommunicationService = CCommunicationService.CCommunicationService()
 	myCCommunicationService.DataStore.setCommModeInterval(3) #move me to setfrontendalive
 
@@ -111,25 +111,27 @@ if __name__ == "__main__":
 		myCCommunicationService.DataStore.TransceiverSettings.Frequency = 868300000
 		Freq = 868
 
-	def infoscreen():
+	def infoscreen(TransceiverSerNo,Freq):
+		os.system( [ 'clear', 'cls' ][ os.name == 'nt' ] )
 		print "ws28xx python driver\r"
 		print "====================\r"
 		
-		print "Transceiver With SerNo %s at %d Mhz\r" % (myCCommunicationService.DataStore.getTransceiverSerNo(),Freq)
+		print "Transceiver With SerNo %s at %d Mhz\r" % (TransceiverSerNo,Freq)
 		print "\r"
 		print "0: Current\r"
-		print "1:\r"
-		print "2:\r"
-		print "3:\r"
-		print "4:\r"
+		print "1: History\r"
+		print "2: GetConfig\r"
+		print "3: SetConfig\r"
+		print "4: SetTime\r"
 		print "5: Syncronize - press [v] key on Display then choose this option\r"
-		print "F: switch operating frequency (and exit)\r"
+		print "\r"
+		print "f: switch operating frequency (and exit)\r"
 		print "\r"
 		print "x: exit\r"
+		print "esc: exit\r"
 		print "\r"
 
 	sys.stdout.write("waiting until transceiver initialized")
-
 	while True:
 		sys.stdout.write(".")
 		time.sleep(0.5)
@@ -140,13 +142,13 @@ if __name__ == "__main__":
 
 	myCCommunicationService.DataStore.setDeviceRegistered(True); #temp hack
 
-	infoscreen()
+	infoscreen(myCCommunicationService.DataStore.getTransceiverSerNo(),Freq)
 
 	try:
 	    while True:
 		if char is not None:
 			print "Key pressed is %s\r" % char
-		print "GetRequestType %d GetRequestState %d\r" % (myCCommunicationService.DataStore.getRequestType(), myCCommunicationService.DataStore.getRequestState())
+		#print "GetRequestType %d GetRequestState %d\r" % (myCCommunicationService.DataStore.getRequestType(), myCCommunicationService.DataStore.getRequestState())
 		if   char == "0":
 			char = None
 			Weather = [0]

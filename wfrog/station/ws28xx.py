@@ -51,36 +51,47 @@ class WS28xxStation(object):
 	
 	def run(self, generate_event, send_event, context={}):
 
-		import HeavyWeatherService
+		import CCommunicationService
 		import CWeatherTraits
+		import EConstants
 
+		ERequestState=EConstants.ERequestState()
 		CWeatherTraits = CWeatherTraits.CWeatherTraits()
 
-		myCCommunicationService = HeavyWeatherService.CCommunicationService()
-		HeavyWeatherService.CDataStore.setCommModeInterval(myCCommunicationService.DataStore,3)
-		time.sleep(5)
+		myCCommunicationService = CCommunicationService.CCommunicationService()
+		myCCommunicationService.DataStore.setCommModeInterval(3) #move me to setfrontendalive
+		
+		if myCCommunicationService.DataStore.getTransmissionFrequency() == 1:
+			print "Set Frequency to EU"
+			myCCommunicationService.DataStore.TransceiverSettings.Frequency = 868300000
 
-		if HeavyWeatherService.CDataStore.getDeviceId(myCCommunicationService.DataStore) == -1:
-			TimeOut = HeavyWeatherService.CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + HeavyWeatherService.CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
+		while True:
+			time.sleep(0.5)
+			if myCCommunicationService.DataStore.getFlag_FLAG_TRANSCEIVER_PRESENT():
+				break
+
+		if myCCommunicationService.DataStore.getDeviceId() == -1:
+			TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
 			ID=[0]
 			ID[0]=0
 			print "Press [v] key on Weather Station"
-			HeavyWeatherService.CDataStore.FirstTimeConfig(myCCommunicationService.DataStore,ID,TimeOut)
+			myCCommunicationService.DataStore.FirstTimeConfig(ID,TimeOut)
 
-		HeavyWeatherService.CDataStore.setDeviceRegistered(myCCommunicationService.DataStore, True);	#temp hack
+		myCCommunicationService.DataStore.setDeviceRegistered( True);	#temp hack
 
 		Weather = [0]
 		Weather[0]=[0]
 
-		TimeOut = HeavyWeatherService.CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + HeavyWeatherService.CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
-		HeavyWeatherService.CDataStore.GetCurrentWeather(myCCommunicationService.DataStore,Weather,TimeOut)
-		time.sleep(1)
+		#TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
+		#print TimeOut
+		#myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
+		#time.sleep(1)
 
 		while True:
-			if HeavyWeatherService.CDataStore.getRequestState(myCCommunicationService.DataStore) == HeavyWeatherService.ERequestState.rsFinished \
-			       or HeavyWeatherService.CDataStore.getRequestState(myCCommunicationService.DataStore) == HeavyWeatherService.ERequestState.rsINVALID:
-					TimeOut = HeavyWeatherService.CDataStore.getPreambleDuration(myCCommunicationService.DataStore) + HeavyWeatherService.CDataStore.getRegisterWaitTime(myCCommunicationService.DataStore)
-					HeavyWeatherService.CDataStore.GetCurrentWeather(myCCommunicationService.DataStore,Weather,TimeOut)
+			#if myCCommunicationService.DataStore.getRequestState() == ERequestState.rsFinished \
+			#       or myCCommunicationService.DataStore.getRequestState() == ERequestState.rsINVALID:
+			#		TimeOut = myCCommunicationService.DataStore.getPreambleDuration() + myCCommunicationService.DataStore.getRegisterWaitTime()
+			#		myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
 
 			try:
 				if abs(CWeatherTraits.TemperatureNP() - myCCommunicationService.DataStore.CurrentWeather._IndoorTemp ) > 0.001:

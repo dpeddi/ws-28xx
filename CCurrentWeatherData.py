@@ -536,20 +536,3 @@ class CCurrentWeatherData(object):
 		self.logger.info("_PressureRelative_inHg=%7.2f" % self._PressureRelative_inHg)
 		self.logger.info("_Rain1H=%8.2f" % self._Rain1H)
 		self.logger.info("_Rain1HMax._Value=%8.2f" % self._Rain1HMax._Value)
-		#print "_WeatherState=%s _WeatherTendency=%s" % ( CWeatherTraits.forecastMap[self._WeatherState], CWeatherTraits.trends[self._WeatherTendency])
-		#print "_IndoorTemp=     %7.2f _Min=%7.2f(%s) _Max=%7.2f(%s)" % (self._IndoorTemp,     self._IndoorTempMinMax._Min._Value,     self._IndoorTempMinMax._Min._Time,     self._IndoorTempMinMax._Max._Value,     self._IndoorTempMinMax._Max._Time)
-		#print "_IndoorHumidity= %7.2f _Min=%7.2f(%s) _Max=%7.2f(%s)" % (self._IndoorHumidity, self._IndoorHumidityMinMax._Min._Value, self._IndoorHumidityMinMax._Min._Time, self._IndoorHumidityMinMax._Max._Value, self._IndoorHumidityMinMax._Max._Time)
-		#print "_OutdoorTemp=    %7.2f _Min=%7.2f(%s) _Max=%7.2f(%s)" % (self._OutdoorTemp, self._OutdoorTempMinMax._Min._Value, self._OutdoorTempMinMax._Min._Time, self._OutdoorTempMinMax._Max._Value, self._OutdoorTempMinMax._Max._Time)
-		#print "_OutdoorHumidity=%7.2f _Min=%7.2f(%s) _Max=%7.2f(%s)" % (self._OutdoorHumidity, self._OutdoorHumidityMinMax._Min._Value, self._OutdoorHumidityMinMax._Min._Time, self._OutdoorHumidityMinMax._Max._Value, self._OutdoorHumidityMinMax._Max._Time)
-		#print "_Windchill=      %7.2f _Min=%7.2f(%s) _Max=%7.2f(%s)" % (self._Windchill, self._WindchillMinMax._Min._Value, self._WindchillMinMax._Min._Time, self._WindchillMinMax._Max._Value, self._WindchillMinMax._Max._Time)
-		#print "_Dewpoint=       %7.2f _Min=%7.2f(%s) _Max=%7.2f(%s)" % (self._Dewpoint, self._DewpointMinMax._Min._Value, self._DewpointMinMax._Min._Time, self._DewpointMinMax._Max._Value, self._DewpointMinMax._Max._Time)
-		#print "_WindSpeed=      %7.2f                                   _Max=%7.2f(%s)" % (self._WindSpeed * 3.6, self._WindSpeedMinMax._Max._Value * 3.6, self._WindSpeedMinMax._Max._Time)
-		#print "_Gust=           %7.2f                                   _Max=%7.2f(%s)" % (self._Gust * 3.6,      self._GustMinMax._Max._Value * 3.6, self._GustMinMax._Max._Time)
-		#print "_Rain1H=         %7.2f            _Max=%7.2f" % (self._Rain1H, self._Rain1HMax._Value)
-		#print "_RainTotal=%7.2f" % self._RainTotal
-		#print "w=%d , w1=%d, w2=%d, w3=%d, w4=%d, w5=%d" % (w, w1, w2, w3, w4, w5)
-		#print "w=%s , w1=%s, w2=%s, w3=%s, w4=%s, w5=%s" % (CWeatherTraits.windDirMap[w], CWeatherTraits.windDirMap[w1], CWeatherTraits.windDirMap[w2], CWeatherTraits.windDirMap[w3], CWeatherTraits.windDirMap[w4], CWeatherTraits.windDirMap[w5])
-		#print "g=%d , g1=%d, g2=%d, g3=%d, g4=%d, g5=%d" % (g, g1, g2, g3, g4, g5)
-		#print "g=%s , g1=%s, g2=%s, g3=%s, g4=%s, g5=%s" % (CWeatherTraits.windDirMap[g], CWeatherTraits.windDirMap[g1], CWeatherTraits.windDirMap[g2], CWeatherTraits.windDirMap[g3], CWeatherTraits.windDirMap[g4], CWeatherTraits.windDirMap[g5])
-		#print "_PressureRelative_hPa= %7.2f" % self._PressureRelative_hPa
-		#print "_PressureRelative_inHg=%7.2f" % self._PressureRelative_inHg

@@ -373,7 +373,7 @@ class CDataStore(object):
 
 	def getLastHistoryIndex(self):
 		self.logger.debug("LastHistoryIndex=%x" % self.LastStat.LastHistoryIndex)
-		print "CDataStore::getLastHistoryIndex %x" % self.LastStat.LastHistoryIndex
+		#print "CDataStore::getLastHistoryIndex %x" % self.LastStat.LastHistoryIndex
 		#ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(
 		#    &FuncName,
 		#    "unsigned int __thiscall CDataStore::getLastHistoryIndex(void) const");

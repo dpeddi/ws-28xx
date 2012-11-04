@@ -806,8 +806,8 @@ class CCommunicationService(object):
 					else:
 						newLength[0] = 0
 				else:
-					print "Unrecognized TransceiverID=%x" % ID
-					self.logger.debug("Unrecognized ID=%x" % ID)
+					#print "Unrecognized TransceiverID=%x" % ID
+					self.logger.critical("Unrecognized ID=%x" % ID)
 					newLength[0] = 0
 			else:
 				if RequestType == 5:
@@ -816,7 +816,7 @@ class CCommunicationService(object):
 					#    00000000: dd 0a 01 fe 18 f6 aa 01 2a a2 4d 00 00 87 16 
 					TransceiverID = buffer[0][0] << 8;
 					TransceiverID += buffer[0][1];
-					print "GenerateResponse: TransceiverID", TransceiverID
+					#print "GenerateResponse: TransceiverID", TransceiverID
 					#print "GenerateResponse: Length[0]",Length[0]
 					#print "Buffer[0]", Buffer[0]
 					if (    Length[0]            !=    6
@@ -986,7 +986,7 @@ class CCommunicationService(object):
 				ReceiverState = StateBuffer[0][0];
 				if ReceiverState == 0x16:
 					ret = sHID.GetFrame(FrameBuffer, DataLength);
-					print FrameBuffer
+					#print FrameBuffer #---fixme
 					if ret == None:
 						raise ws28xxError("USBDevice->GetFrame returned false")
 					if DataLength[0]:
