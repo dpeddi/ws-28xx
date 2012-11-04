@@ -123,7 +123,7 @@ if __name__ == "__main__":
 		print "3:\r"
 		print "4:\r"
 		print "5: Syncronize - press [v] key on Display then choose this option\r"
-		print "F: switch frequency (active at next restart)\r"
+		print "F: switch operating frequency (and exit)\r"
 		print "\r"
 		print "x: exit\r"
 		print "\r"
@@ -146,11 +146,9 @@ if __name__ == "__main__":
 	    while True:
 		if char is not None:
 			print "Key pressed is %s\r" % char
-		print "GetRequestType %d\r" % myCCommunicationService.DataStore.getRequestType()
-		print "GetRequestState %d\r" % myCCommunicationService.DataStore.getRequestState()
+		print "GetRequestType %d GetRequestState %d\r" % (myCCommunicationService.DataStore.getRequestType(), myCCommunicationService.DataStore.getRequestState())
 		if   char == "0":
 			char = None
-			print "Choosen 0\r"
 			Weather = [0]
 			Weather[0]=[0]
 			if myCCommunicationService.DataStore.getRequestState() == ERequestState.rsFinished \
@@ -160,19 +158,14 @@ if __name__ == "__main__":
 				myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
 		elif char == "1":
 			char = None
-			print "Choosen 1\r"
 		elif char == "2":
 			char = None
-			print "Choosen 2\r"
 		elif char == "3":
 			char = None
-			print "Choosen 3\r"
 		elif char == "4":
 			char = None
-			print "Choosen 4\r"
 		elif char == "5":
 			char = None
-			print "Choosen 5\r"
 			#if myCCommunicationService.DataStore.getDeviceId() == -1:
 			if True: #hack ident
 				print "TransceiverSerNo will be overwritten", myCCommunicationService.DataStore.getTransceiverSerNo()
@@ -183,6 +176,16 @@ if __name__ == "__main__":
 				ID[0]=0
 				myCCommunicationService.DataStore.FirstTimeConfig(ID,TimeOut)
 				print ID[0]
+		elif char == "F" or char == "f":
+			char = None
+			FreqID = myCCommunicationService.DataStore.getTransmissionFrequency()
+			if FreqID == 1:
+				FreqID = 0
+			else:
+				FreqID = 1
+			FreqID = myCCommunicationService.DataStore.setTransmissionFrequency(FreqID)
+			myCCommunicationService.kill_received = True
+			break
 		elif char==chr(27) or char == "x":
 			char = None
 			myCCommunicationService.kill_received = True

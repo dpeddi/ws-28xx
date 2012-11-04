@@ -153,6 +153,14 @@ class CDataStore(object):
 		#print "TransceiverSettings.TransmissionFrequency=%x" % self.TransceiverSettings.TransmissionFrequency
 		return self.TransceiverSettings.TransmissionFrequency
 
+	def setTransmissionFrequency(self,val):
+		filename= "/etc/WV5Datastore.cfg"
+		config = ConfigObj(filename)
+		config.filename = filename
+		config['TransceiverSettings'] = {}
+		config['TransceiverSettings']['TransmissionFrequency'] = val
+		config.write()
+
 	def getDeviceId(self):
 		filename= "/etc/WV5Datastore.cfg"
 		config = ConfigObj(filename)

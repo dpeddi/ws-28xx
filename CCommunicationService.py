@@ -750,8 +750,6 @@ class CCommunicationService(object):
 		self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0] = (FreqVal >>0)  & 0xFF;
 		#print "dd %x" % (self.AX5051RegisterNames_map[self.AX5051RegisterNames.FREQ0])
 		self.logger.debug("FreqVal: %x" % FreqVal)
-		print "FreqVal: %x" % FreqVal
-		print "should be 36 46 51 b5"
 
 	def GenerateResponse(self,Buffer,Length):
 		self.logger.debug("Length=%x" % Length[0])
@@ -905,7 +903,7 @@ class CCommunicationService(object):
 			if sHID.Execute(5):
 				sHID.SetPreamblePattern(0xaa)
 				if sHID.SetState(0):
-					time.sleep(0.005) #//fixme
+					time.sleep(1) #//fixme
 					#print "fixme: subsecond duration" //fixme
 					if sHID.SetRX():
 						v67 = 1  #//fixme:and so?
