@@ -8,13 +8,13 @@ import logging
 import time
 import threading
 import CDataStore
-import CHistoryDataSet
 import sHID
 
 import EConstants
 
 from CWeatherStationConfig import CWeatherStationConfig
 import CCurrentWeatherData
+import CHistoryDataSet
 import USBHardware
 
 ERequestType=EConstants.ERequestType()
@@ -579,6 +579,7 @@ class CCommunicationService(object):
 		else:
 			#CDataStore::setLastHistTimeStamp( CHistoryDataSet::GetTime(&Data));
 			#CDataStore::addHistoryData( &Data);
+			self.DataStore.addHistoryData(Data);
 			self.DataStore.setLastHistoryIndex( ThisHistoryIndex);
 			if ( LatestHistoryIndex >= ThisHistoryIndex ): #unused
 				self.DataStore.setOutsatndingHistorySets( LatestHistoryIndex - ThisHistoryIndex) #unused

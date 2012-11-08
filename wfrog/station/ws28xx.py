@@ -87,6 +87,7 @@ class WS28xxStation(object):
 		#myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
 		#time.sleep(1)
 
+		LastTimeStamp = None
 		while True:
 			#if myCCommunicationService.DataStore.getRequestState() == ERequestState.rsFinished \
 			#       or myCCommunicationService.DataStore.getRequestState() == ERequestState.rsINVALID:
@@ -94,6 +95,7 @@ class WS28xxStation(object):
 			#		myCCommunicationService.DataStore.GetCurrentWeather(Weather,TimeOut)
 
 			try:
+				
 				if abs(CWeatherTraits.TemperatureNP() - myCCommunicationService.DataStore.CurrentWeather._IndoorTemp ) > 0.001:
 					e = generate_event('temp')
 					e.sensor = 0
@@ -130,7 +132,7 @@ class WS28xxStation(object):
 					send_event(e)
 
 				if abs(CWeatherTraits.WindNP() - myCCommunicationService.DataStore.CurrentWeather._WindSpeed) > 0.001:
-	    				e = generate_event('wind')
+					e = generate_event('wind')
 					e.create_child('mean')
 					e.mean.speed = myCCommunicationService.DataStore.CurrentWeather._WindSpeed
 					e.mean.dir = myCCommunicationService.DataStore.CurrentWeather._WindDirection * 360 / 16
@@ -139,9 +141,61 @@ class WS28xxStation(object):
 					e.gust.dir = myCCommunicationService.DataStore.CurrentWeather._GustDirection * 360 / 16
 					send_event(e)
 
+
+				#history records...
+				if myCCommunicationService.DataStore.HistoryData.m_Time != LastTimeStamp:
+					if abs(CWeatherTraits.TemperatureNP() - myCCommunicationService.DataStore.HistoryData.m_IndoorTemp ) > 0.001:
+						e = generate_event('temp')
+						e.sensor = 0
+						e.value = myCCommunicationService.DataStore.HistoryData.m_IndoorTemp
+						e.timestamp = myCCommunicationService.DataStore.HistoryData.m_Time
+						send_event(e)
+
+					if abs(CWeatherTraits.HumidityNP() - myCCommunicationService.DataStore.HistoryData.m_IndoorHumidity ) > 0.001:
+						e = generate_event('hum')
+						e.sensor = 0
+						e.value = myCCommunicationService.DataStore.HistoryData.m_IndoorHumidity
+						e.timestamp = myCCommunicationService.DataStore.HistoryData.m_Time
+						send_event(e)
+
+					if abs(CWeatherTraits.TemperatureNP() - myCCommunicationService.DataStore.HistoryData.m_OutdoorTemp ) > 0.001:
+						e = generate_event('temp')
+						e.sensor = 1
+						e.value = myCCommunicationService.DataStore.HistoryData.m_OutdoorTemp
+						e.timestamp = myCCommunicationService.DataStore.HistoryData.m_Time
+						send_event(e)
+
+					if abs(CWeatherTraits.HumidityNP() - myCCommunicationService.DataStore.HistoryData.m_OutdoorHumidity ) > 0.001:
+						e = generate_event('hum')
+						e.sensor = 1
+						e.value = myCCommunicationService.DataStore.HistoryData.m_OutdoorHumidity
+						e.timestamp = myCCommunicationService.DataStore.HistoryData.m_Time
+						send_event(e)
+
+					if abs(CWeatherTraits.PressureNP() - myCCommunicationService.DataStore.HistoryData.m_PressureRelative ) > 0.001:
+						e = generate_event('press')
+						e.value = myCCommunicationService.DataStore.HistoryData.m_PressureRelative
+						e.timestamp = myCCommunicationService.DataStore.HistoryData.m_Time
+						send_event(e)
+
+				#myCCommunicationService.DataStore.HistoryData.m_RainCounterRaw = 0
+				#	if abs(CWeatherTraits.WindNP() - myCCommunicationService.DataStore.HistoryData.m_WindSpeed) > 0.001:
+				#		e = generate_event('wind')
+				#		e.create_child('mean')
+				#		e.mean.speed = myCCommunicationService.DataStore.HistoryData.m_WindSpeed
+				#		e.mean.dir = myCCommunicationService.DataStore.HistoryData.m_WindDirection * 360 / 16
+				#		e.create_child('gust')
+				#		e.gust.speed = myCCommunicationService.DataStore.HistoryData.m_Gust
+				#		#e.gust.dir = myCCommunicationService.DataStore.HistoryData.m_GustDirection * 360 / 16
+				#		e.gust.dir = None
+				#		e.timestamp = myCCommunicationService.DataStore.HistoryData.m_Time
+				#		send_event(e)
+
+					LastTimeStamp = myCCommunicationService.DataStore.HistoryData.m_Time
+
 			except Exception, e:
 				self.logger.error(e)
 
-			time.sleep(5)
+			time.sleep(1)
 
 name = WS28xxStation.name

@@ -19,6 +19,17 @@ class CHistoryDataSet(object):
 
 	def __init__(self):
 		self.logger = logging.getLogger('ws28xx.CHistoryDataSet')
+		
+		self.m_Time = None
+		self.m_IndoorTemp = CWeatherTraits.TemperatureNP()
+		self.m_IndoorHumidity = CWeatherTraits.HumidityNP()
+		self.m_OutdoorTemp = CWeatherTraits.TemperatureNP()
+		self.m_OutdoorHumidity = CWeatherTraits.HumidityNP()
+		self.m_PressureRelative = None
+		self.m_WindDirection = 16
+		self.m_RainCounterRaw = 0
+		self.m_WindSpeed = CWeatherTraits.WindNP()
+		self.m_Gust = CWeatherTraits.WindNP()
 
 	def CHistoryDataSet_buf(self,buf,pos):
 		self.logger.debug("")
@@ -67,6 +78,6 @@ class CHistoryDataSet(object):
 		self.logger.info("m_OutdoorHumidity=  %7.2f" % self.m_OutdoorHumidity)
 		self.logger.info("m_PressureRelative= %7.2f" % self.m_PressureRelative)
 		self.logger.info("m_RainCounterRaw=   %7.2f" % self.m_RainCounterRaw)
-		self.logger.info("m_WindDirection=    %d"    % self.m_RainCounterRaw)
+		self.logger.info("m_WindDirection=    %d"    % self.m_WindDirection)
 		self.logger.info("m_WindSpeed=        %7.2f" % self.m_WindSpeed)
 		self.logger.info("m_Gust=             %7.2f" % self.m_Gust)

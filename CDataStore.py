@@ -10,6 +10,7 @@ import CWeatherStationConfig
 import threading
 import logging
 import CCurrentWeatherData
+import CHistoryDataSet
 
 BitHandling = BitHandling.BitHandling()
 ERequestType = EConstants.ERequestType()
@@ -70,11 +71,11 @@ class CDataStore(object):
 		#self.MemSegment = shelve???? o mmap??
 		#self.DataStoreAllocator = shelve???? mmap???
 		self.Guards = 0;
-		self.HistoryData = 0;
 		self.Flags = 0;
 		self.Settings = 0;
 		self.TransceiverSettings = 0;
 		self.WeatherClubSettings = 0;
+		self.HistoryData = CHistoryDataSet.CHistoryDataSet();
 		self.CurrentWeather = CCurrentWeatherData.CCurrentWeatherData();
 		self.DeviceConfig = 0;
 		self.FrontEndConfig = 0;
@@ -246,6 +247,10 @@ class CDataStore(object):
 		self.logger.debug("")
 		self.CurrentWeather = Data
 
+	def addHistoryData(self,Data):
+		self.logger.debug("")
+		self.HistoryData = Data
+
 	def RequestNotify(self):
 		self.logger.debug("implement me")
 		#ATL::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>::CStringT<char_ATL::StrTraitATL<char_ATL::ChTraitsCRT<char>>>(
@@ -341,9 +346,6 @@ class CDataStore(object):
 	def setCommModeInterval(self,val):
 		self.logger.debug("val=%x" % val)
 		self.Settings.CommModeInterval = val
-
-	def addHistoryData(self,Data):
-		self.logger.debug("")
 
 	def setTransceiverID(self,tid):
 		if tid != None:
