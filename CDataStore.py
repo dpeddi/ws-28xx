@@ -35,7 +35,7 @@ class CDataStore(object):
 			self.Type = 6
 			self.State = ERequestState.rsError
 			self.TTL = 90000
-			self.Lock = 0
+			self.Lock = threading.Lock()
 			self.CondFinish = threading.Condition()
 
 	class TLastStat(object):
@@ -250,6 +250,16 @@ class CDataStore(object):
 	def addHistoryData(self,Data):
 		self.logger.debug("")
 		self.HistoryData = Data
+
+	def getHistoryData(self,clear):
+		self.logger.debug("")
+		
+		import copy
+		
+		self.Request.Lock.acquire()
+		History = copy.copy(self.HistoryData)
+		self.Request.Lock.release()
+		return History
 
 	def RequestNotify(self):
 		self.logger.debug("implement me")
