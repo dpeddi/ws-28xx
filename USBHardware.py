@@ -339,7 +339,7 @@ class USBHardware(object):
 	def ToWindspeedRingBuffer(self,buffer,start):
 		if ( buffer[0][start+0] != 254 or (buffer[0][start+1] & 0xF) != 1 ):
 			if ( buffer[0][start+0] != 255 or (buffer[0][start+1] & 0xF) != 1 ):
-				val = self.ByteToFloat(buffer, start, 1, 16, 6);
+				val = self.ByteToFloat(buffer, start, 1, 16, 3);
 				val = val / 10.0;
 				result = val;
 			else:

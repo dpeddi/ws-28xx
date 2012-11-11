@@ -180,17 +180,18 @@ class WS28xxStation(object):
 						send_event(e)
 
 				#History.m_RainCounterRaw = 0
-				#	if abs(CWeatherTraits.WindNP() - History.m_WindSpeed) > 0.001:
-				#		e = generate_event('wind')
-				#		e.create_child('mean')
-				#		e.mean.speed = History.m_WindSpeed
-				#		e.mean.dir = History.m_WindDirection * 360 / 16
-				#		e.create_child('gust')
-				#		e.gust.speed = History.m_Gust
-				#		#e.gust.dir = History.m_GustDirection * 360 / 16
-				#		e.gust.dir = None
-				#		e.timestamp = History.m_Time
-				#		send_event(e)
+					if abs(CWeatherTraits.WindNP() - History.m_WindSpeed) > 0.001:
+						e = generate_event('wind')
+						e.create_child('mean')
+						e.mean.speed = History.m_WindSpeed
+						e.mean.dir = History.m_WindDirection * 360 / 16
+						e.create_child('gust')
+						e.gust.speed = History.m_Gust
+						#we don't have gust dir... we take wind dir... :-(
+						e.gust.dir = History.m_WindDirection * 360 / 16
+						e.gust.dir = None
+						e.timestamp = History.m_Time
+						send_event(e)
 
 					LastTimeStamp = History.m_Time
 
