@@ -62,8 +62,10 @@ class WS28xxStation(object):
 		myCCommunicationService.DataStore.setCommModeInterval(3) #move me to setfrontendalive
 		
 		if myCCommunicationService.DataStore.getTransmissionFrequency() == 1:
-			print "Set Frequency to EU"
+			self.logger.info("Set Frequency to EU")
 			myCCommunicationService.DataStore.TransceiverSettings.Frequency = 868300000
+		else:
+			self.logger.info("Set Frequency to US(Default)")
 
 		while True:
 			time.sleep(0.5)
@@ -146,6 +148,7 @@ class WS28xxStation(object):
 				History = myCCommunicationService.DataStore.getHistoryData(1)
 				if History.m_Time != LastTimeStamp:
 					if abs(CWeatherTraits.TemperatureNP() - History.m_IndoorTemp ) > 0.001:
+						self.logger.info("ts=%s indoor_temp %d"%(History.m_Time,History.m_IndoorTemp))
 						e = generate_event('temp')
 						e.sensor = 0
 						e.value = History.m_IndoorTemp
@@ -153,6 +156,7 @@ class WS28xxStation(object):
 						send_event(e)
 
 					if abs(CWeatherTraits.HumidityNP() - History.m_IndoorHumidity ) > 0.001:
+						self.logger.info("ts=%s indoor_hum %d"%(History.m_Time,History.m_IndoorHumidity))
 						e = generate_event('hum')
 						e.sensor = 0
 						e.value = History.m_IndoorHumidity
@@ -160,6 +164,7 @@ class WS28xxStation(object):
 						send_event(e)
 
 					if abs(CWeatherTraits.TemperatureNP() - History.m_OutdoorTemp ) > 0.001:
+						self.logger.info("ts=%s Outdoor_temp %d"%(History.m_Time,History.m_OutdoorTemp))
 						e = generate_event('temp')
 						e.sensor = 1
 						e.value = History.m_OutdoorTemp
@@ -167,6 +172,7 @@ class WS28xxStation(object):
 						send_event(e)
 
 					if abs(CWeatherTraits.HumidityNP() - History.m_OutdoorHumidity ) > 0.001:
+						self.logger.info("ts=%s Outdoor_hum %d"%(History.m_Time,History.m_OutdoorHumidity))
 						e = generate_event('hum')
 						e.sensor = 1
 						e.value = History.m_OutdoorHumidity
@@ -174,6 +180,7 @@ class WS28xxStation(object):
 						send_event(e)
 
 					if abs(CWeatherTraits.PressureNP() - History.m_PressureRelative ) > 0.001:
+						self.logger.info("ts=%s Pressure %d"%(History.m_Time,History.m_PressureRelative))
 						e = generate_event('press')
 						e.value = History.m_PressureRelative
 						e.timestamp = History.m_Time
@@ -181,6 +188,8 @@ class WS28xxStation(object):
 
 				#History.m_RainCounterRaw = 0
 					if abs(CWeatherTraits.WindNP() - History.m_WindSpeed) > 0.001:
+						self.logger.info("ts=%s Wind %d %d"%(History.m_Time,History.m_WindSpeed,History.m_WindDirection))
+						self.logger.info("ts=%s Gust %d %d"%(History.m_Time,History.m_Gust,History.m_WindDirection))
 						e = generate_event('wind')
 						e.create_child('mean')
 						e.mean.speed = History.m_WindSpeed
@@ -189,7 +198,6 @@ class WS28xxStation(object):
 						e.gust.speed = History.m_Gust
 						#we don't have gust dir... we take wind dir... :-(
 						e.gust.dir = History.m_WindDirection * 360 / 16
-						e.gust.dir = None
 						e.timestamp = History.m_Time
 						send_event(e)
 

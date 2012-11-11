@@ -78,6 +78,6 @@ class CHistoryDataSet(object):
 		self.logger.info("m_OutdoorHumidity=  %7.2f" % self.m_OutdoorHumidity)
 		self.logger.info("m_PressureRelative= %7.2f" % self.m_PressureRelative)
 		self.logger.info("m_RainCounterRaw=   %7.2f" % self.m_RainCounterRaw)
-		self.logger.info("m_WindDirection=    %d"    % self.m_WindDirection)
+		self.logger.info("m_WindDirection=    %7.2f" % self.m_WindDirection)
 		self.logger.info("m_WindSpeed=        %7.2f" % self.m_WindSpeed)
 		self.logger.info("m_Gust=             %7.2f" % self.m_Gust)

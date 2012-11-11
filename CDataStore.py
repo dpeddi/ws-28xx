@@ -42,7 +42,6 @@ class CDataStore(object):
 		# void __thiscall CDataStore::TLastStat::TLastStat(CDataStore::TLastStat *this);
 		def __init__(self):
 			self.LastBatteryStatus = [0]
-			self.LastHistoryIndex = 0xffff
 			self.LastLinkQuality = 0
 			self.OutstandingHistorySets = -1
 			self.WeatherClubTransmissionErrors = 0
@@ -51,6 +50,15 @@ class CDataStore(object):
 			self.LastConfigTime = datetime(1900, 01, 01, 00, 00)
 			self.LastWeatherClubTransmission = None
 			self.LastSeen = None
+
+			filename= "/tmp/WV5Datastore.cfg"
+			config = ConfigObj(filename)
+			config.filename = filename
+			try:
+				self.LastHistoryIndex = int(config['LastStat']['LastHistoryIndex'])
+			except:
+				self.LastHistoryIndex = 0xffff
+				pass
 
 	class TSettings(object):
 		#void __thiscall CDataStore::TSettings::TSettings(CDataStore::TSettings *this);
