@@ -66,23 +66,41 @@ class sHID(object):
 					time.sleep(usbWait)
 					self.devh.getDescriptor(0x2, 0, 0x22)
 					time.sleep(usbWait)
-
-					if platform.system() is 'Windows':
-						#self.devh.setConfiguration(self.usbConfiguration)
-						self.devh.setConfiguration(1)
-					#self.devh.claimInterface(self.usbInterface)
-					self.devh.claimInterface(0)
-					#self.devh.setAltInterface(self.usbInterface)
-					self.devh.setAltInterface(0)
-					#self.devh.reset()
-					#time.sleep(3.5)
-					time.sleep(0.5)
 					
-					ret = self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,
-								0x000000a, [], 0x0000000, 0x0000000, 1000);
-					time.sleep(0.3)
+
+					try:
+						if platform.system() is 'Windows':
+							#self.devh.setConfiguration(self.usbConfiguration)
+							self.devh.setConfiguration(1)
+						#self.devh.claimInterface(self.usbInterface)
+						self.devh.claimInterface(0)
+						#self.devh.setAltInterface(self.usbInterface)
+						self.devh.setAltInterface(0)
+						#self.devh.reset()
+						#time.sleep(3.5)
+						time.sleep(0.5)
+						
+						ret = self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,
+									0x000000a, [], 0x0000000, 0x0000000, 1000);
+						time.sleep(0.3)
 								
-					self.devh.getDescriptor(0x22, 0, 0x2a9)
+						self.devh.getDescriptor(0x22, 0, 0x2a9)
+
+						time.sleep(usbWait)
+
+						return device
+
+						#push wv5devices device
+
+					except:
+						#push wv5devices null 
+						pass
+					
+					#the idea is to count wv5device to add data to config by allowing multiple instances of driver
+					#new config struct: 
+					#Transceiver_50
+					#Transceiver_ad
+					
 					
 					#while True:
 					#	try:
@@ -92,9 +110,6 @@ class sHID(object):
 					#		break
 					#	break
 
-					time.sleep(usbWait)
-
-					return device
 		return None
 
 	def SetTX(self):
