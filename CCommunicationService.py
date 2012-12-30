@@ -1063,4 +1063,5 @@ class CCommunicationService(object):
 			if not ret:
 				self.DataStore.setFlag_FLAG_TRANSCEIVER_PRESENT( 0)
 				pass
-			time.sleep(0.001)
+			time.sleep(0.5) # original driver value was time.sleep(0.001)
+
