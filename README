@@ -1,10 +1,21 @@
+Running:
+==============
+
+Start HeavyWeatherService.py. You will see a menu that allow you first
+configuration of service.
+
 Configuration:
 ==============
 
 ws28xx store its data to /etc/WV5Datastore.cfg.
+If you are running ws28xx as non root user the data is stored to
+$HOME/.WV5Datastore.cfg (still unimplemented)
 
 IT+868 Unit:
 ============
 If you have an IT+868 unit you need to edit configuration file by adding
 [TransceiverSettings]
 TransmissionFrequency = 1
+
+You can switching the frequency by choosing option "F" of menu.
+

@@ -60,30 +60,47 @@ class sHID(object):
 					except usb.USBError, e:
 					    pass
 
-					#self.devh.setAltInterface(0)
-					
 					self.devh.getDescriptor(0x1, 0, 0x12)
 					time.sleep(usbWait)
 					self.devh.getDescriptor(0x2, 0, 0x9)
 					time.sleep(usbWait)
 					self.devh.getDescriptor(0x2, 0, 0x22)
 					time.sleep(usbWait)
-					if platform.system() is 'Windows':
-						#self.devh.setConfiguration(self.usbConfiguration)
-						self.devh.setConfiguration(1)
-					#self.devh.claimInterface(self.usbInterface)
-					self.devh.claimInterface(0)
-					#self.devh.setAltInterface(self.usbInterface)
-					self.devh.setAltInterface(0)
-					#self.devh.reset()
-					#time.sleep(3.5)
-					time.sleep(0.5)
 					
-					ret = self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,
-								0x000000a, [], 0x0000000, 0x0000000, 1000);
-					time.sleep(0.3)
+
+					try:
+						if platform.system() is 'Windows':
+							#self.devh.setConfiguration(self.usbConfiguration)
+							self.devh.setConfiguration(1)
+						#self.devh.claimInterface(self.usbInterface)
+						self.devh.claimInterface(0)
+						#self.devh.setAltInterface(self.usbInterface)
+						self.devh.setAltInterface(0)
+						#self.devh.reset()
+						#time.sleep(3.5)
+						time.sleep(0.5)
+						
+						ret = self.devh.controlMsg(usb.TYPE_CLASS + usb.RECIP_INTERFACE,
+									0x000000a, [], 0x0000000, 0x0000000, 1000);
+						time.sleep(0.3)
 								
-					self.devh.getDescriptor(0x22, 0, 0x2a9)
+						self.devh.getDescriptor(0x22, 0, 0x2a9)
+
+						time.sleep(usbWait)
+
+						return device
+
+						#push wv5devices device
+
+					except:
+						#push wv5devices null 
+						pass
+					
+					#the idea is to count wv5device to add data to config by allowing multiple instances of driver
+					#new config struct: 
+					#Transceiver_50
+					#Transceiver_ad
+					
 					
 					#while True:
 					#	try:
@@ -93,30 +110,6 @@ class sHID(object):
 					#		break
 					#	break
 
-					time.sleep(usbWait)
-
-					#try:
-					#	self.devh.claimInterface(0)
-					#	print "claimed"
-					#except:
-					#	if not hasattr(self.devh, 'detachKernelDriver'):
-					#		raise RuntimeError(
-					#			"Please upgrade pyusb (or python-usb) to 0.4 or higher")
-					#try:
-					#<-----					self.devh.setAltInterface(0)
-					#except usb.USBError:
-					#<-----					raise "failed setAlt"
-					#try:
-					#	self.devh.detachKernelDriver(self.usbInterface.interfaceNumber)
-					#<-----					self.logger.info("Unloaded other driver from interface %d" %
-					#<-----										self.usbInterface.interfaceNumber)
-					#	print "unloaded"
-					#except usb.USBError, e:
-					#					raise "Failed to detach KernelDriver"
-					#					pass
-					time.sleep(usbWait)
-
-					return device
 		return None
 
 	def SetTX(self):
@@ -139,7 +132,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.debug(">%s" % strbuf)
 		return result
 
 	def SetRX(self):
@@ -162,7 +155,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.debug(">%s" % strbuf)
 		return result
 
 	def GetState(self,StateBuffer):
@@ -193,7 +186,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.debug("<%s" % strbuf)
 
 		return result
 
@@ -224,9 +217,8 @@ class sHID(object):
 				for entry in buffer:
 					strbuf += str("%.2x" % (buffer[i]))
 					i+=1
-				self.logger.debug("%s" % strbuf)
+				self.logger.debug(">%s" % strbuf)
 
-				#time.sleep(0.5)
 
 				try:
 					buffer = self.devh.controlMsg(requestType=usb.TYPE_CLASS | usb.RECIP_INTERFACE | usb.ENDPOINT_IN,
@@ -235,7 +227,6 @@ class sHID(object):
 											   index=0x0000000,
 											   buffer=0x15,
 											   timeout=1000)
-
 					result = 1
 				except:
 					result = 0
@@ -265,7 +256,7 @@ class sHID(object):
 				for entry in buffer:
 					strbuf += str("%.2x" % (buffer[i]))
 					i+=1
-				self.logger.debug("%s" % strbuf)
+				self.logger.debug("<%s" % strbuf)
 
 			result = 1;
 		else:
@@ -295,7 +286,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.debug(">%s" % strbuf)
 		return result
 
 
@@ -338,7 +329,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.debug(">%s" % strbuf)
 		return result
 
 	def GetFrame(self,data,numBytes):
@@ -350,7 +341,6 @@ class sHID(object):
 										  index=0x0000000,
 										  buffer=0x111,
 										  timeout=1000)
-
 			result = 1
 		except:
 			result = 0
@@ -365,7 +355,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.debug("<%s" % strbuf)
 
 		data[0] = new_data
 		numBytes[0] = new_numBytes
@@ -396,7 +386,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.debug(">%s" % strbuf)
 		return result
 
 	def Execute(self,command):
@@ -421,7 +411,7 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.debug(">%s" % strbuf)
 		return result
 
 	def SetPreamblePattern(self,pattern):
@@ -446,5 +436,5 @@ class sHID(object):
 		for entry in buffer:
 			strbuf += str("%.2x" % (buffer[i]))
 			i+=1
-		self.logger.debug("%s" % strbuf)
+		self.logger.debug(">%s" % strbuf)
 		return result
