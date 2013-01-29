@@ -19,3 +19,8 @@ TransmissionFrequency = 1
 
 You can switching the frequency by choosing option "F" of menu.
 
+Wfrog Integration:
+==================
+- Modify the wfrog init script adding "export PYTHONPATH=$PYTHONPATH:/path/to/dpeddi-ws-28xx"
+- copy updated ws28xx.py from git repository to [wfrog install path]/lib/wfrog/wfdriver/station
+- download ws-28xx python software from https://github.com/dpeddi/ws-28xx
