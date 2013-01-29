@@ -1,0 +1,9 @@
+ws28xx driver
+=============
+0.2
+- Add support for historic data
+- Less cpu usage
+- Menu for easier configuration
+0.1
+- Added support for EU unit
+- First working release
