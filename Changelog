@@ -1,5 +1,7 @@
 ws28xx driver
 =============
+0.3
+- Add initial support for statin with OldRainsensors (should be pre 2009 unit)
 0.2
 - Add support for historic data
 - Less cpu usage

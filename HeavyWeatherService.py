@@ -126,6 +126,7 @@ if __name__ == "__main__":
 		print "5: Syncronize - press [v] key on Display then choose this option\r"
 		print "\r"
 		print "f: switch operating frequency (and exit)\r"
+		print "o: switch to old rainsensor (and exit)\r"
 		print "\r"
 		print "x: exit\r"
 		print "esc: exit\r"
@@ -186,6 +187,10 @@ if __name__ == "__main__":
 			else:
 				FreqID = 1
 			FreqID = myCCommunicationService.DataStore.setTransmissionFrequency(FreqID)
+			myCCommunicationService.kill_received = True
+			break
+		elif char == "O" or char == "o":
+			char = None
 			myCCommunicationService.kill_received = True
 			break
 		elif char==chr(27) or char == "x":
