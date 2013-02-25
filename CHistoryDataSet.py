@@ -36,6 +36,8 @@ class CHistoryDataSet(object):
 
 		self.read(buf,pos)
 
+	#def CalculateRelativeRain(CHistoryDataSet *this, bool oldRainSensors)
+
 	def read(self,buf,pos):
 		self.logger.debug("")
 

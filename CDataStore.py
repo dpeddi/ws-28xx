@@ -18,6 +18,11 @@ ERequestState=EConstants.ERequestState()
 
 class CDataStore(object):
 
+	class TBufferCheck:
+		eBufferCheckInactive = 0
+		eBufferCheckRequired = 1
+		eBufferCheckRunning = 2
+
 	class TTransceiverSettings(object): 
 		# void __thiscall CDataStore::TTransceiverSettings::TTransceiverSettings(CDataStore::TTransceiverSettings *this);
 		def __init__(self):
