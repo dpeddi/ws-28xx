@@ -255,6 +255,8 @@ class CDataStore(object):
 		self.logger.debug("")
 		self.logger.info("Battery 3=%d 0=%d 1=%d 2=%d" % (BitHandling.testBit(BatteryStat,3),BitHandling.testBit(BatteryStat,0),BitHandling.testBit(BatteryStat,1),BitHandling.testBit(BatteryStat,2)))
 		self.LastStat.LastBatteryStatus = BatteryStat
+		#Battery 3=8 0=0 1=0 2=0
+		#3=8 is the Display Battery
 
 	def setCurrentWeather(self,Data):
 		self.logger.debug("")
