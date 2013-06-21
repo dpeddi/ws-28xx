@@ -105,11 +105,15 @@ if __name__ == "__main__":
 	print "Initializing ws28xx...\r"
 	myCCommunicationService = CCommunicationService.CCommunicationService()
 	myCCommunicationService.DataStore.setCommModeInterval(3) #move me to setfrontendalive
+	
+	time.sleep(10)# hack wait for serial number to be retrieved
 
 	Freq = 915
 	if myCCommunicationService.DataStore.getTransmissionFrequency() == 1:
 		myCCommunicationService.DataStore.TransceiverSettings.Frequency = 868300000
 		Freq = 868
+
+	myCCommunicationService.DataStore.TransceiverSettings.SerialNum = "010109090600173"
 
 	def infoscreen(TransceiverSerNo,Freq):
 		os.system( [ 'clear', 'cls' ][ os.name == 'nt' ] )

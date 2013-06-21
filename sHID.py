@@ -32,7 +32,7 @@ class sHID(object):
 	def __init__(self):
 		self.logger = logging.getLogger('ws28xx.sHID')
 
-	def Find(self, vendorID, productID, versionNr):
+	def Find(self, vendorID, productID, serialNum, versionNr):
 		self.logger.debug("")
 		try:
 			import usb
@@ -49,9 +49,9 @@ class sHID(object):
 					self.usbEndpoint = self.usbInterface.endpoints[0]
 
 					self.devh = device.open()
-					self.logger.info("iManufacturer   %s" % self.devh.getString(device.iManufacturer,30))
-					self.logger.info("iProduct        %s" % self.devh.getString(device.iProduct,30))
-					self.logger.info("interfaceNumber %d" % self.usbInterface.interfaceNumber)
+					self.logger.info("iManufacturer           %s" % self.devh.getString(device.iManufacturer,30))
+					self.logger.info("iProduct                %s" % self.devh.getString(device.iProduct,30))
+					self.logger.info("interfaceNumber         %d" % self.usbInterface.interfaceNumber)
 
 					try:
 					  self.devh.detachKernelDriver(self.usbInterface.interfaceNumber)
@@ -87,8 +87,27 @@ class sHID(object):
 						self.devh.getDescriptor(0x22, 0, 0x2a9)
 
 						time.sleep(usbWait)
+						
+						buffer = [None]
+						if ( self.ReadConfigFlash(0x1F9, 7, buffer) ):
+							ID  = buffer[0][5] << 8;
+							ID += buffer[0][6];
+						#	self.logger.debug("ID=0x%x" % ID)
+							print "\n"
+							print ID
+							print "\n"
 
-						return device
+							SN  = str("%02d"%(buffer[0][0]))
+							SN += str("%02d"%(buffer[0][1]))
+							SN += str("%02d"%(buffer[0][2]))
+							SN += str("%02d"%(buffer[0][3]))
+							SN += str("%02d"%(buffer[0][4]))
+							SN += str("%02d"%(buffer[0][5]))
+							SN += str("%02d"%(buffer[0][6]))
+							self.logger.info("TransceiverSerialNumber %s" % SN)
+
+						if (serialNum == None or SN == serialNum):
+							return device
 
 						#push wv5devices device
 

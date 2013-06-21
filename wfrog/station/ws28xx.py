@@ -32,6 +32,11 @@
 ##              but I can't get my station back to repair.
 
 
+#if we have multiple station modify 
+#/etc/wfrog/wfdriver/config/embedded.yaml
+#station: !${settings.station.driver} 
+#    serialnum: serialofyourdongle
+
 import time
 import logging
 
@@ -44,6 +49,17 @@ def detect():
 	return station
 
 class WS28xxStation(object):
+#	'''
+#    Station driver for LaCrosse WS28xx and clones.
+#    
+#    [ Properties ]
+#    
+#    serialnum [numeric] (optional):
+#        Transceiver serial number. Defaults to first one.
+#        Needed only if you have multiple transceiver
+#	'''
+
+	serialnum = None
 
 	logger = logging.getLogger('station.ws28xx')
 
@@ -61,11 +77,19 @@ class WS28xxStation(object):
 		myCCommunicationService = CCommunicationService.CCommunicationService()
 		myCCommunicationService.DataStore.setCommModeInterval(3) #move me to setfrontendalive
 		
+		time.sleep(10)# hack wait for serial number to be retrieved
+		
 		if myCCommunicationService.DataStore.getTransmissionFrequency() == 1:
 			self.logger.info("Set Frequency to EU")
 			myCCommunicationService.DataStore.TransceiverSettings.Frequency = 868300000
 		else:
 			self.logger.info("Set Frequency to US(Default)")
+		
+		if self.serialnum == None:
+			self.logger.info("Use first USB dongle available in system")
+		else:
+			self.logger.info("Bind to USB dongle with serial %s" % self.serialnum)
+		myCCommunicationService.DataStore.TransceiverSettings.SerialNum = self.serialnum
 
 		while True:
 			time.sleep(0.5)

@@ -30,6 +30,7 @@ class CDataStore(object):
 			self.ProductId	= 0x5555
 			self.VersionNo	= 1
 			self.Frequency	= 905000000
+			self.SerialNum = None
 			self.TransmissionFrequency = 0
 			self.manufacturer	= "LA CROSSE TECHNOLOGY"
 			self.product		= "Weather Direct Light Wireless Device"
@@ -60,7 +61,7 @@ class CDataStore(object):
 			config = ConfigObj(filename)
 			config.filename = filename
 			try:
-				self.LastHistoryIndex = int(config['LastStat']['LastHistoryIndex'])
+				self.LastHistoryIndex = int(config['LastStat_'+self.TransceiverSerNo]['LastHistoryIndex'])
 			except:
 				self.LastHistoryIndex = 0xffff
 				pass
@@ -123,24 +124,24 @@ class CDataStore(object):
 		    
 
 	def writeLastStat(self):
-		filename= "/tmp/WV5Datastore.cfg"
+		filename= "/tmp/WV5Datastore_" + self.TransceiverSerNo + ".cfg"
 		config = ConfigObj(filename)
 		config.filename = filename
-		config['LastStat'] = {}
-		config['LastStat']['LastLinkQuality'] = str(self.LastStat.LastLinkQuality)
-		config['LastStat']['LastSeen'] = str(self.LastStat.LastSeen)
-		config['LastStat']['LastHistoryIndex'] = str(self.LastStat.LastHistoryIndex)
-		config['LastStat']['LastCurrentWeatherTime'] = str(self.LastStat.LastCurrentWeatherTime)
-		config['LastStat']['LastHistoryDataTime'] = str(self.LastStat.LastHistoryDataTime)
-		config['LastStat']['LastConfigTime'] = str(self.LastStat.LastConfigTime)
+		config['LastStat_'+self.TransceiverSerNo] = {}
+		config['LastStat_'+self.TransceiverSerNo]['LastLinkQuality'] = str(self.LastStat.LastLinkQuality)
+		config['LastStat_'+self.TransceiverSerNo]['LastSeen'] = str(self.LastStat.LastSeen)
+		config['LastStat_'+self.TransceiverSerNo]['LastHistoryIndex'] = str(self.LastStat.LastHistoryIndex)
+		config['LastStat_'+self.TransceiverSerNo]['LastCurrentWeatherTime'] = str(self.LastStat.LastCurrentWeatherTime)
+		config['LastStat_'+self.TransceiverSerNo]['LastHistoryDataTime'] = str(self.LastStat.LastHistoryDataTime)
+		config['LastStat_'+self.TransceiverSerNo]['LastConfigTime'] = str(self.LastStat.LastConfigTime)
 		config.write()
 
 	def writeSettings(self):
-		filename= "/etc/WV5Datastore.cfg"
+		filename= "/etc/WV5Datastore_" + self.TransceiverSerNo + ".cfg"
 		config = ConfigObj(filename)
 		config.filename = filename
-		config['Settings'] = {}
-		config['Settings']['DeviceID'] = str(self.Settings.DeviceId)
+		config['Settings_'+self.TransceiverSerNo] = {}
+		config['Settings_'+self.TransceiverSerNo]['DeviceID'] = str(self.Settings.DeviceId)
 		
 		config.write()
 
@@ -148,8 +149,8 @@ class CDataStore(object):
 		filename= "/etc/WV5Datastore.cfg"
 		config = ConfigObj(filename)
 		config.filename = filename
-		config['DataStore'] = {}
-		config['DataStore']['TransceiverSerNo'] = self.TransceiverSerNo
+		config['DataStore_'+self.TransceiverSerNo] = {}
+		config['DataStore_'+self.TransceiverSerNo]['TransceiverSerNo'] = self.TransceiverSerNo
 		config.write()
 
 	def getDeviceConfig(self,result):
@@ -160,7 +161,7 @@ class CDataStore(object):
 		config = ConfigObj(filename)
 		config.filename = filename
 		try:
-			self.TransceiverSettings.TransmissionFrequency = int(config['TransceiverSettings']['TransmissionFrequency'])
+			self.TransceiverSettings.TransmissionFrequency = int(config['TransceiverSettings_'+self.TransceiverSerNo]['TransmissionFrequency'])
 		except:
 			pass
 		self.logger.debug("TransceiverSettings.TransmissionFrequency=%x" % self.TransceiverSettings.TransmissionFrequency)
@@ -171,8 +172,8 @@ class CDataStore(object):
 		filename= "/etc/WV5Datastore.cfg"
 		config = ConfigObj(filename)
 		config.filename = filename
-		config['TransceiverSettings'] = {}
-		config['TransceiverSettings']['TransmissionFrequency'] = val
+		config['TransceiverSettings_'+self.TransceiverSerNo] = {}
+		config['TransceiverSettings_'+self.TransceiverSerNo]['TransmissionFrequency'] = val
 		config.write()
 
 	def getDeviceId(self):
@@ -180,7 +181,7 @@ class CDataStore(object):
 		config = ConfigObj(filename)
 		config.filename = filename
 		try:
-			self.Settings.DeviceId = int(config['Settings']['DeviceID'])
+			self.Settings.DeviceId = int(config['Settings_'+self.TransceiverSerNo]['DeviceID'])
 		except:
 			pass
 		self.logger.debug("Settings.DeviceId=%x" % self.Settings.DeviceId)

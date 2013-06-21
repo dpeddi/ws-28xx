@@ -922,7 +922,7 @@ class CCommunicationService(object):
 		self.DataStore.setFlag_FLAG_TRANSCEIVER_SETTING_CHANGE(1)
 
 		TransceiverSettings=self.DataStore.TransceiverSettings
-		device = sHID.Find(TransceiverSettings.VendorId,TransceiverSettings.ProductId,TransceiverSettings.VersionNo)
+		device = sHID.Find(TransceiverSettings.VendorId,TransceiverSettings.ProductId,TransceiverSettings.SerialNum,TransceiverSettings.VersionNo)
 		if device:
 			self.TransceiverInit()
 			self.DataStore.setFlag_FLAG_TRANSCEIVER_PRESENT( 1);
