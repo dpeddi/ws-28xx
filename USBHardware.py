@@ -307,7 +307,7 @@ class USBHardware(object):
 					rawresult = (buffer[0][start+2] >>  4)* 100    \
 						  + (buffer[0][start+2] & 0xF)*  10    \
 						  + (buffer[0][start+1] >>  4)*   1    \
-						  + (buffer[0][start+0] & 0xF)*   0.1  \
+						  + (buffer[0][start+1] & 0xF)*   0.1  \
 						  + (buffer[0][start+0] >>  4)*   0.01
 				result = rawresult
 		return result
