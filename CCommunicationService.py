@@ -904,7 +904,8 @@ class CCommunicationService(object):
 			if sHID.Execute(5):
 				sHID.SetPreamblePattern(0xaa)
 				if sHID.SetState(0):
-					time.sleep(1) #//fixme
+					#time.sleep(1) #//fixme
+					threading.Event().wait(1)
 					#print "fixme: subsecond duration" //fixme
 					if sHID.SetRX():
 						v67 = 1  #//fixme:and so?
@@ -964,7 +965,8 @@ class CCommunicationService(object):
 							print "RequestType != self.DataStore.getRequestType()"
 							break
 						self.DataStore.RequestTick();
-						time.sleep(0.001)
+						#time.sleep(0.001)
+						threading.Event().wait(0.001)
 						self.DataStore.setFlag_FLAG_SERVICE_RUNNING(True);
 					#time.sleep(6)
 
@@ -1045,7 +1047,8 @@ class CCommunicationService(object):
 						#		timeout -= 1;
 						#if timeout == 0:
 							self.RepeatTime = datetime.now()
-							time.sleep(0.2)
+							#time.sleep(0.2)
+							threading.Event().wait(0.2)
 						break;
 						timeout -= 1
 						#if ( not timeout ):
@@ -1063,5 +1066,6 @@ class CCommunicationService(object):
 			if not ret:
 				self.DataStore.setFlag_FLAG_TRANSCEIVER_PRESENT( 0)
 				pass
-			time.sleep(0.5) # original driver value was time.sleep(0.001)
+			#time.sleep(0.5) # original driver value was time.sleep(0.001)
+			threading.Event().wait(0.5)
 
